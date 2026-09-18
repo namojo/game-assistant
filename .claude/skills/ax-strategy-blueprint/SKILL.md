@@ -55,6 +55,9 @@ description: "게임사 AX(AI Transformation) 전략 청사진 작성 스킬. 3�
 ## 10. 첫 미팅 후 갱신 항목
 ```
 
+## 공통 규약
+로드맵 단계 번호는 항상 `0 진단 / 1 Quick Win / 2 파이프라인화 / 3 조직화`를 쓴다. 문서마다 번호 체계가 다르면 고객이 다른 체계로 답하게 되고, 검수에서 실제로 이 불일치가 발견되었다.
+
 ## 참조
 - `references/domain-ax-playbook.md` — 영역별 문제 정의·구성 요소·한계·지표 기준안
 - `references/governance-templates.md` — 거버넌스 5문서 골격과 에이전트 권한 등급
