@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="원시인 형님 2 키 비주얼: 빙하기 밤, 불씨를 지키는 부족 캠프">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050E1F"/><stop offset=".55" stop-color="#0B2247"/><stop offset="1" stop-color="#173B6B"/></linearGradient>
+<linearGradient id="ice" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7CC4FF"/><stop offset="1" stop-color="#1E54D6"/></linearGradient>
+<linearGradient id="ice2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B9E2FF"/><stop offset="1" stop-color="#3D7BE0"/></linearGradient>
+<linearGradient id="snow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8F4FF"/><stop offset="1" stop-color="#9DC6F5"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFB347" stop-opacity=".95"/><stop offset=".4" stop-color="#FF7A1A" stop-opacity=".45"/><stop offset="1" stop-color="#FF7A1A" stop-opacity="0"/></radialGradient>
+<radialGradient id="aurora" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#38E1FF" stop-opacity=".35"/><stop offset="1" stop-color="#38E1FF" stop-opacity="0"/></radialGradient>
+<linearGradient id="ember" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF4D00"/><stop offset=".6" stop-color="#FFB347"/><stop offset="1" stop-color="#FFF3C4"/></linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+<filter id="blur2"><feGaussianBlur stdDeviation="3"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#sky)"/>
+<!-- aurora -->
+<ellipse cx="1100" cy="180" rx="620" ry="160" fill="url(#aurora)" filter="url(#soft)"/>
+<path d="M300 220 C 520 120, 760 260, 980 150 S 1380 120, 1560 230" stroke="#38E1FF" stroke-opacity=".25" stroke-width="40" fill="none" filter="url(#soft)"/>
+<!-- stars -->
+<g fill="#DCE9FF"><circle cx="120" cy="90" r="2"/><circle cx="260" cy="160" r="1.5"/><circle cx="420" cy="70" r="2.2"/><circle cx="640" cy="120" r="1.4"/><circle cx="820" cy="60" r="2"/><circle cx="1030" cy="110" r="1.6"/><circle cx="1240" cy="70" r="2.4"/><circle cx="1420" cy="140" r="1.6"/><circle cx="1520" cy="60" r="2"/><circle cx="960" cy="230" r="1.3"/><circle cx="1350" cy="260" r="1.5"/></g>
+<!-- moon -->
+<circle cx="1300" cy="200" r="70" fill="#E6F2FF" opacity=".9"/><circle cx="1325" cy="185" r="62" fill="#0B2247" opacity=".9"/>
+<!-- far glaciers -->
+<path d="M0 560 L140 400 L260 500 L380 380 L520 520 L640 430 L760 540 L900 400 L1040 520 L1180 420 L1300 540 L1460 410 L1600 520 L1600 900 L0 900Z" fill="#12294D"/>
+<path d="M0 620 L120 500 L240 590 L380 470 L500 600 L620 520 L780 620 L900 500 L1060 610 L1200 520 L1340 630 L1480 520 L1600 600 L1600 900 L0 900Z" fill="url(#ice)" opacity=".85"/>
+<!-- ice facets -->
+<g opacity=".5" fill="url(#ice2)"><path d="M380 470 L440 560 L330 570Z"/><path d="M900 500 L960 590 L840 600Z"/><path d="M1480 520 L1540 600 L1420 610Z"/></g>
+<!-- snow ground -->
+<path d="M0 700 C 300 660, 600 740, 900 690 S 1400 700, 1600 670 L1600 900 L0 900Z" fill="url(#snow)"/>
+<path d="M0 760 C 400 730, 700 800, 1000 760 S 1400 770, 1600 740 L1600 900 L0 900Z" fill="#C9E1FA" opacity=".8"/>
+<!-- hut left -->
+<g transform="translate(330 560)"><path d="M0 160 L120 0 L240 160Z" fill="#2B4470"/><path d="M40 160 L120 40 L200 160Z" fill="#1B2F52"/><path d="M95 160 L120 110 L145 160Z" fill="#FFB347" opacity=".9"/><path d="M0 160 L120 0" stroke="#7CC4FF" stroke-width="3"/><path d="M120 0 L240 160" stroke="#7CC4FF" stroke-width="3" opacity=".5"/></g>
+<!-- hut right -->
+<g transform="translate(1080 540)"><path d="M0 180 L140 0 L280 180Z" fill="#2B4470"/><path d="M50 180 L140 50 L230 180Z" fill="#1B2F52"/><path d="M115 180 L140 125 L165 180Z" fill="#FFB347" opacity=".9"/><path d="M0 180 L140 0" stroke="#7CC4FF" stroke-width="3"/></g>
+<!-- totem -->
+<g transform="translate(560 520)"><rect x="0" y="0" width="44" height="200" rx="8" fill="#3A5A8F"/><rect x="-14" y="30" width="72" height="30" rx="6" fill="#7CC4FF"/><circle cx="22" cy="90" r="12" fill="#38E1FF"/><rect x="-8" y="120" width="60" height="22" rx="5" fill="#1E54D6"/><path d="M22 -30 L44 0 L0 0Z" fill="#B9E2FF"/></g>
+<!-- ember fire -->
+<ellipse cx="800" cy="720" rx="260" ry="140" fill="url(#glow)" filter="url(#soft)"/>
+<g transform="translate(800 720)">
+<ellipse cx="0" cy="18" rx="120" ry="26" fill="#0B1F3A" opacity=".55"/>
+<g fill="#3A2A22"><rect x="-90" y="-6" width="180" height="22" rx="10" transform="rotate(-12)"/><rect x="-90" y="-6" width="180" height="22" rx="10" transform="rotate(14)"/><rect x="-70" y="-2" width="140" height="20" rx="10"/></g>
+<path d="M0 -150 C 40 -120, 70 -80, 62 -30 C 56 6, 20 22, 0 20 C -20 22, -56 6, -62 -30 C -70 -80, -40 -120, 0 -150Z" fill="url(#ember)"/>
+<path d="M0 -104 C 24 -80, 40 -56, 34 -26 C 30 -4, 12 6, 0 6 C -12 6, -30 -4, -34 -26 C -40 -56, -24 -80, 0 -104Z" fill="#FFF3C4" opacity=".9"/>
+<g fill="#FFD27A" opacity=".9"><circle cx="-60" cy="-170" r="4"/><circle cx="30" cy="-200" r="3"/><circle cx="80" cy="-150" r="3.5"/><circle cx="-20" cy="-240" r="2.5"/><circle cx="110" cy="-220" r="2"/></g>
+</g>
+<!-- brothers silhouettes around fire -->
+<g fill="#0B1F3A">
+<g transform="translate(600 690)"><ellipse cx="0" cy="130" rx="40" ry="10" opacity=".4"/><rect x="-32" y="10" width="64" height="110" rx="26"/><circle cx="0" cy="-10" r="30"/><rect x="-46" y="-2" width="92" height="22" rx="8"/><rect x="34" y="20" width="16" height="130" rx="6" transform="rotate(-18 34 20)"/><rect x="18" y="10" width="14" height="90" rx="6" transform="rotate(-70 18 10)"/></g>
+<g transform="translate(1000 690)"><rect x="-38" y="10" width="76" height="118" rx="28"/><circle cx="0" cy="-12" r="34"/><rect x="-52" y="-4" width="104" height="24" rx="8"/><rect x="-60" y="30" width="14" height="80" rx="6" transform="rotate(30 -60 30)"/><circle cx="-92" cy="-20" r="22"/></g>
+<g transform="translate(720 730)"><rect x="-26" y="6" width="52" height="90" rx="22"/><circle cx="0" cy="-10" r="24"/><rect x="-36" y="-4" width="72" height="18" rx="7"/></g>
+<g transform="translate(890 735)"><rect x="-28" y="6" width="56" height="88" rx="22"/><circle cx="0" cy="-8" r="26"/><rect x="-40" y="-2" width="80" height="18" rx="7"/><rect x="26" y="0" width="12" height="70" rx="5" transform="rotate(-40 26 0)"/></g>
+</g>
+<!-- mammoth silhouette far right -->
+<g transform="translate(1330 600)" fill="#0E2140" opacity=".85"><ellipse cx="0" cy="0" rx="110" ry="70"/><rect x="-100" y="40" width="26" height="80" rx="10"/><rect x="-40" y="50" width="26" height="80" rx="10"/><rect x="30" y="50" width="26" height="80" rx="10"/><rect x="75" y="40" width="26" height="80" rx="10"/><circle cx="-110" cy="-30" r="42"/><path d="M-140 -10 C -190 10, -200 70, -170 90" stroke="#0E2140" stroke-width="18" fill="none" stroke-linecap="round"/><path d="M-130 10 C -80 60, -60 40, -70 -10" stroke="#B9E2FF" stroke-width="9" fill="none" stroke-linecap="round"/></g>
+<!-- title -->
+<g font-family="Noto Serif KR, serif" font-weight="900" fill="#FFFFFF"><text x="80" y="140" font-size="72" letter-spacing="-2">원시인 형님 2</text><text x="82" y="190" font-size="22" font-family="IBM Plex Mono, monospace" font-weight="500" fill="#7CC4FF" letter-spacing="6">PRIMITIVE BROTHERS 2 · ICE AGE</text></g>
+<text x="80" y="240" font-size="20" fill="#C9DAF5" font-family="IBM Plex Sans KR, sans-serif">빙하기에 쫓기는 부족 캠프를 경영하고, 세대가 끝날 때마다 남는 「불씨」로 다음 세대를 더 멀리 보낸다</text>
+</svg>
