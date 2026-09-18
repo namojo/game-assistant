@@ -27,6 +27,14 @@ inputs ─┬→ [시장분석가] ─→ 01 ─┐
 
 Claude Code에서 `ax-consulting-orchestrator` 스킬을 트리거하는 요청(예: "○○게임즈 AX 컨설팅 기획서와 신작 GDD 만들어줘")으로 다른 회사에도 재사용할 수 있습니다.
 
+## 컨셉 아트 생성 (Codex image_generation)
+
+`site/images/*.svg`는 벡터 자리표시자입니다. Codex CLI에 로그인된 PC에서 아래를 실행하면 4장이 병렬 생성되어 `site/images/gen/`에 저장되고, 재빌드 시 자동으로 PNG가 사용됩니다. 프롬프트는 `site/images/PROMPTS.md`.
+
+```bash
+bash site/scripts/gen_concept_images.sh && python3 site/build.py
+```
+
 ## Codex로 원시인 형님 2 프로토타입 만들기
 
 1. 새 저장소를 만들고 `deliverables/thundergames/gdd/primitive-brothers-2/`의 `AGENTS.md`를 루트에, GDD·밸런스·빌드 플랜을 `docs/`에 둡니다.

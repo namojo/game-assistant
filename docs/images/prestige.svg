@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" role="img" aria-label="세대 교체 프레스티지: 빙하기가 오고, 불씨가 남고, 다음 세대는 더 멀리 간다">
+<defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#061224"/><stop offset="1" stop-color="#0B2247"/></linearGradient>
+<linearGradient id="curve" x1="0" x2="1"><stop offset="0" stop-color="#7CC4FF"/><stop offset="1" stop-color="#38E1FF"/></linearGradient>
+<radialGradient id="em" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF3C4"/><stop offset=".5" stop-color="#FFB347"/><stop offset="1" stop-color="#FF4D00" stop-opacity="0"/></radialGradient></defs>
+<rect width="1600" height="700" fill="url(#bg)"/>
+<text x="80" y="70" font-family="IBM Plex Mono, monospace" font-size="15" fill="#38E1FF" letter-spacing="5">PRESTIGE · GENERATION RESET · EMBER NODES</text>
+<text x="80" y="115" font-family="Noto Serif KR, serif" font-weight="700" font-size="32" fill="#fff">세대가 끝날 때마다 「불씨」가 남고, 다음 세대는 수식상 반드시 더 멀리 간다</text>
+<!-- axes -->
+<g stroke="#7CC4FF" stroke-opacity=".25"><path d="M120 560H1520"/><path d="M120 560V180"/></g>
+<text x="1520" y="590" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12" fill="#7CC4FF">시간 →</text>
+<text x="112" y="175" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12" fill="#7CC4FF">스테이지</text>
+<!-- generation curves -->
+<g fill="none" stroke="url(#curve)" stroke-width="5" stroke-linecap="round">
+<path d="M130 555 C 200 500, 260 470, 330 462"/>
+<path d="M340 555 C 420 470, 500 420, 590 410"/>
+<path d="M600 555 C 700 440, 800 370, 900 356"/>
+<path d="M910 555 C 1030 410, 1160 310, 1280 292"/>
+<path d="M1290 555 C 1380 380, 1450 250, 1510 225" stroke-dasharray="8 8" opacity=".7"/>
+</g>
+<!-- ice age drops -->
+<g fill="#7CC4FF" opacity=".9"><path d="M330 462 L340 555" stroke="#7CC4FF" stroke-width="2" stroke-dasharray="4 4" fill="none"/><path d="M590 410 L600 555" stroke="#7CC4FF" stroke-width="2" stroke-dasharray="4 4" fill="none"/><path d="M900 356 L910 555" stroke="#7CC4FF" stroke-width="2" stroke-dasharray="4 4" fill="none"/><path d="M1280 292 L1290 555" stroke="#7CC4FF" stroke-width="2" stroke-dasharray="4 4" fill="none"/></g>
+<!-- ice crystals at resets -->
+<g fill="#B9E2FF"><path d="M335 440 l10 18 l-10 18 l-10 -18z"/><path d="M595 388 l10 18 l-10 18 l-10 -18z"/><path d="M905 334 l10 18 l-10 18 l-10 -18z"/><path d="M1285 270 l10 18 l-10 18 l-10 -18z"/></g>
+<g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="#C9DAF5" text-anchor="middle"><text x="335" y="425">빙하기 1</text><text x="595" y="373">빙하기 2</text><text x="905" y="319">빙하기 3</text><text x="1285" y="255">빙하기 4</text></g>
+<!-- 1.15x labels -->
+<g font-family="IBM Plex Mono, monospace" font-size="12" fill="#38E1FF" text-anchor="middle"><text x="465" y="600">×1.15</text><text x="750" y="600">×1.15</text><text x="1095" y="600">×1.15</text><text x="1400" y="600">×1.15</text></g>
+<!-- ember nodes accumulating below -->
+<g><circle cx="335" cy="640" r="22" fill="url(#em)"/><circle cx="595" cy="640" r="22" fill="url(#em)"/><circle cx="640" cy="640" r="22" fill="url(#em)"/><circle cx="905" cy="640" r="22" fill="url(#em)"/><circle cx="950" cy="640" r="22" fill="url(#em)"/><circle cx="995" cy="640" r="22" fill="url(#em)"/><circle cx="1285" cy="640" r="22" fill="url(#em)"/><circle cx="1330" cy="640" r="22" fill="url(#em)"/><circle cx="1375" cy="640" r="22" fill="url(#em)"/><circle cx="1420" cy="640" r="22" fill="url(#em)"/></g>
+<text x="120" y="645" font-family="IBM Plex Sans KR, sans-serif" font-size="14" fill="#FFB347">불씨 노드 (절대 리셋되지 않음) · Q = floor(0.35·s^1.45) · M = 1.05^A</text>
+<!-- legend box -->
+<g transform="translate(1180 140)"><rect width="340" height="112" rx="14" fill="#0E2140" stroke="#1F3A63"/><g font-family="IBM Plex Sans KR, sans-serif" font-size="13" fill="#C9DAF5"><text x="16" y="28" fill="#7CC4FF" font-weight="600">리셋되는 것</text><text x="16" y="50">스테이지 · 골드 · 강화 레벨 · 장비(드랍 대기)</text><text x="16" y="78" fill="#FFB347" font-weight="600">유지되는 것</text><text x="16" y="100">불씨 노드 · 도감 · 스킨 · 탈것 · 유산 · 시작 s = ½ best</text></g></g>
+</svg>

@@ -39,6 +39,15 @@ AGENT_META = [
   ("ax-deliverable-reviewer","산출물 검수자","QA"),
 ]
 
+IMAGES = SITE / "images"
+DEMO_URL = "https://ember-clan.robin-hwang.chatgpt.site/"
+
+def img(name, rel):
+    """gen/<name>.png 가 있으면 PNG, 없으면 SVG 자리표시자."""
+    if (IMAGES/"gen"/f"{name}.png").exists():
+        return f"{rel}images/gen/{name}.png"
+    return f"{rel}images/{name}.svg"
+
 def md_to_html(text):
     md = markdown.Markdown(extensions=["tables","fenced_code","toc","attr_list","md_in_html","sane_lists","pymdownx.tilde","pymdownx.betterem","pymdownx.tasklist"],
                            extension_configs={"toc":{"toc_depth":"2-3","permalink":False}})
@@ -66,7 +75,7 @@ def toc_html(tokens):
     return "\n".join(out)
 
 def nav(rel, active=""):
-    items = [("index.html","홈"),("thundergames/proposal.html","기획서"),("thundergames/strategy.html","전략"),("gdd/gdd.html","원시인 형님 2"),("harness/index.html","하네스"),(REPO,"GitHub")]
+    items = [("index.html","홈"),("thundergames/proposal.html","기획서"),("thundergames/strategy.html","전략"),("gdd/gdd.html","원시인 형님 2"),("index.html#demo","데모"),("harness/index.html","하네스"),(REPO,"GitHub")]
     links = "".join(f'<a href="{rel+h if not h.startswith("http") else h}" class="{"on" if a==active else ""}"{" target=_blank rel=noopener" if h.startswith("http") else ""}>{n}</a>' for h,n in items for a in [n])
     return f'''<header class="nav"><div class="wrap"><a class="brand" href="{rel}index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links">{links}</nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header>'''
 
@@ -150,6 +159,7 @@ def index():
 <p class="note" style="margin-top:22px">제출 전 확인: 지원사업 금액 구간(3~10인 최대 1,000만 원)은 원문 미확인이라 확인되지 않으면 삭제합니다. 제안 조직명 "AX 컨설팅 팀"과 담당자 정보는 치환이 필요합니다.</p></div></section>
 
 <section class="sec alt"><div class="wrap"><div class="sec-h"><span class="num">04</span><h2>신작 「원시인 형님 2」</h2><p>장르는 방치형 RPG를 유지하되 대형 IP 방치형과 정면 경쟁을 피하는 세 축으로 차별화했습니다. Codex가 웹 프로토타입을 자율 구현할 수 있는 스펙까지 내려갔습니다.</p></div>
+<figure class="kv"><img src="{img('key-visual', rel)}" alt="원시인 형님 2 키 비주얼 — 빙하기 밤, 불씨를 지키는 부족 캠프" loading="lazy"><figcaption>키 비주얼 (컨셉). 프로덕션 에셋은 자사 원화 기반 스타일 모델로 만든다 — 핵심 캐릭터는 사람, 변형은 AI.</figcaption></figure>
 <div class="split"><div>
 <blockquote class="quote">8년째 형님들을 키워온 방치형 유저가, 빙하기에 쫓기는 원시 부족의 캠프를 경영하며 형님들을 강화해 사냥터를 밀어 올리고, 세대가 끝날 때마다 남는 「불씨」와 부족 유산이 다음 세대를 반드시 더 멀리 보내기 때문에 계속한다.</blockquote>
 <div class="grid g3">
@@ -169,9 +179,26 @@ def index():
 <tr><td>D30 도달</td><td>무과금 950 / 소과금 1,110 (격차 1.17배)</td></tr>
 </tbody></table>
 <p class="note" style="margin-top:14px">아키텍처: TypeScript 모노레포. <code>packages/core</code>(무의존 결정적 룰) → <code>packages/sim</code>(헤드리스 CLI, exit code 2 = 임계 위반) → <code>apps/web</code>(PixiJS). 난수는 xoshiro128** 시드 하나, 수치는 <code>data/balance.json</code> 하나. Unity/C# 포팅은 2차 트랙.</p>
+</div></div>
+<div class="gallery">
+<figure><img src="{img('brothers', rel)}" alt="형님 6종 라인업" loading="lazy"><figcaption><b>형님 6종 라인업</b> 슬롯 순서 = 그리디 타이브레이크 순서. <code>atk0_i = 6·4^i</code></figcaption></figure>
+<figure><img src="{img('prestige', rel)}" alt="세대 교체 프레스티지 다이어그램" loading="lazy"><figcaption><b>세대 교체 프레스티지</b> 빙하기마다 리셋, 불씨 노드는 누적. 다음 세대는 ×1.15 더 멀리.</figcaption></figure>
+<figure><img src="{img('core-loop', rel)}" alt="코어 루프 다이어그램" loading="lazy"><figcaption><b>코어 루프와 벽</b> 100ms 결정적 틱. 벽은 시뮬레이터가 배포 전에 확인한다.</figcaption></figure>
+</div>
+</div></section>
+
+<section class="sec demo" id="demo"><div class="wrap"><div class="sec-h"><span class="num">05</span><h2>먼저 만들어 본 데모: Ember Clan</h2><p>기획서를 쓰기 전에, 같은 컨셉의 방치형 게임을 에이전틱 코딩으로 실제로 만들어 봤습니다. 문서가 아니라 돌아가는 게임이 컨설팅의 첫 증거입니다.</p></div>
+<div class="demo-grid">
+<a class="demo-card" href="{DEMO_URL}" target="_blank" rel="noopener">
+<div class="demo-shot"><img src="{img('camp', rel) if (IMAGES/'gen'/'camp.png').exists() else img('key-visual', rel)}" alt="Ember Clan 데모" loading="lazy"><span class="play">▶ 데모 플레이</span></div>
+<div class="demo-body"><span class="k">DEMO · PLAYABLE IN BROWSER</span><h3>Ember Clan</h3><p>불씨(Ember)를 지키는 부족(Clan). 원시인 형님 2와 같은 세계관의 방치형 게임을 에이전틱 코딩으로 브라우저 데모까지 만들어 봤습니다. 기획서의 "시뮬레이터-퍼스트"와 "데이터 주도" 원칙이 문서 밖에서도 돌아가는지 확인하는 용도입니다.</p><span class="url">{DEMO_URL}</span></div>
+</a>
+<div class="demo-side">
+<div class="card era"><span class="k">WHY NOW</span><h3>누구나 게임을 만드는 시대</h3><p>GPT-6 Astral 같은 최신 모델과 Codex·Claude Code 같은 에이전틱 코딩 도구 덕분에, 기획 문서를 <em>실행 가능한 스펙</em>으로 쓰면 코딩 에이전트가 프로토타입을 스스로 만들고 테스트까지 돌립니다. 9명 규모 스튜디오에게 이것은 "신작을 검증할 여력"이 처음으로 생긴다는 뜻입니다.</p><ul><li>컨셉 → 플레이어블 데모: 며칠이 아니라 <b>몇 시간</b></li><li>사람이 하는 일은 코딩이 아니라 <b>규칙·수식·수용 기준을 쓰는 것</b></li><li>그래서 이 저장소의 GDD는 산문이 아니라 <b>41개 태스크 카드와 테스트 명령</b>으로 끝납니다</li></ul></div>
+<div class="card"><span class="k">FROM DEMO TO PLAN</span><h3>데모에서 배운 것이 빌드 플랜이 됐다</h3><p>데모를 만들며 확인한 세 가지가 빌드 플랜의 원칙이 됐습니다: 난수는 시드 하나에서, 수치는 코드가 아니라 테이블에, 렌더러 없이 콘솔에서 수천 판을 돌릴 수 있어야 한다.</p></div>
 </div></div></div></section>
 
-<section class="sec"><div class="wrap"><div class="sec-h"><span class="num">05</span><h2>하네스: 누가, 어떤 순서로</h2><p>팬아웃(시장·진단·GDD 병렬) → 수렴(전략·빌드 플랜) → 생성-검증(기획서 → 검수) → 조립. 팀원 간 이의와 질의가 실제로 결과를 바꿨습니다.</p></div>
+<section class="sec"><div class="wrap"><div class="sec-h"><span class="num">06</span><h2>하네스: 누가, 어떤 순서로</h2><p>팬아웃(시장·진단·GDD 병렬) → 수렴(전략·빌드 플랜) → 생성-검증(기획서 → 검수) → 조립. 팀원 간 이의와 질의가 실제로 결과를 바꿨습니다.</p></div>
 <div class="flow">{flow_svg()}</div>
 <div class="grid g3" style="margin-top:22px">
 <div class="card"><span class="k">실측 1</span><h3>진단가의 이의 → 전략가 수용</h3><p>"CS가 병목 2위이고 난이도 최저인데 아트 단독 1순위는 이상하다" → 1순위 3개 동순위 + 착수 시점 분리로 변경.</p></div>
@@ -182,7 +209,7 @@ def index():
 <h3 style="font-family:var(--serif);margin:34px 0 14px;font-size:22px">스킬 8</h3><div class="chips">{skills}</div>
 </div></section>
 
-<section class="sec alt"><div class="wrap"><div class="sec-h"><span class="num">06</span><h2>Codex로 프로토타입 만들기</h2><p>코딩 에이전트는 모호함에 약하고 테스트로 완료를 증명할 수 있는 작업에 강합니다. 그래서 모든 태스크는 <code>실행 명령 → 기대 결과</code> 수용 기준을 갖습니다.</p></div>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><span class="num">07</span><h2>Codex로 프로토타입 만들기</h2><p>코딩 에이전트는 모호함에 약하고 테스트로 완료를 증명할 수 있는 작업에 강합니다. 그래서 모든 태스크는 <code>실행 명령 → 기대 결과</code> 수용 기준을 갖습니다.</p></div>
 <div class="steps">
 <div class="step"><div><b>새 저장소 루트에 AGENTS.md, docs/에 GDD·BALANCE·BUILD_PLAN 배치</b><p>문서가 코드보다 우선. 문서와 코드가 다르면 문서를 고치지 말고 이슈로 남긴 뒤 문서를 따릅니다.</p></div></div>
 <div class="step"><div><b>T0.1(스캐폴드)부터 순서대로 Codex에 프롬프트</b><p>빌드 플랜 7.3의 프롬프트 예시 2개(P0.1, P2.x)를 템플릿으로. 태스크 1개 = Codex 1세션.</p></div></div>
@@ -221,6 +248,9 @@ def build():
     if OUT.exists(): shutil.rmtree(OUT)
     (OUT/"assets").mkdir(parents=True)
     for f in (SITE/"assets").iterdir(): shutil.copy(f, OUT/"assets"/f.name)
+    (OUT/"images"/"gen").mkdir(parents=True)
+    for f in IMAGES.glob("*.svg"): shutil.copy(f, OUT/"images"/f.name)
+    for f in (IMAGES/"gen").glob("*.png"): shutil.copy(f, OUT/"images"/"gen"/f.name)
     (OUT/".nojekyll").write_text("")
     (OUT/"index.html").write_text(index(), encoding="utf-8")
     for grp in ("thundergames","gdd"):

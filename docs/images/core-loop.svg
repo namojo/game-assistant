@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" role="img" aria-label="코어 루프: 자동 전투 → 골드 → 강화 → 스테이지 → 벽 → 오프라인/캠프로 돌파">
+<defs><linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0B2247"/><stop offset="1" stop-color="#061224"/></linearGradient>
+<linearGradient id="nd" x1="0" x2="1"><stop offset="0" stop-color="#1E54D6"/><stop offset="1" stop-color="#2A63E8"/></linearGradient>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0L10 5L0 10z" fill="#38E1FF"/></marker></defs>
+<rect width="1600" height="700" fill="url(#bg)"/>
+<text x="80" y="70" font-family="IBM Plex Mono, monospace" font-size="15" fill="#38E1FF" letter-spacing="5">CORE LOOP · 100ms TICK · DETERMINISTIC</text>
+<text x="80" y="115" font-family="Noto Serif KR, serif" font-weight="700" font-size="32" fill="#fff">초 단위 코어 루프와 벽, 그리고 벽을 넘게 하는 자원</text>
+<!-- ring -->
+<circle cx="800" cy="420" r="210" fill="none" stroke="#7CC4FF" stroke-opacity=".2" stroke-width="2" stroke-dasharray="6 8"/>
+<g font-family="IBM Plex Sans KR, sans-serif" font-size="15" fill="#fff" text-anchor="middle">
+<g transform="translate(800 210)"><rect x="-110" y="-32" width="220" height="64" rx="16" fill="url(#nd)" stroke="#7CC4FF" stroke-opacity=".5"/><text y="-4" font-weight="600">자동 전투</text><text y="18" font-size="12" fill="#C9DAF5">DPS_total · T_kill 3~8초</text></g>
+<g transform="translate(1000 330)"><rect x="-100" y="-32" width="200" height="64" rx="16" fill="url(#nd)" stroke="#7CC4FF" stroke-opacity=".5"/><text y="-4" font-weight="600">골드</text><text y="18" font-size="12" fill="#C9DAF5">G(s) = 8 · 1.052^(s−1)</text></g>
+<g transform="translate(1000 510)"><rect x="-100" y="-32" width="200" height="64" rx="16" fill="url(#nd)" stroke="#7CC4FF" stroke-opacity=".5"/><text y="-4" font-weight="600">강화</text><text y="18" font-size="12" fill="#C9DAF5">C(L) = 25 · 1.075^L</text></g>
+<g transform="translate(800 630)"><rect x="-110" y="-32" width="220" height="64" rx="16" fill="url(#nd)" stroke="#7CC4FF" stroke-opacity=".5"/><text y="-4" font-weight="600">스테이지 진행</text><text y="18" font-size="12" fill="#C9DAF5">HP(s) = 25 · 1.058^(s−1) · 계단</text></g>
+<g transform="translate(600 510)"><rect x="-100" y="-32" width="200" height="64" rx="16" fill="#0E2140" stroke="#FFB347"/><text y="-4" font-weight="600" fill="#FFB347">벽</text><text y="18" font-size="12" fill="#C9DAF5">T_kill &gt; 30초 · 보스 시간 초과</text></g>
+<g transform="translate(600 330)"><rect x="-100" y="-32" width="200" height="64" rx="16" fill="#0E2140" stroke="#38E1FF"/><text y="-4" font-weight="600" fill="#38E1FF">돌파 자원</text><text y="18" font-size="12" fill="#C9DAF5">오프라인 보상 · 캠프 · 장비 · 불씨</text></g>
+</g>
+<g fill="none" stroke="#38E1FF" stroke-width="2.5" marker-end="url(#a)">
+<path d="M905 232 C 950 250, 980 270, 990 296"/>
+<path d="M1000 364 L1000 476"/>
+<path d="M990 544 C 970 580, 930 610, 912 620"/>
+<path d="M690 622 C 660 600, 630 575, 612 545"/>
+<path d="M600 476 L600 364"/>
+<path d="M612 296 C 640 260, 680 235, 690 226"/>
+</g>
+<!-- side notes -->
+<g font-family="IBM Plex Sans KR, sans-serif" font-size="14" fill="#A9BEDF">
+<text x="80" y="300">첫 벽: 53.5분, s≈110 (보스 벽)</text><text x="80" y="326">D1 무과금 s 138 · 소과금 s 211</text><text x="80" y="352">D7 450 / 520 · D30 950 / 1,110</text>
+<text x="80" y="400" fill="#7CC4FF">10 체크포인트 전부 ±10% 이내</text>
+<text x="1220" y="300">벽 없는 방치형은 결제 동기가 없다.</text><text x="1220" y="326">벽은 시뮬레이터가 먼저 확인하고,</text><text x="1220" y="352">배포 뒤 200스테이지 뒤에서 발견하지 않는다.</text>
+</g>
+</svg>
