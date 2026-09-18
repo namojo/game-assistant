@@ -243,10 +243,11 @@ primitive-brothers-2/
 | `npm test` | `vitest run` 전 워크스페이스 (pretest에서 `validate:assets`, `check:deps`) |
 | `npm test -w packages/core` | 코어 유닛 테스트만 |
 | `npm run sim -- --days 7 --bot balanced --seed 42` | 시뮬레이터 1회 실행 |
-| `npm run sim:regress` | 목표 벽 표 10 체크포인트 + 첫 벽 + 확률 + 천장 회귀 |
+| `npm run sim:regress` | 목표 벽 표 10 체크포인트 ±10% + 첫 벽 + 격차 + D1 프레스티지 (13 단언) |
+| `npm run sim:prob` | 확률 표기 검증 4종 + 천장 단언 (6.4 T5·T6) |
 | `npm run sim:diff -- --base bal_v1 --head bal_v2` | 곡선 diff 마크다운 리포트 |
 | `npm run sim:determinism` | 동일 시드 2회 실행 SHA-256 비교 |
-| `npm run sim:long -- --days 90` | 60/90일 장기 프로파일 (리포트 전용) |
+| `npm run sim:long -- --days 90` / `npm run sim:long -- --all` | 60/90일 장기 프로파일 (리포트 전용, 게이트 아님) |
 | `npm run dev -w apps/web` | 렌더러 개발 서버 |
 | `npm run e2e` | Playwright 스크린샷 + 콘솔 에러 검사 |
 | `npm run validate:assets` | 에셋 거버넌스 게이트 (1.7) |
@@ -298,12 +299,12 @@ GDD 8.2~8.12를 그대로 옮기되, 스키마로 강제해야 하는 제약을 
 | `equipment` | id, name_ko, slot, tier, mult, merge_count, drop_stage_min, drop_weight, asset_id | `tier` 0~40, **`mult == equip_tier_mult^tier` (로더 파생 검사, 오차 1e-12)**, `merge_count == 4`, `drop_weight` 0~1, `merge_from` null 또는 tier-1 항목 |
 | `totems` | id, branch, order, cost_base, cost_slope, effect_stat, effect_value, effect_kind, requires | `branch` enum 4종 **유일**, **`order == 0` (계열 1행 규칙 — 589행 금지)**, `cost_slope > 0`, `effect_kind` enum |
 | `stages` | id, type, range_from, world_id, monster_pool | `range_to` null 허용, `range_from ≤ range_to`, **구간 중첩 금지(로더 검사)**, `monster_pool` minItems 1 |
-| `monsters` | id, name_ko, family, rank, hp_mult, gold_mult, codex_id, asset_id | `hp_mult` 0.8~1.3, `gold_mult` 0.8~1.3, `rank` enum |
+| `monsters` | id, name_ko, family, rank, hp_mult, gold_mult, codex_id, asset_id | `hp_mult` 0.8~1.3, `gold_mult` 0.8~1.3, `rank` enum. **GDD 8.7의 `drop_table_id`는 확장 테이블 `drop_tables` 참조라 MVP에서 선택 필드(null 허용), `palette_variants`는 `assets/_index.json` 항목 배열로 선택 필드** |
 | `skins` | id, brother_id, name_ko, rarity, stat_bonus, acquire, asset_id, source_asset_id | **`stat_bonus.value ≤ 0.05` (GDD 5.8 상한, 스키마 `maximum`)**, `product_id` null 허용 |
 | `mounts` | id, name_ko, offline_cap_add_sec, start_stage_add, atk_mult, acquire, asset_id | `offline_cap_add_sec` 0~14400, `start_stage_add` 0~50, **`atk_mult` 1.00~1.05** |
 | `collection` | id, monster_id, tiers, rewards, card_asset_id, persist_on_prestige | `tiers` = `[10,100,1000]` 고정 길이 3 오름차순, `rewards` 길이 == tiers 길이, **`persist_on_prestige` const true** |
-| `events` | id, type, start_at, end_at, reward_hours, repeat | `start_at`/`end_at` `format: date-time`, **`reward_hours` 0.5~10 (절대 수치 금지 — GDD 6.3)**, `end_at > start_at` |
-| `shop_products` | id, name_ko, price_krw, store_sku, kind, grants, is_probabilistic | `price_krw ≥ 0`, **`is_probabilistic` const false** (뼈 갈기는 상품이 아니라 게임 내 시행이므로 상점 테이블에 확률형 상품이 존재할 수 없다) |
+| `events` | id, type, start_at, end_at, reward_hours, repeat | `start_at`/`end_at` `format: date-time`, **`reward_hours` 0.5~10 (절대 수치 금지 — GDD 6.3)**, `end_at > start_at`. **GDD 8.11의 `reward_items`·`condition`·`banner_asset_id`는 MVP 로더가 읽지 않으므로 선택 필드로 두되 스키마에는 정의한다** |
+| `shop_products` | id, name_ko, price_krw, store_sku, kind, grants, is_probabilistic (`limit_per_account`·`visible_condition`은 null 허용 선택 필드) | `price_krw ≥ 0`, **`is_probabilistic` const false** (뼈 갈기는 상품이 아니라 게임 내 시행이므로 상점 테이블에 확률형 상품이 존재할 수 없다) |
 
 **확장 전용 스키마(로더 무시, 파일만 존재)**: `camp_buildings`, `guilds`, `pass_tracks`, `drop_tables`, `passives` — P0.3에서 스키마만 작성하고 `_manifest.json`에 `"loaded": false`로 등록한다.
 
@@ -1202,12 +1203,12 @@ reports/{botId}-{profile}-{seed}-{days}d/
 
 | 등급 | 표기 p | 산식값 | 채택 N | 3σ 허용 구간 |
 |---|---|---|---|---|
-| 전설 | 0.005 | 1,791,000 | **1,800,000** | p ± 3√(p(1−p)/N) = 0.005 ± 0.000158 |
+| 전설 | 0.005 | 179,100 | **1,800,000** (산식값의 약 10배 여유) | p ± 3√(p(1−p)/N) = 0.005 ± 0.000158 |
 | 영웅 | 0.03 | 29,100 | 100,000 | 0.03 ± 0.001618 |
 | 희귀 | 0.15 | 5,100 | 100,000 | 0.15 ± 0.003387 |
 | 일반 | 0.815 | 204 | 100,000 | 0.815 ± 0.003676 |
 
-전 확률에 N=100,000을 일괄 적용하면 전설의 상대오차가 42%라 검증력이 사실상 0이다. 그래서 산식을 코드에 넣고 표기표에서 자동 산출한다.
+전 확률에 N=100,000을 일괄 적용하면 전설의 3σ 상대오차가 13.4%로 ±10% 기준을 못 넘는다. 그래서 산식을 코드에 넣고 표기표에서 자동 산출한다. **전설의 채택 N(1,800,000)은 산식값(179,100)보다 한 자릿수 크다 — 규제 증거용 여유분이며, T2.6 수용 기준 5(60초 이내)를 못 지키면 산식값 기준으로 내리는 것을 기획과 합의한다.**
 
 ---
 
@@ -1381,6 +1382,8 @@ docs/BUILD_PLAN.md의 태스크 카드 「T2.5 목표 진행 벽 표 회귀 (10 
 | A-D11 | 애니메이션 프레임 에셋(`fx_anim_*`)은 `origin:"human"`만 허용해 빌드 게이트가 AI 생성을 차단한다 | GDD 9.2가 "프레임 간 일관성은 현 시점 AI 한계"로 사람 생산을 명시 | T0.4 | **가정** |
 | A-D12 | `packages/data`를 신설해 ajv·파일 I/O를 격리하고 `packages/core`의 의존성 0을 지킨다 | 스킬 기본 구조는 core/sim/web 3개지만, 로더가 core에 들어가면 "의존성 0"이 깨진다 | 1.1, T0.3 | **가정** |
 | A-D13 | Phase 3을 "저장·영속성·회귀 시나리오"로 재정의하고, 오프라인·프레스티지를 Phase 1로 올린다 | 시뮬레이터(P2)가 프레스티지·오프라인 없이는 목표 벽 표를 재현할 수 없고, 디렉터 우선순위표도 같은 순서 | 4절 Phase 구성 | **가정** |
+| A-D14 | 확률값을 **부동소수 0~1**(`balance.drop_rates`)로 관리한다 | GDD 8.0 공통 규칙("확률은 `number` 0~1")과 7.3 표기표를 그대로 따랐다. **단 전략 청사진 4.3.1과 그 팀원 전달 메모 (2)-①(d), 기획서 부록 E는 "확률·비율은 전부 정수 ppm(백만분율)"을 규격으로 명시했고, 기획서는 그 규칙을 고객에게 이미 약속했다.** 본 플랜은 그 규격을 따르지 않았다 | 3.1, 3.4, T0.3, T2.6, GDD 8.0/7.3. **정합 필요 — 기획 담당·전략 담당 판단 대상** | **가정(이탈 기록)** |
+| A-D15 | 시뮬레이터 CLI를 `npm run sim` / `sim:regress` / `sim:prob` / `sim:diff` / `sim:determinism` / `sim:long` 체계로 둔다 | 워크스페이스 npm 스크립트로 통일해 CI 게이트와 1:1로 묶기 위함 | **전략 청사진 팀원 전달 메모 (2)-②의 `sim run` / `sim diff` / `sim verify-odds` / `sim replay` 규격과 명령 이름·exit code 규약(0/1/2)·테이블 JSON 포맷(`schema_version`·`generated_at`·`source`·`checksum`·`columns`/`rows`)이 다르다. 전작 시뮬레이터와의 자산 재사용을 위해서는 한쪽으로 통일해야 한다** | **가정(이탈 기록)** |
 
 ### 8.4 미결·미검증 (측정 후 판단)
 
