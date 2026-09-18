@@ -1,5 +1,7 @@
 # game-assistant
 
+**웹 페이지: https://namojo.github.io/game-assistant/** (gh-pages 브랜치, `site/build.py`로 생성)
+
 부산 지역 게임사를 위한 **AX(AI Transformation) 컨설팅 하네스**와 그 첫 적용 사례(썬더게임즈)입니다.
 
 ## 무엇이 들어 있나
