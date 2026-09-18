@@ -1,0 +1,210 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>스킬 — ax-strategy-blueprint · game-assistant</title><meta name="description" content="게임사 AX(AI Transformation) 전략 청사진 작성 스킬. 3년 시나리오(장기 운영 심화/글로벌 재출시/신작 병렬)별 AX 우선순위, 우선순위 매트릭스(병목×효과×난이도), 영역별 AX 방안(아트 스타일 파이프라인·헤드리스 QA 시뮬레이터·밸런스 코파일럿·CS·개발 자산화·로컬라이즈·데이터·UA·신작 프로토타이핑), 에이전트 하네스 아키텍처, 4단계 로드맵, 4대 KPI, 리스크·거버넌스 문서 체계를 설계. &#x27;AX 전략&#x27;, &#x27;AI 전환 로드맵&#x27;, &#x27;AI 도입 우선순위&#x27;, &#x27;에이전트 하네스 설계&#x27;, &#x27;게임사 AI 거버넌스&#x27; 요청이나 진단 결과를 실행 계획으로 바꿔야 하면 이 스킬을 사용할 것. 고객 제출용 기획서 문장 작성은 ax-proposal-writer가 담당."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="">원시인 형님 2</a><a href="../harness/index.html" class="on">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="index.html">하네스</a> / 스킬</div><h1>스킬 — ax-strategy-blueprint</h1><p class="sub">게임사 AX(AI Transformation) 전략 청사진 작성 스킬. 3년 시나리오(장기 운영 심화/글로벌 재출시/신작 병렬)별 AX 우선순위, 우선순위 매트릭스(병목×효과×난이도), 영역별 AX 방안(아트 스타일 파이프라인·헤드리스 QA 시뮬레이터·밸런스 코파일럿·CS·개발 자산화·로컬라이즈·데이터·UA·신작 프로토타이핑), 에이전트 하네스 아키텍처, 4단계 로드맵, 4대 KPI, 리스크·거버넌스 문서 체계를 설계. &#x27;AX 전략&#x27;, &#x27;AI 전환 로드맵&#x27;, &#x27;AI 도입 우선순위&#x27;, &#x27;에이전트 하네스 설계&#x27;, &#x27;게임사 AI 거버넌스&#x27; 요청이나 진단 결과를 실행 계획으로 바꿔야 하면 이 스킬을 사용할 것. 고객 제출용 기획서 문장 작성은 ax-proposal-writer가 담당.</p></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#_1">핵심 명제</a>
+<a href="#_2">절차</a>
+<a class="l3" href="#1">1. 시나리오 × 우선순위</a>
+<a class="l3" href="#2">2. 우선순위 매트릭스</a>
+<a class="l3" href="#3-ax">3. 영역별 AX 방안</a>
+<a class="l3" href="#4">4. 하네스 아키텍처</a>
+<a class="l3" href="#5-kpi">5. 로드맵과 KPI</a>
+<a class="l3" href="#6">6. 리스크·거버넌스</a>
+<a class="l3" href="#7">7. 신작 트랙 연결</a>
+<a href="#_3">출력 템플릿</a>
+<a href="#_4">공통 규약</a>
+<a href="#_5">참조</a>
+<a href="#referencesdomain-ax-playbookmd">참조 문서: references/domain-ax-playbook.md</a>
+<a class="l3" href="#ax-rpg">영역별 AX 플레이북 (방치형 RPG 소규모 스튜디오 기준안)</a>
+<a class="l3" href="#_6">목차</a>
+<a class="l3" href="#1_1">1. 아트 — &quot;생성&quot;이 아니라 &quot;스타일 일관성 파이프라인&quot;</a>
+<a class="l3" href="#2-qa">2. QA — &quot;화면 테스트&quot;가 아니라 &quot;수치 시뮬레이션&quot;</a>
+<a class="l3" href="#3">3. 밸런스·기획 코파일럿</a>
+<a class="l3" href="#4-cs-quick-win">4. CS·커뮤니티 (Quick Win)</a>
+<a class="l3" href="#5">5. 개발 생산성과 코드 자산화</a>
+<a class="l3" href="#6_1">6. 텍스트·로컬라이즈</a>
+<a class="l3" href="#7_1">7. 데이터</a>
+<a class="l3" href="#8-ua">8. UA·마케팅</a>
+<a class="l3" href="#9">9. 신작 프로토타이핑</a>
+<a href="#referencesgovernance-templatesmd">참조 문서: references/governance-templates.md</a>
+<a class="l3" href="#5_1">거버넌스 5문서 골격</a>
+<a class="l3" href="#1-ai-1">1. AI 활용 원칙 (1장)</a>
+<a class="l3" href="#2_1">2. 아트 스타일 가이드</a>
+<a class="l3" href="#3_1">3. 에이전트 권한 정책 (등급표)</a>
+<a class="l3" href="#4_1">4. 데이터 정책</a>
+<a class="l3" href="#5_2">5. 역할 정의서</a>
+<a class="l3" href="#_7">리스크표 형식</a></aside><article class="md"><h1 id="ax-strategy-blueprint">AX Strategy Blueprint</h1>
+<p>진단(병목)과 시장(방향)을 받아 실행 가능한 AX 청사진을 만든다.</p>
+<h2 id="_1">핵심 명제</h2>
+<p>지방 게임사의 구조적 약점(인력·자본·정보 격차)은 AI 에이전트로 가장 직접 상쇄할 수 있는 종류의 약점이다. 채용할 수 없는 사람의 역할을 에이전트가 메운다. 청사진의 모든 항목은 이 명제의 구체화여야 하며, 명제와 연결되지 않는 항목(예: 유행하는 도구 도입)은 뺀다.</p>
+<h2 id="_2">절차</h2>
+<h3 id="1">1. 시나리오 × 우선순위</h3>
+<p>시나리오 A(장기 운영 심화) / B(글로벌 재출시) / C(신작 병렬 개발)별로 최우선 AX 영역을 표로 만든다. 시나리오는 배타적이 아니며, 대표의 무게 중심이 첫 미팅에서 확인되기 전까지는 셋을 모두 유지한다.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>시나리오</th>
+<th>최우선 영역</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>아트 변형·QA 시뮬레이터·밸런스</td>
+<td>콘텍스트 소비 속도를 따라가는 처리량이 전부</td>
+</tr>
+<tr>
+<td>B</td>
+<td>로컬라이즈·다국어 CS·크리에이티브</td>
+<td>인력이 필요한 영역이자 LLM이 잘하는 영역</td>
+</tr>
+<tr>
+<td>C</td>
+<td>프로토타이핑 파이프라인 + 기존 자산 재사용</td>
+<td>운영 인력 빼지 않고 병렬 검증</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="2">2. 우선순위 매트릭스</h3>
+<p>진단의 병목 점수표를 받아 <code>병목 강도 × AI 효과 × (1/도입 난이도)</code>로 순위를 매긴다. 요청 분야(예: 아트·QA)는 순위와 무관하게 1순위 "요청"으로 표시하고 Quick Win 1개(대개 CS·리뷰)를 함께 1순위로 둔다. 진단의 순위와 다르면 이유를 병기한다.</p>
+<h3 id="3-ax">3. 영역별 AX 방안</h3>
+<p><code>references/domain-ax-playbook.md</code>의 영역별 문제 정의·구성 요소·한계·지표를 대상사에 맞게 채운다. 각 영역에 반드시 <strong>한계 명시</strong>(예: 스프라이트 프레임 간 일관성은 사람 필요)와 <strong>사람 개입 지점</strong>을 쓴다. 한계를 말하는 것이 신뢰를 만든다.</p>
+<h3 id="4">4. 하네스 아키텍처</h3>
+<p>단일 진입점(Slack/CLI/웹) → 오케스트레이터(요청 해석·에이전트 선택·결과 검증) → 도메인 에이전트(아트·QA·밸런스·운영·개발) → 스킬 → 공유 도구. 에이전트별 입력·출력·사람 개입 지점 표와 단계적 구축 순서(운영→개발→아트→QA→밸런스→통합)를 쓴다. 왜 이 순서인가: 운영은 즉시 체감, 개발(문서화·전투 로직 분리)은 QA 시뮬레이터의 전제 조건이기 때문이다.</p>
+<h3 id="5-kpi">5. 로드맵과 KPI</h3>
+<p>0 진단(2~3주) → 1 Quick Win(1~2개월) → 2 파이프라인화(3~6개월) → 3 조직화(6개월~, 컨설턴트 의존 종료). KPI는 4개로 고정: 에셋 1종당 리드타임 / 업데이트 주기 / 배포 후 회귀 버그 수 / CS 1차 응답 시간. 보조 지표는 별도 표로 분리해 "약속"과 구분한다.</p>
+<h3 id="6">6. 리스크·거버넌스</h3>
+<p><code>references/governance-templates.md</code>의 5문서(AI 활용 원칙·아트 스타일 가이드·에이전트 권한 정책·데이터 정책·역할 정의서) 골격을 채우고, 리스크표(가능성×영향×대응)를 만든다. AI 아트 유저 반발과 내부 저항은 항상 상위 리스크다.</p>
+<h3 id="7">7. 신작 트랙 연결</h3>
+<p>시나리오 C가 살아 있으면, 신작이 재사용할 기존 자산(스타일 모델·시뮬레이터·운영 에이전트)과 신작이 처음부터 지켜야 할 아키텍처 원칙(시뮬레이터-퍼스트, 데이터 주도)을 1절로 쓴다. 상세는 GDD·빌드 플랜으로 넘긴다.</p>
+<h2 id="_3">출력 템플릿</h2>
+<pre><code class="language-markdown"># {대상사} AX 전략 청사진
+## 1. 핵심 명제와 대상사 적용
+## 2. 시나리오 A/B/C × AX 우선순위
+## 3. 우선순위 매트릭스 (진단 점수 연결)
+## 4. 영역별 AX 방안 (문제 정의·구성·한계·사람 개입·지표)
+## 5. 에이전트 하네스 아키텍처 (다이어그램·역할표·구축 순서)
+## 6. 로드맵 (4단계·산출물)
+## 7. 성과 지표 (4대 KPI + 보조 지표 분리)
+## 8. 리스크와 거버넌스 (5문서 골격)
+## 9. 신작 트랙 연결
+## 10. 첫 미팅 후 갱신 항목
+</code></pre>
+<h2 id="_4">공통 규약</h2>
+<p>로드맵 단계 번호는 항상 <code>0 진단 / 1 Quick Win / 2 파이프라인화 / 3 조직화</code>를 쓴다. 문서마다 번호 체계가 다르면 고객이 다른 체계로 답하게 되고, 검수에서 실제로 이 불일치가 발견되었다.</p>
+<h2 id="_5">참조</h2>
+<ul>
+<li><code>references/domain-ax-playbook.md</code> — 영역별 문제 정의·구성 요소·한계·지표 기준안</li>
+<li><code>references/governance-templates.md</code> — 거버넌스 5문서 골격과 에이전트 권한 등급</li>
+</ul>
+<hr />
+<h2 id="referencesdomain-ax-playbookmd">참조 문서: references/domain-ax-playbook.md</h2>
+<h3 id="ax-rpg">영역별 AX 플레이북 (방치형 RPG 소규모 스튜디오 기준안)</h3>
+<h3 id="_6">목차</h3>
+<ol>
+<li>아트 2. QA 3. 밸런스·기획 4. CS·커뮤니티 5. 개발 생산성 6. 텍스트·로컬라이즈 7. 데이터 8. UA·마케팅 9. 신작 프로토타이핑</li>
+</ol>
+<hr />
+<h3 id="1_1">1. 아트 — "생성"이 아니라 "스타일 일관성 파이프라인"</h3>
+<ul>
+<li>문제: 300번째 몬스터가 1번째와 다른 그림이 되는 것이 실패 패턴. 목표는 자사 스타일을 학습한 생산 라인.</li>
+<li>구성: 자사 원화로 스타일 모델(LoRA) → 컨셉 탐색은 상용 모델, 프로덕션은 로컬 파이프라인+자체 스타일 → 변형 자동화 우선(등급별 팔레트·스킨 의상·색상/크기 변형) → Vision LLM 자동 검수(팔레트·선 굵기·실루엣·해상도) → 아틀라스 패킹·엔진 임포트 자동화</li>
+<li>한계: 스프라이트 애니메이션 프레임 간 일관성은 사람 손 필요</li>
+<li>거버넌스: 학습 데이터 자사 IP 한정 / 핵심 캐릭터 원화는 사람 / 유저 공개 범위 사전 결정 / 원화가 → 아트 디렉터·큐레이터</li>
+<li>지표: 에셋 1종당 리드타임, 월간 신규 에셋 수, 검수 반려율</li>
+</ul>
+<h3 id="2-qa">2. QA — "화면 테스트"가 아니라 "수치 시뮬레이션"</h3>
+<ul>
+<li>문제: 방치형은 버그보다 성장 곡선 꼬임이 치명적. 상수 하나가 200스테이지 뒤에서 벽으로 나타남.</li>
+<li>구성: 전투 로직을 엔진 컴포넌트에서 분리한 순수 클래스 → 헤드리스 시뮬레이터(몬테카를로 가상 유저, 곡선 diff 리포트) → 확률 검증(표기 vs 구현 일치) → 결제·수령 회귀 시나리오 → Vision LLM 플레이 에이전트(UI 깨짐·소프트락) → 리뷰 마이닝(버전별 불만 급증) → 크래시 트리아지</li>
+<li>전제: 전투 로직 분리 리팩터링 선행(5번과 연결)</li>
+<li>지표: 배포 후 회귀 버그 수, 핫픽스 빈도, 밸런스 긴급 패치 수</li>
+</ul>
+<h3 id="3">3. 밸런스·기획 코파일럿</h3>
+<ul>
+<li>시트에 자연어 질의·수정 → 시뮬레이터 연결("이 수치면 D7 벽이 어디로") → 신규 콘텍스트 정합성 자동 체크 → 이벤트 보상 인플레이션 예측</li>
+<li>사람 개입: 최종 수치 확정</li>
+</ul>
+<h3 id="4-cs-quick-win">4. CS·커뮤니티 (Quick Win)</h3>
+<ul>
+<li>티켓·리뷰 분류(버그/결제/밸런스/제안/칭찬) → FAQ 기반 1차 답변 초안(GM 검토 후 발송) → 결제 티켓은 서버 로그 자동 대조 → 공지·이벤트 문구 초안(톤 가이드)</li>
+<li>도입 비용 최저·체감 최고. 진단 기간 병행 구축.</li>
+<li>지표: CS 1차 응답 시간</li>
+</ul>
+<h3 id="5">5. 개발 생산성과 코드 자산화</h3>
+<ul>
+<li>코드 문서화 → 아키텍처 맵 → 테스트 보강 → 전투 로직 분리 순. 엔진(Unity/C#)은 AI 코딩 도구가 잘하는 영역.</li>
+<li>지방 게임사 특유 효과: 이직 시 지식 유실 방지(지식 자산화)</li>
+</ul>
+<h3 id="6_1">6. 텍스트·로컬라이즈</h3>
+<ul>
+<li>도감·이벤트·대사 톤 가이드 기반 대량 생산 → 용어집 + LLM 번역 + 네이티브 검수 1회</li>
+<li>시나리오 B 전제. 콘진원 게임더하기 연계 가능</li>
+</ul>
+<h3 id="7_1">7. 데이터</h3>
+<ul>
+<li>Text-to-SQL 분석 에이전트(데이터 분석가 채용 대체) → 코호트 잔존·결제 전환·이탈 직전 행동 정기 리포트 → 리뷰 마이닝과 결합</li>
+</ul>
+<h3 id="8-ua">8. UA·마케팅</h3>
+<ul>
+<li>크리에이티브 대량 생성·A/B 자동화 → ASO 문구 → 국가별 변형</li>
+</ul>
+<h3 id="9">9. 신작 프로토타이핑</h3>
+<ul>
+<li>컨셉 → 플레이어블 1~2주. 기존 스타일 모델·밸런스 프레임워크·시뮬레이터·운영 에이전트 재사용.</li>
+<li>신작은 처음부터 시뮬레이터-퍼스트·데이터 주도 아키텍처로 만들어 QA AX의 전제 조건(로직 분리)을 리팩터링 없이 확보한다.</li>
+</ul>
+<hr />
+<h2 id="referencesgovernance-templatesmd">참조 문서: references/governance-templates.md</h2>
+<h3 id="5_1">거버넌스 5문서 골격</h3>
+<h3 id="1-ai-1">1. AI 활용 원칙 (1장)</h3>
+<ul>
+<li>학습 데이터 범위: 자사 IP 원화·스프라이트·로그로 한정. 외부 데이터 학습 모델은 컨셉 탐색에만.</li>
+<li>사람 유지 영역: 핵심 캐릭터 원화, 최종 밸런스 수치 확정, 배포 승인, CS 발송 승인.</li>
+<li>유저 공개 범위: (택1) 전면 공개 / 변형·배경에 한해 공개 / 비공개+스토어 고지 의무 준수. 스팀 진출 시 고지 필수.</li>
+<li>시상식·전시 규정 확인 절차.</li>
+</ul>
+<h3 id="2_1">2. 아트 스타일 가이드</h3>
+<p>팔레트(등급별), 선 굵기, 실루엣 규칙, 해상도·여백, 금지 표현. 자동 검수 기준의 원본. 없으면 컨설팅 2단계 초입에 작성.</p>
+<h3 id="3_1">3. 에이전트 권한 정책 (등급표)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>등급</th>
+<th>예</th>
+<th>자동 실행</th>
+<th>승인</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L0 읽기</td>
+<td>리뷰 분류, 곡선 diff 리포트</td>
+<td>O</td>
+<td>불필요</td>
+</tr>
+<tr>
+<td>L1 초안</td>
+<td>CS 답변 초안, 공지 초안, 변형 에셋 후보</td>
+<td>O(초안까지)</td>
+<td>발송·임포트는 사람</td>
+</tr>
+<tr>
+<td>L2 변경</td>
+<td>시트 수정, 코드 PR 생성</td>
+<td>O(PR/브랜치까지)</td>
+<td>머지·반영은 사람</td>
+</tr>
+<tr>
+<td>L3 배포</td>
+<td>스토어 제출, 서버 배포</td>
+<td>X</td>
+<td>항상 사람</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="4_1">4. 데이터 정책</h3>
+<p>유저 식별 정보 외부 API 전송 금지, 로그 익명화 규칙, 외부 모델 API에 보내는 데이터 범위(리뷰 텍스트 O, 결제 식별자 X), 보관 기간.</p>
+<h3 id="5_2">5. 역할 정의서</h3>
+<p>아트 디렉터(큐레이션·리터치·스타일 가이드 소유) / QA 오너(시뮬레이터 결과 해석·배포 승인) / 에이전트 운영자(하네스 관리·스킬 라이브러리·권한 정책 집행). 기존 직무에서의 전환 경로를 함께 적는다.</p>
+<h3 id="_7">리스크표 형식</h3>
+<p>| 리스크 | 가능성 | 영향 | 대응 | 담당 |
+항상 포함: AI 아트 유저 반발 / 외부 모델 저작권 / 내부 저항·고용 불안 / 확률형 규제 위반 / 툴 피로 / 컨설턴트 의존 / 시뮬레이터-실게임 괴리 / 리팩터링 중 회귀 / 지원사업 일정 불일치</p><div class="pn"><a class="prev" href="index.html"><small>← 하네스</small>구조로 돌아가기</a><span></span></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>

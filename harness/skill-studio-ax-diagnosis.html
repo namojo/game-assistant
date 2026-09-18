@@ -1,0 +1,194 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>스킬 — studio-ax-diagnosis · game-assistant</title><meta name="description" content="게임 스튜디오 AX 진단 스킬. 대상사 프로파일(사실/추정/미확인 분리), 추정 기술 스택, 업데이트 1사이클 분해, 병목 점수화(빈도×소요×인원), 스토어 리뷰 신호 분류, Quick Win 후보, 첫 미팅 진단 워크숍(세션 B) 진행안, 사전 요청 자료 목록·메일, 확인 질문 체크리스트, 관찰 포인트, 진단 기간 계획서를 작성. &#x27;스튜디오 진단&#x27;, &#x27;병목 분석&#x27;, &#x27;첫 미팅 준비&#x27;, &#x27;사전 요청 자료&#x27;, &#x27;진단 계획서&#x27;, &#x27;개발 사이클 해부&#x27; 요청이나 게임사 AX 도입 전 현황 파악이 필요하면 이 스킬을 사용할 것. 시장 트렌드 조사나 전략 로드맵 작성은 대상이 아님."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="">원시인 형님 2</a><a href="../harness/index.html" class="on">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="index.html">하네스</a> / 스킬</div><h1>스킬 — studio-ax-diagnosis</h1><p class="sub">게임 스튜디오 AX 진단 스킬. 대상사 프로파일(사실/추정/미확인 분리), 추정 기술 스택, 업데이트 1사이클 분해, 병목 점수화(빈도×소요×인원), 스토어 리뷰 신호 분류, Quick Win 후보, 첫 미팅 진단 워크숍(세션 B) 진행안, 사전 요청 자료 목록·메일, 확인 질문 체크리스트, 관찰 포인트, 진단 기간 계획서를 작성. &#x27;스튜디오 진단&#x27;, &#x27;병목 분석&#x27;, &#x27;첫 미팅 준비&#x27;, &#x27;사전 요청 자료&#x27;, &#x27;진단 계획서&#x27;, &#x27;개발 사이클 해부&#x27; 요청이나 게임사 AX 도입 전 현황 파악이 필요하면 이 스킬을 사용할 것. 시장 트렌드 조사나 전략 로드맵 작성은 대상이 아님.</p></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#_1">왜 병목을 먼저 보는가</a>
+<a href="#_2">절차</a>
+<a class="l3" href="#1-3">1. 프로파일 3단 분리</a>
+<a class="l3" href="#2-1">2. 업데이트 1사이클 분해</a>
+<a class="l3" href="#3">3. 병목 점수화</a>
+<a class="l3" href="#4">4. 리뷰 신호 분류</a>
+<a class="l3" href="#5-quick-win-3">5. Quick Win 후보 3개</a>
+<a class="l3" href="#6">6. 첫 미팅 키트</a>
+<a class="l3" href="#7-23">7. 진단 계획서 (2~3주)</a>
+<a href="#_3">출력 템플릿</a>
+<a href="#_4">참조</a>
+<a href="#referencesfirst-meeting-kitmd">참조 문서: references/first-meeting-kit.md</a>
+<a class="l3" href="#_5">첫 미팅 키트 구성 원칙</a>
+<a class="l3" href="#_6">목표 문장</a>
+<a class="l3" href="#4_1">구조 (반나절 4시간)</a>
+<a class="l3" href="#d-7-nda">사전 요청 (D-7, NDA 후)</a>
+<a class="l3" href="#_7">참석자</a>
+<a class="l3" href="#_8">관찰 포인트</a>
+<a class="l3" href="#_9">어긋나는 지점 (하지 말 것)</a>
+<a class="l3" href="#d3">미팅 후 D+3</a>
+<a href="#referencesupdate-cycle-templatemd">참조 문서: references/update-cycle-template.md</a>
+<a class="l3" href="#rpg-1">방치형 RPG 메이저 업데이트 1사이클 단계표</a></aside><article class="md"><h1 id="studio-ax-diagnosis">Studio AX Diagnosis</h1>
+<p>게임 스튜디오의 제작·운영 사이클을 해부해 병목을 수치화하고, 첫 미팅에서 확인할 것을 설계한다.</p>
+<h2 id="_1">왜 병목을 먼저 보는가</h2>
+<p>AX 컨설팅이 실패하는 첫 번째 패턴은 도구 이름을 먼저 말하는 것이다. 고객은 "팔러 왔구나"로 읽는다. 병목이 수치로 드러나면 도구는 자연스럽게 따라온다. 그래서 이 스킬의 산출물에는 도구 이름이 없다(추정 스택 확인 항목 제외).</p>
+<h2 id="_2">절차</h2>
+<h3 id="1-3">1. 프로파일 3단 분리</h3>
+<p>입력 리포트에서 항목을 세 열로 나눈다: <strong>확인된 사실(출처)</strong> / <strong>추정(근거)</strong> / <strong>미확인(확인 질문)</strong>. 인원·매출·스택·외주 여부는 대개 추정이다. 추정을 사실처럼 쓰면 첫 미팅에서 한 번에 신뢰를 잃는다.</p>
+<h3 id="2-1">2. 업데이트 1사이클 분해</h3>
+<p><code>references/update-cycle-template.md</code>의 단계표를 기준으로 방치형 RPG 메이저 업데이트(예: 월드 시스템 + 스킨 + 도감 + 탈것) 1건을 분해한다. 단계마다 담당 역할·추정 소요·의존·병목 유형(손/판단/대기)을 적는다. 알 수 없는 소요는 범위(예: 2~4일)로 쓴다.</p>
+<h3 id="3">3. 병목 점수화</h3>
+<p><code>점수 = 발생 빈도(월) × 1회 소요(인·일) × 관여 인원</code>. 순위표를 만들고 상위 5개에 대해 "AI가 흡수 가능한 부분 / 사람이 남아야 하는 판단"을 나눈다. 이 표가 전략가의 우선순위 매트릭스 입력이 된다.</p>
+<h3 id="4">4. 리뷰 신호 분류</h3>
+<p>스토어 리뷰·리포트의 신호를 결제/버그/밸런스/UX/CS응답/칭찬으로 분류하고, 각 신호가 QA·CS·기획 중 어디의 병목인지 연결한다. 결제 후 미수령류는 매출 직결이므로 항상 상위.</p>
+<h3 id="5-quick-win-3">5. Quick Win 후보 3개</h3>
+<p>기준: 도입 난이도 낮음 + 체감 높음 + 진단 기간(2~3주) 내 시제품 가능. 보통 리뷰 마이닝 대시보드, CS 답변 초안, 변형 아트 자동화가 후보다. 후보마다 "미팅에서 보여줄 화면 1장"을 정의한다.</p>
+<h3 id="6">6. 첫 미팅 키트</h3>
+<p><code>references/first-meeting-kit.md</code>의 구성(세션 A/B/C, 사전 요청, 체크리스트, 관찰 포인트, 어긋나는 지점)을 대상사에 맞게 채운다. 원화가·개발자 세션은 대표 없이 진행한다는 점을 명시한다. AI에 대한 감정은 대표 앞에서 나오지 않는다.</p>
+<h3 id="7-23">7. 진단 계획서 (2~3주)</h3>
+<p>주차별: 접근 자산(코드·에셋·시트·티켓), 인터뷰 대상, 기준선 측정 지표 4개(에셋 리드타임·업데이트 주기·회귀 버그·CS 응답시간)의 측정 방법, 산출물(진단 보고서·우선순위 확정).</p>
+<h2 id="_3">출력 템플릿</h2>
+<pre><code class="language-markdown"># {대상사} 스튜디오 진단
+## 1. 프로파일 (사실 / 추정 / 미확인)
+## 2. 추정 기술 스택과 검증 질문
+## 3. 업데이트 1사이클 분해표
+## 4. 병목 점수표 (상위 5 + AI 흡수/사람 유지 분리)
+## 5. 리뷰 신호 분류 → 병목 연결
+## 6. Quick Win 후보 3 (미팅 시연 화면 포함)
+## 7. 첫 미팅 키트 (세션 A/B/C 아젠다, 참석자, 사전 요청 목록·메일, 체크리스트, 관찰 포인트)
+## 8. 진단 계획서 (2~3주)
+## 9. 미확인 사항 총목록
+</code></pre>
+<h2 id="_4">참조</h2>
+<ul>
+<li><code>references/update-cycle-template.md</code> — 방치형 RPG 업데이트 단계표와 병목 유형</li>
+<li><code>references/first-meeting-kit.md</code> — 첫 미팅 키트 구성 원칙과 어긋나는 지점</li>
+</ul>
+<hr />
+<h2 id="referencesfirst-meeting-kitmd">참조 문서: references/first-meeting-kit.md</h2>
+<h3 id="_5">첫 미팅 키트 구성 원칙</h3>
+<h3 id="_6">목표 문장</h3>
+<p>"진단할 수 있는 데이터를 확보하고, 게임·시장·지역을 이해했다는 신뢰를 주고, 3년 방향과 AX 범위를 합의한다." 해결책 제시는 목표가 아니다.</p>
+<h3 id="4_1">구조 (반나절 4시간)</h3>
+<ul>
+<li><strong>세션 A 경영 워크숍 90분(전원)</strong>: 오프닝(플레이 소감+리뷰 마이닝 화면 1장) → 지방 게임사 이슈 1장 → 트렌드 5장+토론 → 3년 후 모습(화이트보드) → 현 게임 수명 가정 → AI에 대한 회사 입장</li>
+<li><strong>세션 B 진단 워크숍 120분</strong>: 경영진 목표 15 → 업데이트 1건 해부 30(핵심) → 아트 세션 20(원화가, 대표 없이) → QA·기술 세션 20(개발자) → 기대와 우려 15 → 휴식 겸 개별 대화 20</li>
+<li><strong>세션 C 종합 30분</strong>: 3년 방향(시나리오 A/B/C) × 병목 → 우선순위 초안 그 자리에서 → 다음 단계 합의</li>
+</ul>
+<h3 id="d-7-nda">사전 요청 (D-7, NDA 후)</h3>
+<p>"가능한 것만, 없으면 '없음'이라고" 명시. 카테고리: 조직·전략 / 사업·지표 / 개발 사이클(최근 업데이트 1건 기획서·일정·분배) / 아트(원본 파일 샘플, 스타일 가이드 유무) / 밸런스(테이블 샘플, 게임 반입 경로) / QA(방식, 체크리스트, 최근 3회 핫픽스 사유) / 기술(엔진 버전, 서버, 빌드, 자동화 테스트 개수) / 운영(월 티켓 수, 리뷰 답변 프로세스)</p>
+<h3 id="_7">참석자</h3>
+<p>대표 + 기획 + 원화 + 개발 각 1인 이상. 경영진만의 미팅은 절반만 본 것.</p>
+<h3 id="_8">관찰 포인트</h3>
+<p>대표가 실무 질문에 직접 답하는가 / 밸런스 시트를 여는가 코드를 여는가 / "○○님만 알아요" 횟수 / 원화가의 팔짱 / 핫픽스 사유가 밸런스인가 결제인가 / 3년 그림에서 대표·실무 답이 갈리는가 / 지방 이슈 슬라이드에서 끄덕이는 항목</p>
+<h3 id="_9">어긋나는 지점 (하지 말 것)</h3>
+<p>도구 이름 먼저 / 경영진만 / 범위를 아트·QA로 잠금 / Quick Win 없이 진단만 / 브리핑 30분 초과 / 대형사 사례 길게 / 지방 이슈를 동정으로</p>
+<h3 id="d3">미팅 후 D+3</h3>
+<p>미팅 노트(사실/미확인/인식 차이) → 워크플로우 맵 → 시나리오·우선순위 초안 → 진단 계획서 → 누락 자료 재요청 → Quick Win 착수</p>
+<hr />
+<h2 id="referencesupdate-cycle-templatemd">참조 문서: references/update-cycle-template.md</h2>
+<h3 id="rpg-1">방치형 RPG 메이저 업데이트 1사이클 단계표</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>단계</th>
+<th>담당(전형)</th>
+<th>산출물</th>
+<th>병목 유형</th>
+<th>전형적 함정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>콘텐츠 기획 (월드/스킨/도감/탈것)</td>
+<td>기획</td>
+<td>기획서, 테이블 초안</td>
+<td>판단</td>
+<td>기존 곡선과의 정합성 검토 없이 확정</td>
+</tr>
+<tr>
+<td>2</td>
+<td>밸런스 테이블 작성</td>
+<td>기획</td>
+<td>시트</td>
+<td>손+판단</td>
+<td>시트→JSON 수동 변환, 하드코딩 상수 존재</td>
+</tr>
+<tr>
+<td>3</td>
+<td>원화·스프라이트 제작</td>
+<td>원화</td>
+<td>PSD/Spine</td>
+<td>손</td>
+<td>몬스터 1종 = 원화 1장이지만 변형·팔레트가 반복 노동</td>
+</tr>
+<tr>
+<td>4</td>
+<td>애니메이션·이펙트</td>
+<td>원화/개발</td>
+<td>Spine, 프리팹</td>
+<td>손</td>
+<td>프레임 간 일관성은 사람 필요</td>
+</tr>
+<tr>
+<td>5</td>
+<td>아틀라스 패킹·임포트</td>
+<td>개발</td>
+<td>Unity 에셋</td>
+<td>손(대기)</td>
+<td>수동 임포트, 명명 규칙 불일치</td>
+</tr>
+<tr>
+<td>6</td>
+<td>클라이언트 구현</td>
+<td>개발</td>
+<td>코드</td>
+<td>판단+손</td>
+<td>Update()에 로직 혼재, 테스트 0개</td>
+</tr>
+<tr>
+<td>7</td>
+<td>서버·결제·데이터 마이그레이션</td>
+<td>개발</td>
+<td>서버 코드, DB</td>
+<td>판단</td>
+<td>결제→수령 회귀 미검증</td>
+</tr>
+<tr>
+<td>8</td>
+<td>텍스트(도감 설명·공지·이벤트 문구)</td>
+<td>기획</td>
+<td>문구</td>
+<td>손</td>
+<td>톤 불일치, 다국어 없음</td>
+</tr>
+<tr>
+<td>9</td>
+<td>QA(수동 플레이)</td>
+<td>개발/기획 겸임</td>
+<td>체크리스트</td>
+<td>손+대기</td>
+<td>성장 곡선 꼬임은 200스테이지 뒤에서 발견</td>
+</tr>
+<tr>
+<td>10</td>
+<td>스토어 제출·심사</td>
+<td>개발</td>
+<td>빌드</td>
+<td>대기</td>
+<td>확률 표기 누락 시 반려</td>
+</tr>
+<tr>
+<td>11</td>
+<td>배포 후 모니터링·핫픽스</td>
+<td>전원</td>
+<td>패치</td>
+<td>판단</td>
+<td>리뷰 급증을 사람이 눈으로 확인</td>
+</tr>
+<tr>
+<td>12</td>
+<td>CS·리뷰 답변</td>
+<td>기획/개발 겸임</td>
+<td>답변</td>
+<td>손</td>
+<td>템플릿 답변, 결제 이슈 로그 대조 수동</td>
+</tr>
+</tbody>
+</table></div>
+<p>병목 유형: <strong>손</strong>(반복 노동, AI 흡수 1순위) / <strong>판단</strong>(사람 유지, AI는 보조) / <strong>대기</strong>(자동화·파이프라인화 대상).</p>
+<p>점수 계산 예: 3단계 변형 아트 — 월 20종 × 0.5인·일 × 1명 = 10 / 9단계 수동 QA — 월 2회 × 3인·일 × 2명 = 12 / 12단계 CS — 월 300건 × 0.05인·일 × 1명 = 15. 숫자는 확인 전까지 범위로 쓴다.</p><div class="pn"><a class="prev" href="index.html"><small>← 하네스</small>구조로 돌아가기</a><span></span></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>

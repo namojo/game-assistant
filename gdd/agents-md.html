@@ -1,0 +1,202 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AGENTS.md · game-assistant</title><meta name="description" content="Codex 저장소 루트용 규칙 파일. 명령·규칙·완료 정의·막힐 때 행동."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="on">원시인 형님 2</a><a href="../harness/index.html" class="">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="../gdd/gdd.html">원시인 형님 2</a> / AGENTS.md</div><h1>AGENTS.md</h1><p class="sub">Codex 저장소 루트용 규칙 파일. 명령·규칙·완료 정의·막힐 때 행동.</p><div class="badges"><span class="badge">저장소 루트</span><span class="badge">독자: Codex</span></div></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#_1">문서 경로 (코드보다 문서가 우선이다)</a>
+<a href="#_2">이 저장소는</a>
+<a href="#_3">구조</a>
+<a href="#_4">명령</a>
+<a href="#_5">규칙</a>
+<a class="l3" href="#_6">결정성 (가장 중요)</a>
+<a class="l3" href="#_7">데이터</a>
+<a class="l3" href="#_8">저장</a>
+<a class="l3" href="#_9">에셋 거버넌스</a>
+<a class="l3" href="#_10">커밋</a>
+<a href="#_11">완료 정의</a>
+<a href="#_12">막히면</a>
+<a class="l3" href="#_13">상황별 대응</a></aside><article class="md"><h1 id="agentsmd-2">AGENTS.md — 원시인 형님 2 프로토타입</h1>
+<blockquote>
+<p>이 파일은 저장소 루트에 <code>AGENTS.md</code>로 배치한다. 코딩 에이전트는 <strong>작업 시작 전에 이 파일 전체를 읽는다.</strong></p>
+</blockquote>
+<h2 id="_1">문서 경로 (코드보다 문서가 우선이다)</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>문서</th>
+<th>경로</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기획</td>
+<td><strong><code>docs/GDD.md</code></strong></td>
+<td>게임 디자인 문서 v0.1. 시스템 규칙·테이블 스키마·분석 이벤트·MVP 범위</td>
+</tr>
+<tr>
+<td>밸런스</td>
+<td><strong><code>docs/BALANCE.md</code></strong></td>
+<td><code>bal_v1</code> 수식·파라미터·목표 진행 벽 표·검산·시뮬레이터 구현 계약</td>
+</tr>
+<tr>
+<td>빌드 플랜</td>
+<td><strong><code>docs/BUILD_PLAN.md</code></strong></td>
+<td>아키텍처·데이터 스키마·Phase별 태스크 카드(T0.1~T6.5)·회귀 명세·실행 가이드</td>
+</tr>
+<tr>
+<td>가정 기록</td>
+<td><strong><code>docs/ASSUMPTIONS.md</code></strong></td>
+<td>결정·가정·보류 목록. <strong>에이전트가 직접 추가하는 유일한 문서</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>문서와 코드가 다르면 <strong>문서를 고치지 말고</strong> 코드를 문서에 맞춘다. 문서 자체가 틀렸다고 판단되면 고치지 말고 <code>docs/ASSUMPTIONS.md</code>에 관측 사실을 한 줄 추가하고 보고한다.</p>
+<h2 id="_2">이 저장소는</h2>
+<p>「원시인 형님 2」(방치형 RPG + 부족 경영 메타)의 <strong>웹 프로토타입</strong>이다. 목적은 하나다 — <strong><code>docs/BALANCE.md</code>의 목표 진행 벽 표를 화면 없이 재현하고, 그 결과를 사람이 눈으로 볼 수 있게 하는 것.</strong> 그래서 순서가 정해져 있다: 결정적 코어 → 헤드리스 시뮬레이터 → 렌더러. 렌더러를 먼저 만들면 검증할 대상이 없다.</p>
+<h2 id="_3">구조</h2>
+<ul>
+<li><code>packages/core</code> — 순수 게임 룰. <strong>외부 런타임 의존성 0.</strong> DOM·타이머·네트워크·파일 I/O·<code>Math.random</code>·<code>Date.now</code> 금지.</li>
+<li><code>packages/data</code> — 테이블 로더. ajv(JSON Schema draft 2020-12) 검증, <code>_manifest.json</code> 체크섬, 참조 무결성. 파일 I/O는 여기서만 한다.</li>
+<li><code>packages/sim</code> — 헤드리스 시뮬레이터 CLI. <code>core</code>·<code>data</code>만 의존. 봇 3종·회귀·확률 검증·곡선 diff.</li>
+<li><code>apps/web</code> — 렌더러(PixiJS, PWA). <code>core</code>·<code>data</code>만 의존. <strong>룰을 여기서 구현하지 않는다.</strong> 화면은 코어 상태를 읽기만 한다.</li>
+<li><code>data/*.json</code> — 모든 콘텐츠·밸런스 테이블. <strong>코드에 수치를 하드코딩하지 않는다.</strong></li>
+<li><code>data/schema/*.schema.json</code> — 테이블별 JSON Schema. 스키마 위반 = 기동 실패.</li>
+<li><code>assets/source/</code> 사람 원화 · <code>assets/gen/</code> AI 변형 · <code>assets/_index.json</code> 메타.</li>
+<li><code>tools/</code> — 검증·생성 스크립트. <code>reports/</code> — 시뮬레이터 산출물(커밋하지 않는다).</li>
+</ul>
+<h2 id="_4">명령</h2>
+<pre><code class="language-bash">npm ci                                              # 설치 (Node 22 LTS 고정, .nvmrc)
+npm test                                            # 전체 테스트 (pretest에서 validate:assets + check:deps)
+npm test -w packages/core                           # 코어만
+npm test -w packages/core -- combat                 # 특정 스위트만
+npm run build                                       # 전 패키지 빌드 (prebuild에서 validate:assets)
+
+npm run sim -- --days 7 --bot balanced --seed 42    # 시뮬레이터 1회        [= sim run]
+npm run sim:regress                                 # 목표 벽 표 10 체크포인트 ±10% + 첫 벽 + 격차 + D1 프레스티지
+npm run sim:prob                                    # 확률 표기 검증 + 천장 단언  [= sim verify-odds]
+npm run sim:determinism                             # 동일 시드 2회 바이트 동일
+npm run sim:diff -- --base bal_v1 --head bal_v2     # 곡선 diff 리포트        [= sim diff]
+npm run sim:replay -- --run &lt;run.json&gt;              # 기록 재현 (시드 + 테이블 checksum)  [= sim replay]
+npm run sim:long -- --all                           # 60·90일 장기 프로파일 (리포트 전용, 게이트 아님)
+
+npm run dev -w apps/web                             # 렌더러 개발 서버
+npm run e2e                                         # Playwright 스크린샷 + 콘솔 에러 검사
+
+npm run validate:assets                             # 에셋 거버넌스 게이트
+npm run check:deps                                  # 의존 방향·금지 식별자 검사
+</code></pre>
+<p><strong>서브커맨드 별칭</strong>: 위 대괄호가 규격 서브커맨드(<code>sim run</code> / <code>sim diff</code> / <code>sim verify-odds</code> / <code>sim replay</code>)와의 대응이다. 정본 대조표는 <code>docs/BUILD_PLAN.md</code> 6.1.1에 있다. <strong>npm 스크립트 이름을 바꾸지 않는다.</strong></p>
+<p><strong>exit code 규약</strong> (전 시뮬레이터 명령 공통 — <code>docs/BUILD_PLAN.md</code> 6.1.2)</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>코드</th>
+<th>의미</th>
+<th>에이전트 행동</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>정상(PASS)</td>
+<td>다음 단계로</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>실행 오류(인자·파일·스키마·공통 메타 누락)</td>
+<td>스스로 고친다</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><strong>임계 위반</strong>(회귀 밴드·확률 3σ·천장·재현 불일치)</td>
+<td><strong><code>data/balance.json</code>을 건드리지 않고 보고한다.</strong> CI에서는 배포가 차단된다</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>출력 규약</strong>: stdout은 기계 판독 JSON 1개 객체, 사람용 요약은 stderr, 마크다운 리포트는 <code>--format md</code>. <strong>stdout에 사람용 문장을 섞지 않는다.</strong></p>
+<h2 id="_5">규칙</h2>
+<h3 id="_6">결정성 (가장 중요)</h3>
+<ol>
+<li><strong>난수는 <code>packages/core/src/rng.ts</code>의 시드 RNG(<code>xoshiro128**</code>)만 사용한다.</strong> <code>Math.random()</code> 금지. 드랍·합성·뼈 갈기·몬스터 선택은 각각 <code>rng.fork(streamId)</code>로 스트림을 분리한다.</li>
+<li><strong>시간은 정수 틱(100ms)으로만 흐른다.</strong> 코어 상태에 실수 시간 변수를 두지 않는다. 시뮬레이터도 해석적으로 구한 시간을 <code>ceil(t_sec × 10)</code> 틱으로 올려 렌더러와 <strong>같은 함수</strong>를 호출한다.</li>
+<li><strong><code>Math.pow</code> 금지.</strong> <code>g^n</code>은 로드 시 1회 생성한 사전 계산 테이블(반복 곱)에서 읽는다. 범위를 벗어나면 <code>RangeError</code>를 던지고 조용히 폴백하지 않는다. 유일한 예외는 <code>prestige.ts</code>의 비정수 지수 <code>Q = ember_c · s^ember_p</code> 1줄이며 <code>// ALLOW_POW:</code> 주석과 <code>check:deps</code> 화이트리스트에 등록되어 있다.</li>
+<li><strong><code>Date.now()</code>·<code>performance.now()</code>는 코어에 넣지 않는다.</strong> 경과 시간은 어댑터가 계산해 초 단위 정수로 주입한다.</li>
+<li>부동소수점 덧셈·곱셈의 <strong>순서를 바꾸지 않는다.</strong> 배수 곱셈 순서는 <code>DPS_MULT_ORDER</code> 상수로 고정되어 있다.</li>
+</ol>
+<h3 id="_7">데이터</h3>
+<ol start="6">
+<li><strong><code>data/balance.json</code>의 값을 수정하지 않는다.</strong> 이 파일은 기획 담당(game-design-director)의 결정 사항이다. 회귀 테스트가 실패해도, 목표표를 못 맞춰도, 60일 시뮬레이션이 이상해도 <strong>고치지 않고 보고한다.</strong></li>
+<li>수치를 코드에 하드코딩하지 않는다. 전부 <code>data/*.json</code>에서 읽는다. 확률 표기값을 테스트나 UI에 타이핑하면 검증 의미가 사라진다 — 반드시 <code>balance.drop_rates_ppm</code>에서 읽는다.
+7-1. <strong>확률·비율은 정수 ppm(백만분율)이다.</strong> 필드명은 <code>*_ppm</code>, 값은 <strong>0~1,000,000 정수</strong>, 로드 시 <code>p = ppm / 1_000_000</code>으로 변환해 쓴다. 시행 단위 확률 집합은 <strong>정수 합 = 1,000,000</strong>. 코드·테이블·테스트에 <strong>부동소수 확률 리터럴(<code>0.005</code> 등)을 쓰지 않는다</strong> — <code>npm run check:deps</code>가 exit 1로 막는다. 소수 <code>p</code>는 계산 중간값으로만 존재한다.
+7-2. <strong>모든 데이터 파일에 공통 메타 3필드</strong>(<code>schema_version</code>·<code>generated_at</code>·<code>checksum</code>)가 있다. 필드를 지우거나 <code>checksum</code>을 손으로 고치지 않는다. 테이블을 바꿨으면 <code>npx tsx tools/gen-manifest.ts</code>로 재생성한다. 이 셋은 확률 검증 리포트와 <code>sim:replay</code>의 재현 앵커다.</li>
+<li>새 콘텐츠는 <strong>테이블 행 추가로만</strong> 만든다. 몬스터 1종 추가에 코드 변경이 1줄이라도 필요하면 설계가 잘못된 것이다.</li>
+<li>타입·스키마 변경은 <code>data/schema/*.json</code> 갱신 + 테스트 동반. 스키마 위반 시 경고가 아니라 <strong>기동 실패</strong>여야 한다.</li>
+</ol>
+<h3 id="_8">저장</h3>
+<ol start="10">
+<li>저장 데이터에는 <code>schemaVersion</code> 필드가 있다. <strong>마이그레이션 함수 없이 <code>GameState</code>의 필드를 추가·제거·개명하지 않는다.</strong> 구조 잠금 테스트가 이를 막는다.</li>
+<li>프레스티지는 <code>state.run</code>만 새로 만들고 <code>state.account</code>는 건드리지 않는다. GDD 4.1 「유지」 12항목 보존은 구조로 보장한다.</li>
+<li>사용자 설정(<code>account.settings</code>)은 로드 시 코드 기본값으로 덮어쓰지 않는다. 기본값 주입은 마이그레이션에서만 한다.</li>
+</ol>
+<h3 id="_9">에셋 거버넌스</h3>
+<ol start="13">
+<li><code>assets/_index.json</code>에서 <strong><code>origin:"ai"</code>인 항목은 <code>source_id</code>와 <code>reviewed_by</code>가 필수</strong>다. 비어 있으면 <code>npm run build</code>와 <code>npm test</code>가 실패한다.
+13-1. <strong><code>--ignore-scripts</code>로 게이트를 우회하지 않는다.</strong> <code>npm ci --ignore-scripts</code>, <code>npm install --ignore-scripts</code>, <code>git commit --no-verify</code>, <code>prebuild</code>/<code>pretest</code>/<code>pre-commit</code> 훅 삭제·주석 처리는 전부 금지다. 설치는 항상 <code>npm ci</code>로 하고, pre-commit 훅(<code>simple-git-hooks</code>)이 설치돼 있는지 <code>cat .git/hooks/pre-commit</code>으로 확인한다. 이 게이트는 "핵심 캐릭터 원화는 사람이 그린다"는 거버넌스를 <strong>코드로 강제하는 유일한 장치</strong>이고, 그 약속은 고객 문서에 이미 적혀 있다 — 로컬에서 뚫리는 게이트는 약속의 근거가 되지 못한다.</li>
+<li>사람 원화는 <code>assets/source/</code>, AI 변형은 <code>assets/gen/</code>에만 둔다. AI 변형의 <code>source_id</code>는 반드시 <code>origin:"human"</code> 항목이어야 한다(AI의 AI 변형 금지).</li>
+<li>애니메이션 프레임(<code>fx_anim_*</code>)은 사람 생산물만 허용한다.</li>
+<li>테이블에 에셋 <strong>파일 경로를 쓰지 않는다.</strong> <code>asset_id</code>만 쓰고 경로 해석은 <code>assets/_index.json</code>이 담당한다.</li>
+</ol>
+<h3 id="_10">커밋</h3>
+<ol start="17">
+<li><strong>커밋 1개 = 태스크 카드 1개.</strong> 메시지 첫머리에 태스크 id를 붙인다: <code>T1.3: 전투 틱 루프와 벽 판정</code>.</li>
+<li>중간 상태를 커밋하지 않는다. 태스크가 1세션에 안 끝나면 카드를 2개로 쪼개는 제안을 보고하고 사람의 승인을 받는다.</li>
+<li><code>reports/</code>와 <code>node_modules/</code>는 커밋하지 않는다. <code>package-lock.json</code>은 커밋한다.</li>
+</ol>
+<h2 id="_11">완료 정의</h2>
+<ol>
+<li>태스크 카드의 <strong>수용 기준 명령이 전부 통과</strong>하고, 각 명령의 실제 출력을 보고에 붙였다.</li>
+<li><code>npm test</code> 전체 통과, <code>npm run check:deps</code>·<code>npm run validate:assets</code> 통과.</li>
+<li>밸런스에 영향을 주는 변경이면 <code>npm run sim:regress</code> 통과.</li>
+<li>변경 요약 3줄 + 새로 생긴 가정은 <code>docs/ASSUMPTIONS.md</code>에 추가.</li>
+</ol>
+<p><strong>수용 기준을 약화시켜 통과시키는 것은 완료가 아니라 실패다.</strong> 기대값 변경, 단언 삭제, <code>skip</code>/<code>todo</code> 추가, 테스트 개수 축소는 전부 금지다. 카드에 "14 passed"라고 적혀 있으면 14개가 실제로 통과해야 한다.</p>
+<h2 id="_12">막히면</h2>
+<p><strong>규칙이 GDD에 없으면 임의로 정하지 않는다.</strong> 순서는 이렇다.</p>
+<ol>
+<li>가장 <strong>보수적인</strong> 선택을 한다 — 유저에게 불리하지 않고, 성장 곡선을 빠르게 만들지 않는 쪽.</li>
+<li><code>docs/ASSUMPTIONS.md</code>에 한 행을 추가한다: <code>가정: {내용} / 근거: {왜 이 선택} / 영향: {어느 태스크·곡선}</code>.</li>
+<li>보고에 명시한다.</li>
+</ol>
+<p><strong>단, <code>data/balance.json</code> 값 변경은 가정으로 처리할 수 없다.</strong> 그건 항상 기획 담당 회신 대상이다.</p>
+<h3 id="_13">상황별 대응</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>상황</th>
+<th>행동</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>유닛 테스트 실패</td>
+<td>스스로 고친다. 3회 시도 후에도 실패하면 중단하고 원인·시도 내역을 보고한다. 테스트를 약화시키지 않는다</td>
+</tr>
+<tr>
+<td><code>sim:regress</code> 실패</td>
+<td><strong><code>balance.json</code>을 건드리지 않는다.</strong> ① 최근 diff에서 곡선 영향 변경을 찾는다 ② <code>npm run sim:diff</code>로 이전 통과 시점과 비교한다 ③ 구현 버그면 고친다 ④ 모델 가정 차이면 <code>ASSUMPTIONS.md</code>에 관측값과 함께 기록하고 기획 담당에게 회신한다</td>
+</tr>
+<tr>
+<td><code>sim:determinism</code> 실패</td>
+<td><strong>최우선.</strong> 점검 순서: <code>Math.random</code>/<code>Date.now</code> 유입 → 실수 시간 누적 → <code>Math.pow</code> 사용 → 객체 키 순회 순서 의존 → 부동소수점 연산 순서 변경. 고칠 때까지 다음 태스크로 넘어가지 않는다</td>
+</tr>
+<tr>
+<td>Playwright 스크린샷 차이</td>
+<td>의도한 UI 변경이면 스크린샷을 갱신하고 커밋에 명시한다. 아니면 회귀다. <strong>콘솔 에러 0건 기준은 어떤 경우에도 완화하지 않는다</strong></td>
+</tr>
+<tr>
+<td><code>validate:assets</code> 실패</td>
+<td>우회하지 않는다. 메타를 채우거나, 감수 전이면 해당 에셋을 커밋에서 제외한다</td>
+</tr>
+<tr>
+<td>선행 태스크 미완료</td>
+<td>착수하지 않고 보고한다</td>
+</tr>
+</tbody>
+</table></div><div class="pn"><a class="prev" href="build-plan.html"><small>← 이전</small>Codex 빌드 플랜</a><span></span></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>

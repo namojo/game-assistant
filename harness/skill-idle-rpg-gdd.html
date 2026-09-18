@@ -1,0 +1,175 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>스킬 — idle-rpg-gdd · game-assistant</title><meta name="description" content="방치형(키우기) RPG 게임 디자인 문서(GDD)와 밸런스 모델 작성 스킬. 컨셉·전작 계승/개선 분류, 코어 루프·메타 루프(프레스티지·수집·시즌), 성장 곡선 수식(스테이지 HP/DPS/골드/강화 비용), 목표 진행 벽(D1/D3/D7/D30), 데이터 주도 콘텐츠 시스템(테이블 1행+에셋 1종), 수익모델(비확률 중심·확률형 표기 검증), 라이브 운영 훅, 분석 이벤트 스키마를 산출. &#x27;방치형 RPG 기획&#x27;, &#x27;키우기 게임 GDD&#x27;, &#x27;신작 기획안&#x27;, &#x27;성장 곡선 설계&#x27;, &#x27;밸런스 수식&#x27;, &#x27;원시인 형님 2 기획&#x27; 요청이나 코딩 에이전트에 넘길 게임 설계 문서가 필요하면 이 스킬을 사용할 것. 구현 태스크 분해·AGENTS.md 작성은 codex-build-spec가 담당."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="">원시인 형님 2</a><a href="../harness/index.html" class="on">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="index.html">하네스</a> / 스킬</div><h1>스킬 — idle-rpg-gdd</h1><p class="sub">방치형(키우기) RPG 게임 디자인 문서(GDD)와 밸런스 모델 작성 스킬. 컨셉·전작 계승/개선 분류, 코어 루프·메타 루프(프레스티지·수집·시즌), 성장 곡선 수식(스테이지 HP/DPS/골드/강화 비용), 목표 진행 벽(D1/D3/D7/D30), 데이터 주도 콘텐츠 시스템(테이블 1행+에셋 1종), 수익모델(비확률 중심·확률형 표기 검증), 라이브 운영 훅, 분석 이벤트 스키마를 산출. &#x27;방치형 RPG 기획&#x27;, &#x27;키우기 게임 GDD&#x27;, &#x27;신작 기획안&#x27;, &#x27;성장 곡선 설계&#x27;, &#x27;밸런스 수식&#x27;, &#x27;원시인 형님 2 기획&#x27; 요청이나 코딩 에이전트에 넘길 게임 설계 문서가 필요하면 이 스킬을 사용할 것. 구현 태스크 분해·AGENTS.md 작성은 codex-build-spec가 담당.</p></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#_1">왜 이 순서인가</a>
+<a href="#_2">절차</a>
+<a class="l3" href="#1">1. 컨셉과 전작 분류</a>
+<a class="l3" href="#2">2. 루프 정의</a>
+<a class="l3" href="#3">3. 성장 곡선 수식</a>
+<a class="l3" href="#4">4. 데이터 주도 콘텐츠 스키마</a>
+<a class="l3" href="#5">5. 아트 파이프라인 친화 설계</a>
+<a class="l3" href="#6">6. 수익모델과 규제</a>
+<a class="l3" href="#7">7. 라이브 운영 훅과 분석 이벤트</a>
+<a class="l3" href="#8-ui">8. 연출·UI는 마지막</a>
+<a href="#gdd">출력: GDD 템플릿</a>
+<a href="#_3">참조</a>
+<a href="#referencesbalance-mathmd">참조 문서: references/balance-math.md</a>
+<a class="l3" href="#rpg">방치형 RPG 표준 수식군</a>
+<a class="l3" href="#_4">목차</a>
+<a class="l3" href="#1_1">1. 기호</a>
+<a class="l3" href="#2_1">2. 스테이지·몬스터</a>
+<a class="l3" href="#3_1">3. 플레이어 전투력</a>
+<a class="l3" href="#4_1">4. 경제</a>
+<a class="l3" href="#5_1">5. 오프라인 보상</a>
+<a class="l3" href="#6_1">6. 프레스티지 (&quot;빙하기&quot; 등 테마)</a>
+<a class="l3" href="#7_1">7. 목표 진행 벽 표 (반드시 수식 확정 전 작성)</a>
+<a class="l3" href="#8">8. 검산 절차</a>
+<a href="#referencesgdd-templatemd">참조 문서: references/gdd-template.md</a>
+<a class="l3" href="#gdd_1">GDD 목차와 최소 요건</a></aside><article class="md"><h1 id="idle-rpg-gdd">Idle RPG GDD</h1>
+<p>방치형 RPG의 GDD와 밸런스 모델을 <strong>시뮬레이터에서 먼저 돌아가는 형태</strong>로 작성한다.</p>
+<h2 id="_1">왜 이 순서인가</h2>
+<p>방치형의 사업 공식은 <code>에셋 생산량 × 밸런스 정확도 × 업데이트 주기</code>다. GDD가 화면·연출부터 시작하면 수치 시뮬레이션이 불가능한 시스템이 생기고, 그 시스템은 라이브에서 200스테이지 뒤의 벽으로 돌아온다. 그래서 이 스킬은 수식과 데이터 스키마를 먼저 고정하고 연출은 마지막에 붙인다.</p>
+<h2 id="_2">절차</h2>
+<h3 id="1">1. 컨셉과 전작 분류</h3>
+<p>전작 시스템을 <strong>계승 / 개선 / 폐기 / 신규</strong> 4열로 분류하고 이유를 한 줄씩 쓴다. 전작 정보 중 확인되지 않은 상세는 <code>(가정)</code> 표시. 컨셉 문장은 "누가(플레이어 판타지) 무엇을(핵심 동사) 왜 계속하는가(락인 장치)" 세 요소를 포함한다.</p>
+<h3 id="2">2. 루프 정의</h3>
+<ul>
+<li>코어 루프(초 단위): 자동 전투 → 골드 → 강화 → 스테이지 진행 → 벽 → 오프라인 보상/강화로 돌파</li>
+<li>메타 루프(일·주 단위): 프레스티지(리셋 + 영구 보너스), 수집(도감·카드·스킨), 주간 콘텐츠(보스·탑·랭킹), 시즌</li>
+<li>각 루프에 "벽을 만나는 시점"과 "벽을 넘게 하는 자원"을 명시한다. 벽 없는 방치형은 결제 동기가 없다.</li>
+</ul>
+<h3 id="3">3. 성장 곡선 수식</h3>
+<p><code>references/balance-math.md</code>의 표준 수식군(스테이지 HP 지수 성장, DPS 다항+지수 혼합, 골드 드랍, 강화 비용 등비, 오프라인 보상 상한, 프레스티지 통화 산출)을 채택하고 파라미터 초기값을 정한다. 반드시 <strong>목표 진행 벽 표</strong>(D1/D3/D7/D30에서 무과금·소과금 유저가 도달하는 스테이지와 벽 체감 시각)를 먼저 쓰고 수식이 표를 만족하는지 검산한다. 시뮬레이터가 이 표를 회귀 테스트로 쓴다.</p>
+<h3 id="4">4. 데이터 주도 콘텐츠 스키마</h3>
+<p>모든 콘텐츠(형님·몬스터·장비·스킨·탈것·토템·스테이지·이벤트)는 JSON 테이블 1행으로 정의되고, 에셋은 id 규칙으로 참조된다. 스키마마다 필드·타입·범위·예시 1행을 적는다. 콘텐츠 1종 추가 비용이 "테이블 1행 + 에셋 1종"이 아니면 설계를 다시 한다.</p>
+<h3 id="5">5. 아트 파이프라인 친화 설계</h3>
+<p>에셋을 <strong>원본(사람)</strong> 과 <strong>변형(AI 우선)</strong> 으로 나눈다. 몬스터 등급별 팔레트, 장비 등급 색상, 스킨 의상 교체는 변형으로 설계해 원화 1장에서 N종이 나오도록 한다. 이것이 아트 AX 거버넌스(핵심 캐릭터는 사람)를 콘텐츠 구조에 박아 넣는 방법이다.</p>
+<h3 id="6">6. 수익모델과 규제</h3>
+<p>비확률(스킨·시즌 패스·광고 제거·성장 패키지) 중심. 확률형(뽑기·합성·슬롯)을 넣는다면: 확률 표기 위치, 표기값과 구현값의 자동 검증 방식(시뮬레이터 N회 시행 통계 비교), 천장(pity) 규칙을 GDD에 명시한다. 광고는 보상형 광고 슬롯을 시스템으로 설계한다.</p>
+<h3 id="7">7. 라이브 운영 훅과 분석 이벤트</h3>
+<p>이벤트 타입(기간 보스, 수집 이벤트, 성장 부스트), 시즌 구조, 랭킹. 분석 이벤트 스키마(session_start, stage_clear, upgrade, prestige, purchase, ad_reward, wall_hit)와 각 이벤트의 필수 필드.</p>
+<h3 id="8-ui">8. 연출·UI는 마지막</h3>
+<p>화면 구성·연출은 시스템이 확정된 뒤 1절로 쓴다. 프로토타입 범위(MVP)와 확장 범위를 명시한다.</p>
+<h2 id="gdd">출력: GDD 템플릿</h2>
+<p><code>references/gdd-template.md</code>의 목차를 따른다. 밸런스 모델은 별도 파일(<code>04b_balance_model.md</code>)로 분리해 시뮬레이터 구현자가 수식만 읽을 수 있게 한다.</p>
+<h2 id="_3">참조</h2>
+<ul>
+<li><code>references/balance-math.md</code> — 방치형 표준 수식군, 파라미터 초기값 범위, 목표 진행 벽 표 형식, 검산 절차</li>
+<li><code>references/gdd-template.md</code> — GDD 목차와 각 절의 최소 요건</li>
+</ul>
+<hr />
+<h2 id="referencesbalance-mathmd">참조 문서: references/balance-math.md</h2>
+<h3 id="rpg">방치형 RPG 표준 수식군</h3>
+<h3 id="_4">목차</h3>
+<ol>
+<li>기호 2. 스테이지·몬스터 3. 플레이어 전투력 4. 경제 5. 오프라인 보상 6. 프레스티지 7. 목표 진행 벽 표 8. 검산 절차</li>
+</ol>
+<hr />
+<h3 id="1_1">1. 기호</h3>
+<p><code>s</code> 스테이지, <code>L</code> 강화 레벨, <code>t</code> 경과 시간(초), <code>P</code> 프레스티지 횟수, <code>k</code> 등급.</p>
+<h3 id="2_1">2. 스테이지·몬스터</h3>
+<ul>
+<li>몬스터 HP: <code>HP(s) = HP0 · g_hp^(s-1) · (1 + a·floor(s/10))</code> — 지수 기본 + 10스테이지마다 계단. 초기값 <code>HP0=10~30, g_hp=1.06~1.10, a=0.05~0.15</code></li>
+<li>보스(매 s%10==0): <code>HP_boss = HP(s) · m_boss</code>, <code>m_boss=5~10</code>, 제한 시간 30초</li>
+<li>스테이지당 몬스터 수 <code>n(s)=3~5</code>, 골드 드랍 <code>G(s) = G0 · g_gold^(s-1)</code>, <code>g_gold ≈ g_hp − 0.01</code> (골드가 HP보다 조금 느리게 커야 벽이 생긴다)</li>
+</ul>
+<h3 id="3_1">3. 플레이어 전투력</h3>
+<ul>
+<li>기본 공격력: <code>ATK(L) = ATK0 · (1 + b·L) · g_atk^floor(L/25)</code> — 선형 + 25레벨마다 배수 점프(체감 이벤트). <code>b=0.1~0.2, g_atk=1.5~2.0</code></li>
+<li>형님(동료) 기여: <code>DPS_total = Σ_i ATK_i(L_i) · rate_i · (1 + Σ passive%)</code></li>
+<li>장비: 등급 k 배수 <code>E(k) = e^k</code>, <code>e=1.3~1.6</code>; 합성은 같은 등급 n개 → 상위 1개(<code>n=3~5</code>)</li>
+<li>토템/유물: 영구 % 보너스, 프레스티지 통화로 구매</li>
+<li>스테이지 클리어 조건(근사): <code>DPS_total · T_kill ≥ HP(s)·n(s)</code>, 목표 <code>T_kill</code> 3~8초. 벽 정의: <code>T_kill &gt; 30초</code> 또는 보스 시간 초과</li>
+</ul>
+<h3 id="4_1">4. 경제</h3>
+<ul>
+<li>강화 비용: <code>C(L) = C0 · g_cost^L</code>, <code>g_cost=1.07~1.12</code>. 골드 성장률보다 커야 강화가 느려진다(벽 형성)</li>
+<li>등비 비용 하에서 골드 총량 대비 도달 가능 L: <code>L_max ≈ log(G_total·(g_cost−1)/C0 + 1)/log(g_cost)</code></li>
+<li>인플레이션 점검: 이벤트 보상은 해당 시점 1시간 골드 수입의 배수로 정의(예: 3~10시간 분)</li>
+</ul>
+<h3 id="5_1">5. 오프라인 보상</h3>
+<p><code>R_off = min(t_off, T_cap) · G_rate(s_current) · r_off</code>, <code>T_cap</code> 8~12시간, <code>r_off=0.5~0.8</code>. 광고 시청 시 <code>×2</code>, 패스 보유 시 <code>T_cap</code> 확장. 상한이 없으면 접속 동기가 사라진다.</p>
+<h3 id="6_1">6. 프레스티지 ("빙하기" 등 테마)</h3>
+<ul>
+<li>조건: 스테이지 <code>s ≥ s_min(P)</code> 또는 벽 체감 후 임의</li>
+<li>통화 산출: <code>Q = floor(c·(s_reached)^p)</code>, <code>p=1.3~1.6</code> (더 멀리 갈수록 체증)</li>
+<li>영구 보너스: 골드 % / ATK % / 시작 스테이지 / 오프라인 상한. 리셋되는 것과 유지되는 것(스킨·도감·탈것·유물)을 표로 명시</li>
+<li>프레스티지 1회 주기 목표: D1 첫 프레스티지, 이후 1~2일 1회</li>
+</ul>
+<h3 id="7_1">7. 목표 진행 벽 표 (반드시 수식 확정 전 작성)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>시점</th>
+<th>무과금 도달 s</th>
+<th>소과금(월 1~2만원) 도달 s</th>
+<th>첫 벽 체감</th>
+<th>프레스티지 횟수</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1시간</td>
+<td></td>
+<td></td>
+<td></td>
+<td>0</td>
+</tr>
+<tr>
+<td>D1</td>
+<td></td>
+<td></td>
+<td>1회</td>
+<td>1</td>
+</tr>
+<tr>
+<td>D3</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>D7</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>D30</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="8">8. 검산 절차</h3>
+<ol>
+<li>표의 시점별 누적 골드 = ∫ G(s(t))·kill_rate dt 근사</li>
+<li>누적 골드 → L_max → DPS → 클리어 가능 s 재계산, 표와 ±10% 이내인지 확인</li>
+<li>벗어나면 <code>g_hp</code>, <code>g_cost</code>, <code>a</code> 순으로 조정하고 조정 이력을 남긴다</li>
+<li>확률 시스템은 표기값 p에 대해 N=100,000 시행 시 관측 빈도가 <code>p ± 3·sqrt(p(1−p)/N)</code> 안에 있어야 한다(시뮬레이터 테스트로 고정)</li>
+</ol>
+<hr />
+<h2 id="referencesgdd-templatemd">참조 문서: references/gdd-template.md</h2>
+<h3 id="gdd_1">GDD 목차와 최소 요건</h3>
+<pre><code>### {게임명} GDD v0.x
+0. 한 장 요약 (컨셉 문장, 타겟, 플랫폼, MVP 범위, 전작 대비 차별점 3개)
+1. 컨셉과 플레이어 판타지
+2. 전작 시스템 분류 (계승/개선/폐기/신규 + 이유)
+3. 코어 루프 (다이어그램 + 초 단위 흐름 + 벽 정의)
+4. 메타 루프 (프레스티지 규칙: 리셋/유지 표, 수집, 주간 콘텐츠, 시즌)
+5. 시스템 상세
+   5.1 형님(동료) 5.2 강화 5.3 장비·합성 5.4 토템·유물 5.5 스테이지·보스 5.6 탑/원정 5.7 길드(확장) 5.8 탈것·스킨 5.9 도감·카드
+   각 시스템: 목적 / 규칙 / 입력·출력 자원 / 테이블 참조 / MVP or 확장
+6. 경제와 자원 흐름 (자원표: 획득처·소비처·상한, 흐름도)
+7. 수익모델 (비확률 상품표, 확률형 규칙·표기·검증·천장, 광고 슬롯)
+8. 데이터 스키마 (테이블별 필드·타입·예시 1행, 에셋 id 규칙)
+9. 아트 방향과 에셋 파이프라인 (원본/변형 분리, 등급 팔레트 규칙)
+10. 라이브 운영 훅 (이벤트 타입, 시즌, 랭킹)
+11. 분석 이벤트 스키마
+12. UI·연출 (화면 목록, MVP 화면)
+13. MVP 범위와 확장 로드맵
+14. 미결 사항과 가정 목록
+</code></pre>
+<p>최소 요건: 5장의 모든 시스템은 8장의 테이블을 참조해야 하고, 3·4장의 벽 정의는 밸런스 모델 파일의 목표 벽 표와 같은 수치를 써야 한다.</p><div class="pn"><a class="prev" href="index.html"><small>← 하네스</small>구조로 돌아가기</a><span></span></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>
