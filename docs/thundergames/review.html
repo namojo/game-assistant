@@ -1,0 +1,1068 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>교차 검수 리포트 · game-assistant</title><meta name="description" content="차단 2 · 중요 10 · 권고 9, 직접 수정 28곳, 리더 결정 7건, 잔여 리스크"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="on">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="">원시인 형님 2</a><a href="../harness/index.html" class="">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="../thundergames/proposal.html">썬더게임즈 산출물</a> / 교차 검수 리포트</div><h1>교차 검수 리포트</h1><p class="sub">차단 2 · 중요 10 · 권고 9, 직접 수정 28곳, 리더 결정 7건, 잔여 리스크</p><div class="badges"><span class="badge">내부</span><span class="badge">QA</span><span class="badge">독자: 컨설턴트</span></div></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#1">1. 검수 범위와 추출 값 요약표</a>
+<a class="l3" href="#11">1.1 대상 문서</a>
+<a class="l3" href="#12">1.2 경계면 추출 값</a>
+<a href="#2">2. 차단 (파일 · 절 · 인용 · 수정 제안)</a>
+<a class="l3" href="#b-1-gdd-73-p00005">B-1. GDD 7.3 확률 검증표의 전설 행이 다른 확률값(p=0.0005)으로 계산되어 있었다 — 규제 방어 증거의 근거 표 (수정 완료)</a>
+<a class="l3" href="#b-2-65-10">B-2. 빌드 플랜 6.5 확률 검증 시행수 산식값이 자기 산식의 10배 (수정 완료)</a>
+<a href="#3">3. 중요</a>
+<a class="l3" href="#i-1-14-03">I-1. 로드맵 단계 번호 체계가 두 갈래 (1~4 ↔ 0~3) (수정 완료)</a>
+<a class="l3" href="#i-2-86">I-2. 기획서 8.6 별첨 표가 &quot;작성 중&quot; 상태로 고객 제출본에 남아 있었다 (수정 완료)</a>
+<a class="l3" href="#i-3-322">I-3. 기획서 첫 3페이지(2.2 확인된 사실)에 제품 이름 (수정 완료)</a>
+<a class="l3" href="#i-4-agentsmd-2-npm">I-4. AGENTS.md 명령 ↔ 빌드 플랜 2절 npm 스크립트 표 불일치 (수정 완료)</a>
+<a class="l3" href="#i-5-gdd-131-m1-rng">I-5. GDD 13.1 M1의 RNG 알고리즘이 빌드 플랜과 다름 (수정 완료)</a>
+<a class="l3" href="#i-6-ppm-01gdd">I-6. 확률의 데이터 단위 규격이 정면 충돌 — 정수 ppm(전략·기획서) ↔ 부동소수 0~1(GDD·빌드 플랜) (기록만 · 사용자 결정 필요)</a>
+<a class="l3" href="#i-7-cli-json">I-7. 시뮬레이터 CLI·테이블 JSON 규격이 전략 청사진 규격과 다름 (기록만 · 사용자 결정 필요)</a>
+<a class="l3" href="#i-8-gdd-8-33">I-8. GDD 8장 스키마 필드가 빌드 플랜 3.3에서 누락 (수정 완료)</a>
+<a class="l3" href="#i-9-gdd-33">I-9. GDD 3.3의 첫 벽 수치 출처 절 오기 (수정 완료)</a>
+<a class="l3" href="#i-10-63">I-10. 기획서 6.3의 상호참조 오류 (수정 완료)</a>
+<a href="#4">4. 권고</a>
+<a href="#5-gdd">5. GDD 시스템 ↔ 태스크 대응표 검증 결과</a>
+<a class="l3" href="#51-c">5.1 실행 가능성 체크(C) 결과</a>
+<a href="#6">6. 첫 미팅 확인 항목으로 승격한 가정 목록</a>
+<a class="l3" href="#a-06c-gdd-141-a1a14">ⓐ 전작 시스템 상세 — 06c 사전 요청 목록에 없음. 신설 필요 (GDD 14.1 A1~A14)</a>
+<a class="l3" href="#b-02-9-05-84">ⓑ 이미 커버됨 — 확인만 (02 9절 · 05 8.4)</a>
+<a class="l3" href="#c">ⓒ 첫 미팅에서 답할 수 없는 것 — 승격하지 않음</a>
+<a href="#7">7. 잔여 리스크와 재검수 필요 여부</a>
+<a class="l3" href="#71-7">7.1 사용자(컨설턴트) 결정이 필요한 항목 — 7건</a>
+<a class="l3" href="#72">7.2 잔여 리스크</a>
+<a class="l3" href="#73">7.3 재검수 필요 여부</a>
+<a href="#8">8. 직접 수정 내역</a>
+<a class="l3" href="#81-01_market_analyst_briefmd-03-9">8.1 01_market_analyst_brief.md — 로드맵 단계 번호 체계 0~3 통일 (9곳)</a>
+<a class="l3" href="#82-04_gdd_primitive_brothers_2md-rng-5">8.2 04_gdd_primitive_brothers_2.md — 확률 검증 수치·출처·RNG 명칭 (5곳)</a>
+<a class="l3" href="#83-05_codex_build_planmd-n-8">8.3 05_codex_build_plan.md — 명령 표·확률 N·스키마 필드·이탈 기록 (8곳)</a>
+<a class="l3" href="#84-06_proposal_mainmd-6">8.4 06_proposal_main.md — 제품명·상호참조·별첨 상태 (6곳)</a>
+<a class="l3" href="#85">8.5 수정하지 않은 것 (의도적)</a></aside><article class="md"><h1 id="tg-inc-ax-v1">검수 리포트 — 썬더게임즈(T.G Inc) AX 산출물 v1</h1>
+<ul>
+<li><strong>검수</strong>: ax-deliverable-reviewer · 2026-09-18</li>
+<li><strong>모드</strong>: 서브 에이전트(원저자 SendMessage 불가). <strong>리더 위임에 따라 기계적으로 고칠 수 있는 차단·중요 항목은 <code>_workspace</code> 파일을 직접 수정</strong>했고, 전량을 8절에 "파일·절·변경 전→후"로 기록했다.</li>
+<li><strong>판단이 필요한 항목</strong>(전략 선택·프레이밍·가설 노출 수위·이중 모드 유지)은 <strong>수정하지 않고</strong> 2·3절에 양쪽 논거와 권고만 적었다. 결정 주체는 사용자(컨설턴트)다.</li>
+<li>각 문서의 <code>## 팀원 전달 메모</code> 절은 내부 통신 기록이므로 삭제하지 않았다. 처리 완료된 항목에는 "→ 검수(07)에서 처리 완료" 주석만 덧붙였다.</li>
+</ul>
+<p><strong>집계</strong>: 차단 <strong>2건</strong> / 중요 <strong>10건</strong> / 권고 <strong>9건</strong> · 직접 수정 <strong>28곳(4개 파일)</strong> · 사용자 결정 필요 <strong>7건</strong></p>
+<hr />
+<h2 id="1">1. 검수 범위와 추출 값 요약표</h2>
+<h3 id="11">1.1 대상 문서</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>파일</th>
+<th>역할</th>
+<th>팀원 전달 메모</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>01_market_analyst_brief.md</code></td>
+<td>시장·지역·정책 브리핑</td>
+<td>있음(3인 수신)</td>
+<td>로드맵 번호 체계 불일치의 진원지 → 수정함</td>
+</tr>
+<tr>
+<td><code>02_diagnostician_studio_diagnosis.md</code></td>
+<td>스튜디오 진단</td>
+<td>있음(3인 수신)</td>
+<td>병목 점수표·Quick Win·미확인 22건</td>
+</tr>
+<tr>
+<td><code>03_strategy_ax_blueprint.md</code></td>
+<td>AX 전략 청사진</td>
+<td>있음(불확실 판단 3건)</td>
+<td>KPI·시나리오·거버넌스의 <strong>정본</strong></td>
+</tr>
+<tr>
+<td><code>04_gdd_primitive_brothers_2.md</code></td>
+<td>신작 GDD v0.1</td>
+<td>있음(모호 지점 10건)</td>
+<td>확률 검증표 수치 오류 → 수정함</td>
+</tr>
+<tr>
+<td><code>04b_balance_model.md</code></td>
+<td>밸런스 모델 <code>bal_v1</code></td>
+<td>없음</td>
+<td>벽 정의·목표표·검산 일치 확인</td>
+</tr>
+<tr>
+<td><code>05_codex_build_plan.md</code></td>
+<td>빌드 플랜(40태스크)</td>
+<td>있음(불확실 판단 3건)</td>
+<td>확률 N 산식값 오류 → 수정함</td>
+</tr>
+<tr>
+<td><code>05b_AGENTS.md</code></td>
+<td>저장소 규칙</td>
+<td>없음</td>
+<td>명령 목록 ↔ 05 2절 불일치 → 수정함</td>
+</tr>
+<tr>
+<td><code>06_proposal_main.md</code></td>
+<td>기획서(고객 제출)</td>
+<td>있음(<strong>불일치 7건</strong> + 불확실 3건)</td>
+<td>8.6 "작성 중" → 갱신함</td>
+</tr>
+<tr>
+<td><code>06b_executive_summary.md</code></td>
+<td>경영진 요약(고객 제출)</td>
+<td>없음</td>
+<td>KPI 4개 일치 확인</td>
+</tr>
+<tr>
+<td><code>06c_first_meeting_kit.md</code></td>
+<td>첫 미팅 키트(고객 제출)</td>
+<td>없음</td>
+<td>내부 표현 잔재 <strong>0건</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="12">1.2 경계면 추출 값</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+<th>출처 문서</th>
+<th>일치 여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>KPI 4개</strong></td>
+<td>① 에셋 1종당 리드타임 ② 업데이트 주기 ③ 배포 후 회귀 버그 수 ④ CS 1차 응답 시간</td>
+<td>03 7.1 / 06 9.1 / 06b / 02 8.2</td>
+<td><strong>4/4 문자열 일치 ✅</strong></td>
+</tr>
+<tr>
+<td>KPI ② 두 축 정의</td>
+<td>(a) 메이저 간 일수 ↓ (b) 월간 배포 횟수 ↑</td>
+<td>03 2.2·7.1 / 06 9.1 / 06b</td>
+<td>✅ (06 메모 #4의 우려는 실제 불일치 아님)</td>
+</tr>
+<tr>
+<td>기준선 측정 시점</td>
+<td>①② 진단 1주차 / ③④ 진단 2주차</td>
+<td>03 7.1 / 06 9.1 / 06b / 02 8.2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>시나리오 A/B/C</strong></td>
+<td>A 장기 운영 심화 / B 글로벌 재출시 / C 신작 병렬 개발</td>
+<td>01 7절·메모 / 03 2.1 / 06 7.1</td>
+<td>✅ (용어 미세차 → 3절 권고)</td>
+</tr>
+<tr>
+<td>시나리오별 핵심 KPI</td>
+<td>A=② / B=④ / C=①</td>
+<td>03 2.1 / 06 7.1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>진단 병목 상위 5</strong></td>
+<td>① 수동 QA 16 ② CS 15 ③ 밸런스 12 ④ 변형 아트 10 ⑤ 배포 후 모니터링 8</td>
+<td>02 4.1 / 03 3.5 / 06 4.1</td>
+<td>✅ 점수·순위 동일</td>
+</tr>
+<tr>
+<td>병목 순위 ↔ 매트릭스 순위</td>
+<td>1-a CS / 1-b 아트 / 1-c QA / 1-β 확률 / 2-a 문서화 / 2-b 밸런스</td>
+<td>03 3.4 / 06 7.2</td>
+<td>✅ <strong>불일치 전 항목에 이유 병기</strong>(03 3.5, 7행)</td>
+</tr>
+<tr>
+<td><strong>Quick Win 3</strong></td>
+<td>QW-1 리뷰 신호 대시보드 / QW-2 CS 답변 초안 + 결제 근거 자동 대조 / QW-3 변형 아트 일괄 생성 + 기준 대비 자동 검수</td>
+<td>02 6장 / 06 4.4 / 03 6.1</td>
+<td>✅ (03은 명칭 대신 내용으로 인용)</td>
+</tr>
+<tr>
+<td><strong>로드맵 단계·기간</strong></td>
+<td>0 진단 2~3주 / 1 Quick Win 1~2개월 / 2 파이프라인화 3~6개월 / 3 조직화 6개월~ / 의존 종료 T+12M</td>
+<td>02 8장 / 03 6.1 / 06 6.2·11.1 / 06b / 06c</td>
+<td><strong>수정 전 01만 1~4 체계 → 0~3으로 통일함</strong></td>
+</tr>
+<tr>
+<td>의존 종료 조건</td>
+<td>① 운영자 지명·인수인계 ② 소유권 사내 이관 ③ KPI 4개 자체 측정</td>
+<td>03 6.2 / 06 11.3 / 06b</td>
+<td>✅ 3/3 일치</td>
+</tr>
+<tr>
+<td><strong>거버넌스 5문서</strong></td>
+<td>AI 활용 원칙 / 아트 스타일 가이드 / 에이전트 권한 정책 / 데이터 정책 / 역할 정의서</td>
+<td>03 8.1~8.5 / 06 10.1</td>
+<td>✅ 명칭·소유자·확정 시점 일치</td>
+</tr>
+<tr>
+<td><strong>GDD 벽 정의</strong></td>
+<td><code>n_mob=4</code>, <code>m_boss=7</code>, <code>t_wall=30s</code>, <code>window_sec=1800</code>, <code>window_gain=5</code></td>
+<td>04 3.3 / 04b 2.2·10</td>
+<td>✅ 전 수치 일치</td>
+</tr>
+<tr>
+<td>첫 벽</td>
+<td>53.5분 / s≈110</td>
+<td>04 3.3 / 04b 8.2</td>
+<td>✅ (출처 절 오기 → 수정함)</td>
+</tr>
+<tr>
+<td>목표 벽 표</td>
+<td>1h 105/120 · D1 140/210 · D3 350/400 · D7 450/520 · D30 950/1150</td>
+<td>04b 7·8.2 / 05 6.4</td>
+<td>✅ 10 체크포인트 ±10%</td>
+</tr>
+<tr>
+<td><strong>GDD 5장 시스템</strong></td>
+<td>5.1~5.10 (14개 항목으로 분해)</td>
+<td>04 5장 / 05 5.1</td>
+<td>✅ <strong>빈 행 0개</strong>(5절 참조)</td>
+</tr>
+<tr>
+<td><strong>태스크 총수</strong></td>
+<td>40개 (P0:4 / P1:10 / P2:8 / P3:4 / P4:5 / P5:4 / P6:5)</td>
+<td>05 0·4절</td>
+<td>✅ 실측 40개 일치</td>
+</tr>
+<tr>
+<td>수용 기준</td>
+<td>40/40 태스크가 <code>실행 명령 → 기대 결과</code> 보유</td>
+<td>05 4절</td>
+<td>✅ (1건 주관 서술 → 4절 권고)</td>
+</tr>
+<tr>
+<td>태스크 크기</td>
+<td>S 11 / M 29 / <strong>L 0</strong></td>
+<td>05 4절</td>
+<td>✅ 분할 규칙 준수</td>
+</tr>
+<tr>
+<td>확률 표기값</td>
+<td>전설 0.5 / 영웅 3 / 희귀 15 / 일반 81.5 (%)</td>
+<td>04 7.3 / 04b 10 / 05 3.4</td>
+<td>✅ 값 일치 (<strong>단위 규격은 2절 I-6</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2">2. 차단 (파일 · 절 · 인용 · 수정 제안)</h2>
+<blockquote>
+<p>차단 = 고객 신뢰를 잃게 하는 것(사실 오류·측정 불가 약속·규제 오해·GDD 시스템 무대응·수용 기준 없음).</p>
+</blockquote>
+<h3 id="b-1-gdd-73-p00005">B-1. GDD 7.3 확률 검증표의 전설 행이 <strong>다른 확률값(p=0.0005)으로 계산</strong>되어 있었다 — 규제 방어 증거의 근거 표 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>04_gdd_primitive_brothers_2.md</code> 7.3 「확률형 요소 — 뼈 갈기」 검증 방식 표</li>
+<li><strong>인용(수정 전)</strong>: <code>| 0.005 (0.5%) | 0.000212 | [0.000288, 0.000712] | 42.4% | N = 1,800,000 |</code></li>
+<li><strong>문제</strong>: N=100,000, p=0.005에서 3σ = 3·√(0.005·0.995/100,000) = <strong>0.000669</strong>이고 허용 구간은 <strong>[0.004331, 0.005669]</strong>, 상대오차는 **13.4%**다. 표에 적힌 0.000212 / [0.000288, 0.000712] / 42.4%는 전부 <strong>p = 0.0005(0.05%) 기준</strong>으로 계산된 값이다. 나머지 세 행(3% / 15% / 81.5%)은 전부 정확했으므로 전설 행 한 줄만 자릿수가 밀린 것이다.</li>
+<li><strong>왜 차단인가</strong>: 이 표는 03 4.3.1이 "법적 방어 증거 생산 장치"로 규정한 확률 검증의 수치 근거이고, 05 T2.6의 수용 기준과 06 부록 E의 고객 약속이 이 표에 걸려 있다. 허용 구간 [0.000288, 0.000712]는 <strong>표기 확률 0.5%를 판정에서 항상 탈락시키는 구간</strong>이라, 그대로 구현되면 확률 검증이 영구 FAIL 한다.</li>
+<li><strong>조치</strong>: 표 행과 바로 아래 「주의(코딩 에이전트 필독)」 문단을 정정했다(8절 G-2·G-3). 04 팀원 전달 메모 3-9의 같은 숫자도 정정했다(G-5).</li>
+</ul>
+<h3 id="b-2-65-10">B-2. 빌드 플랜 6.5 확률 검증 시행수 <strong>산식값이 자기 산식의 10배</strong> <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>05_codex_build_plan.md</code> 6.5 「확률 검증 시행수」</li>
+<li><strong>인용(수정 전)</strong>: 산식 <code>N_i = max(100_000, ceil(900 × (1 − p_i) / p_i))</code> / 표의 전설 행 <code>| 전설 | 0.005 | 1,791,000 | 1,800,000 |</code></li>
+<li><strong>문제</strong>: 900 × (1−0.005)/0.005 = 900 × 199 = <strong>179,100</strong>이다. 표의 1,791,000은 <strong>9,000 × 199</strong>로, 계수를 10배로 쓴 값이다. 같은 표의 영웅(29,100) · 희귀(5,100) · 일반(204)은 전부 900 계수로 정확히 계산돼 있어, 전설 행만 틀렸다. GDD 7.3의 "0.5%면 N ≈ 1.8e6"도 같은 오류다.</li>
+<li><strong>왜 차단인가</strong>: 산식과 산식값이 문서 안에서 모순된다. 또 T2.6 수용 기준 5(<strong>전설 1.8e6 시행 60초 이내</strong>)가 필요량의 10배를 전제로 걸려 있어, CI 게이트가 성능 문제로 무력화될 위험이 실재한다(05 팀원 전달 메모 3에서 원저자가 T2.5의 10분 제한을 걱정한 것과 같은 축).</li>
+<li><strong>조치</strong>: 산식값을 179,100으로 정정하고 <strong>채택 N 1,800,000은 그대로 유지</strong>하되 "산식값의 약 10배 여유(규제 증거용)"임을 명시했다. 60초를 못 지킬 경우 산식값 기준으로 내리는 합의 경로도 같은 문단에 붙였다(8절 P-3·P-4). <strong>채택 N을 179,100 또는 200,000으로 내릴지는 기획 담당 결정 사항</strong>(6절 결정 항목 ⑦).</li>
+</ul>
+<hr />
+<h2 id="3">3. 중요</h2>
+<blockquote>
+<p>중요 = 용어 불일치·순위 불일치·추정 표시 누락·경계면 규격 충돌.</p>
+</blockquote>
+<h3 id="i-1-14-03">I-1. 로드맵 단계 번호 체계가 두 갈래 (1~4 ↔ 0~3) <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>01_market_analyst_brief.md</code> 5절 「귀사는?」, 7절 머리글·표 4칸, 10절 C-2</li>
+<li><strong>인용(수정 전)</strong>: <code>컨설팅 로드맵 단계: **1=진단 / 2=Quick Win / 3=파이프라인화 / 4=조직화·내재화**</code></li>
+<li><strong>문제</strong>: 02 8장·03 6.1·06 6.2·06b·06c는 전부 <strong>0~3</strong>이다. 특히 01 5절의 "귀사는?" 질문은 <strong>고객에게 숫자로 답하게 하는 질문</strong>이라, 그대로 쓰면 고객이 다른 체계로 답한다(06 메모 #1이 지적한 항목). 06c는 이미 0~3으로 고쳐져 있어 브리핑 원본과 미팅 키트가 서로 달랐다.</li>
+<li><strong>조치</strong>: 01을 0~3으로 전량 통일했다(8절 M-1~M-9). 파생 표기(<code>3~4단계 연결</code> → <code>2~3단계</code>, <code>2단계 비용 회수</code> → <code>1단계</code>, <code>1단계에서 점검</code> → <code>0단계</code>, <code>4단계</code> → <code>3단계</code>)까지 함께 옮겼고, "3단계 완료 시점 = 지스타 2027"은 새 체계에서 <strong>조직화 완료</strong>를 가리켜 03 6.3과 자동으로 맞아떨어지므로 그대로 두었다.</li>
+</ul>
+<h3 id="i-2-86">I-2. 기획서 8.6 별첨 표가 "작성 중" 상태로 고객 제출본에 남아 있었다 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>06_proposal_main.md</code> 8.6 「별첨 안내」</li>
+<li><strong>인용(수정 전)</strong>: <code>| **Codex 빌드 플랜** | … | **작성 중** — 완성 시 이 기획서의 별첨으로 추가 전달 |</code></li>
+<li><strong>문제</strong>: 05가 제출 완료(40태스크)인데 기획서는 미완으로 표기한다. 고객 제출본에 "작성 중"이 남으면 제안 전체의 완결성이 의심받는다. 동시에 "Codex"는 <strong>제품 이름</strong>이라 이 문서 스스로 머리말에 선언한 규칙 3("도구와 제품 이름은 부록 C에만 있습니다")을 위반한다.</li>
+<li><strong>조치</strong>: 상태를 <strong>제공</strong>으로 바꾸고 <code>Phase 0~6(7단계) · 태스크 40개(P0 4 / P1 10 / P2 8 / P3 4 / P4 5 / P5 4 / P6 5)</code> · "전 태스크가 <code>실행 명령 → 기대 결과</code> 수용 기준 보유" · 동반 규칙 문서 1건을 명기했다. 별첨 명칭은 **「빌드 플랜 (코딩 에이전트 실행용)」**으로 제품명을 제거했다(8절 R-3).</li>
+</ul>
+<h3 id="i-3-322">I-3. 기획서 첫 3페이지(2.2 확인된 사실)에 제품 이름 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>06_proposal_main.md</code> 2.2 F-10</li>
+<li><strong>인용(수정 전)</strong>: <code>| F-10 | 고객센터 | Freshdesk 기반 CS 채널 운영 | 스토어 약관·지원 링크 |</code></li>
+<li><strong>문제</strong>: 체크리스트 B-1(첫 3페이지 = 배경·이해·진단 가설에 도구·제품 이름 금지) 위반이자, 문서 머리말 규칙 3의 자기모순. 부록 C의 같은 제품명은 규칙상 허용되므로 남겨 두었다.</li>
+<li><strong>조치</strong>: <code>외부 SaaS 기반 CS 채널(티켓 시스템) 운영 — 제품명은 부록 C 참조</code>로 교체. 사실 내용(외부 SaaS를 쓴다)은 보존된다.</li>
+</ul>
+<h3 id="i-4-agentsmd-2-npm">I-4. <code>AGENTS.md</code> 명령 ↔ 빌드 플랜 2절 npm 스크립트 표 불일치 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>05b_AGENTS.md</code> 「명령」 ↔ <code>05_codex_build_plan.md</code> 2절 표 (정본은 05 6.1 CLI)</li>
+<li><strong>인용</strong>: AGENTS.md는 <code>npm run sim:prob</code>(확률 표기 검증 + 천장 단언)을 별도 명령으로 두고 <code>sim:regress</code>를 "목표 벽 표 10 체크포인트 ±10% + 첫 벽 + 격차 + D1 프레스티지"로 정의한다. 05 2절 표에는 <strong><code>sim:prob</code> 행이 아예 없었고</strong> <code>sim:regress</code>를 "목표 벽 표 10 체크포인트 + 첫 벽 + <strong>확률 + 천장</strong> 회귀"로 적었다.</li>
+<li><strong>문제</strong>: 코딩 에이전트는 AGENTS.md 전체 + 05 1·2·3절 + 태스크 카드만 읽는다(05 0절). 두 곳이 다르면 T2.6의 수용 기준 명령(<code>npm run sim:prob</code>)이 스크립트 표에 없는 상태로 세션이 시작된다. 05 6.1·6.4가 AGENTS.md와 같으므로 <strong>2절 표가 틀린 쪽</strong>이다.</li>
+<li><strong>조치</strong>: 2절 표에 <code>npm run sim:prob</code> 행을 추가하고 <code>sim:regress</code> 설명을 6.1·6.4·AGENTS.md와 같은 문구(13 단언)로 맞췄다. <code>sim:long</code>도 <code>--days 90</code> / <code>--all</code> 두 형태를 병기했다.</li>
+</ul>
+<h3 id="i-5-gdd-131-m1-rng">I-5. GDD 13.1 M1의 RNG 알고리즘이 빌드 플랜과 다름 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>04_gdd_primitive_brothers_2.md</code> 13.1 M1 ↔ <code>05_codex_build_plan.md</code> 1.2 (D-2), 8.3 A-D5</li>
+<li><strong>인용(수정 전)</strong>: GDD <code>시드 기반 RNG(xorshift128+)</code> / 05 <code>xoshiro128**로 대체한다 → 가정 A-D5로 기록</code> + "<strong>GDD 13.1 M1 문구 수정 필요</strong>"</li>
+<li><strong>문제</strong>: 05가 스스로 "GDD 문구 수정이 필요하다"고 남긴 미처리 항목이다. 결정성(13.3-2)의 근간이라 두 문서가 다른 알고리즘을 지시하면 T0.2·T2.4가 흔들린다.</li>
+<li><strong>조치</strong>: GDD M1을 <code>xoshiro128**</code>로 갱신하고 대체 근거(32비트 정수 연산만 사용)와 출처(A-D5)를 병기했다.</li>
+</ul>
+<h3 id="i-6-ppm-01gdd">I-6. <strong>확률의 데이터 단위 규격이 정면 충돌</strong> — 정수 ppm(전략·기획서) ↔ 부동소수 0~1(GDD·빌드 플랜) <em>(기록만 · 사용자 결정 필요)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>03_strategy_ax_blueprint.md</code> 4.3.1 및 팀원 전달 메모 (2)-①(d) / <code>06_proposal_main.md</code> 부록 E ↔ <code>04_gdd…</code> 8.0·7.3·8.13 / <code>05_codex_build_plan.md</code> 3.1·3.4</li>
+<li><strong>인용</strong>:</li>
+<li>03 4.3.1 — "확률값은 데이터 테이블에서 **부동소수가 아니라 정수 ppm(백만분율)**로 관리한다. 부동소수 오차는 '표기와 구현이 같다'는 증명을 흐리는 가장 흔한 원인이다"</li>
+<li>03 메모 (2) — "아래 규격을 <strong>신작 프로토타입과 전작 시뮬레이터에 동일하게 적용</strong>하면 자산이 그대로 재사용된다"</li>
+<li>06 부록 E — "<strong>ppm</strong> | 백만분율. 확률을 소수 대신 정수로 관리해 <strong>표기와 구현의 일치 증명을 흐리지 않기 위한</strong> 단위 규칙" ← <strong>고객에게 이미 약속된 용어</strong></li>
+<li>GDD 8.0 — "확률은 <code>number</code> 0~1" / 05 3.1 — "확률은 <code>number</code> 0~1" / 05 3.4 — <code>"drop_rates": { "bone_grind": { "legend": 0.005, … } }</code></li>
+<li><strong>문제</strong>: 기획서 용어집에 ppm을 규칙으로 실어 고객에게 약속해 놓고, 같은 제안의 별첨 두 건이 부동소수를 쓴다. 고객이 별첨을 열어 보는 순간 드러나는 종류의 불일치이며, 03이 이 규칙에 붙인 근거가 <strong>법적 방어</strong>라 파장이 크다.</li>
+<li><strong>왜 직접 고치지 않았는가</strong>: ppm 전환은 <code>balance.drop_rates</code> 키 구조, <code>drop_rates</code> 합계 검사(1.0 ± 1e-9 → 1,000,000 정수 합), 스키마 <code>maximum</code>, T0.3·T2.6 수용 기준, GDD 7.3 표기표까지 연쇄 변경되는 <strong>설계 결정</strong>이다. 검수자가 단독으로 바꿀 범위가 아니다.</li>
+<li><strong>조치</strong>: 05 8.3에 **A-D14(이탈 기록)**를 추가해 "본 플랜은 그 규격을 따르지 않았다 / 정합 필요 — 기획·전략 담당 판단 대상"으로 명시적으로 남겼다.</li>
+<li><strong>권고</strong>: <strong>ppm 쪽으로 통일</strong>을 권한다. 근거 세 가지 — ① 고객 문서(06 부록 E)가 이미 약속했고 철회하면 규제 대응 논리가 약해진다, ② 05 1.2 (D-3)가 이미 <code>Math.pow</code> 금지·사전 계산 테이블로 <strong>부동소수 오차 최소화</strong>를 설계 원칙으로 채택했으므로 방향이 같다, ③ 전작 시뮬레이터와 신작 프로토타입이 같은 검증 하네스를 공유해야 03 9.1의 자산 재사용이 성립한다. <strong>비용</strong>: 05 3.4·3.3, GDD 7.3·8.0·8.13, T0.3·T2.6 수정. 반대로 유지한다면 <strong>06 부록 E의 ppm 항목을 삭제</strong>하고 03 4.3.1의 설계 결정을 "전작 시뮬레이터 한정"으로 축소해야 한다 — 어느 쪽이든 <strong>한쪽은 반드시 바꿔야 한다.</strong></li>
+</ul>
+<h3 id="i-7-cli-json">I-7. 시뮬레이터 CLI·테이블 JSON 규격이 전략 청사진 규격과 다름 <em>(기록만 · 사용자 결정 필요)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>03_strategy_ax_blueprint.md</code> 팀원 전달 메모 (2)-①②③ ↔ <code>05_codex_build_plan.md</code> 2·3·6절</li>
+<li><strong>인용</strong>: 03은 <code>sim run --tables --scenario --seed --runs --days --profile --out --format</code> / <code>sim diff</code> / <code>sim verify-odds</code> / <code>sim replay</code>, <strong>exit code 규약 0·1·2(2 = 임계 위반)</strong>, 테이블 JSON에 <code>schema_version</code>·<code>generated_at</code>·<code>source</code>·<code>checksum</code>·<code>columns</code>/<code>rows</code>를 요구한다. 05는 <code>npm run sim</code> / <code>sim:regress</code> / <code>sim:prob</code> / <code>sim:diff</code> / <code>sim:determinism</code> / <code>sim:long</code>이고, 테이블은 배열 1파일 + <code>_manifest.json</code>에 <code>{table, version, checksum}</code>을 둔다. exit code 규약 언급은 없다.</li>
+<li><strong>문제</strong>: 03이 "신작·전작에 <strong>동일하게</strong> 적용하면 자산이 그대로 재사용된다"고 못박은 규격인데, 05가 다른 체계를 택하면서 이탈을 기록하지 않았다. <code>sim replay</code>(시드+체크섬 재현 — 03이 "규제 증거"라 부른 명령)와 **exit code 2(CI가 배포를 막는 신호)**는 05에 대응물이 없다.</li>
+<li><strong>조치</strong>: 05 8.3에 **A-D15(이탈 기록)**를 추가했다.</li>
+<li><strong>권고</strong>: 명령 <strong>이름</strong>은 npm 워크스페이스 관례상 05 쪽이 실무적이므로 유지하되, <strong>(a) exit code 규약 0/1/2를 05 6.1에 추가</strong>하고 <strong>(b) <code>sim:replay</code>(시드 + 테이블 체크섬으로 동일 결과 재현) 태스크를 Phase 2에 신설</strong>할 것을 권한다. 이 둘은 규격 통일이 아니라 <strong>규제 증거 기능의 누락</strong>이라, 명령 이름 논쟁과 분리해서 처리할 수 있다.</li>
+<li><strong>→ 리더 결정: 권고대로 처리 + 확장. 05 6.1.1(규격 서브커맨드 ↔ npm 별칭 정본 대조표)·6.1.2(exit code 0/1/2)·6.1.3(stdout JSON / stderr 요약 / <code>--format md</code>)을 신설하고, <code>sim replay</code>를 <strong>T2.9</strong>로 Phase 2에 추가(태스크 총수 40→41). 테이블 JSON 공통 메타(<code>schema_version</code>·<code>generated_at</code>·<code>checksum</code>)를 05 3.1에 추가하고 T0.3 로더 수용 기준에 checksum 검증을 포함. 05b AGENTS.md 명령 표도 동일 갱신. A-D15는 "결정 완료" (08 참조)</strong></li>
+</ul>
+<h3 id="i-8-gdd-8-33">I-8. GDD 8장 스키마 필드가 빌드 플랜 3.3에서 누락 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>04_gdd…</code> 8.7 <code>monsters</code> / 8.11 <code>events</code> / 8.12 <code>shop_products</code> ↔ <code>05_codex_build_plan.md</code> 3.3</li>
+<li><strong>문제</strong>: 3.3은 "GDD 8.2~8.12를 그대로 옮기되"라고 선언했지만 실제로는 다음이 빠져 있었다 — <code>monsters.drop_table_id</code>·<code>monsters.palette_variants</code>, <code>events.reward_items</code>·<code>events.condition</code>·<code>events.banner_asset_id</code>, <code>shop_products.limit_per_account</code>·<code>shop_products.visible_condition</code>. 05 3.1은 <code>additionalProperties: false</code>를 전 스키마에 강제하므로, <strong>정의되지 않은 필드는 곧 기동 실패</strong>가 된다. T0.3이 GDD 예시 JSON을 그대로 넣으면 로더가 죽는다.</li>
+<li><strong>조치</strong>: 3.3의 세 행에 "선택 필드로 두되 스키마에는 정의한다"는 처리를 명기했다(8절 P-5·P-6·P-7). 나머지 9개 테이블은 전수 대조 결과 필드 집합이 일치했다(<code>upgrades</code>·<code>stages</code>의 곡선 필드 생략은 05 A-D6에 근거가 기록돼 있음).</li>
+</ul>
+<h3 id="i-9-gdd-33">I-9. GDD 3.3의 첫 벽 수치 출처 절 오기 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>04_gdd…</code> 3.3</li>
+<li><strong>인용(수정 전)</strong>: <code>**첫 벽 목표 시각: 플레이 53.5분, 스테이지 약 110** (밸런스 모델 7절 검산값)</code></li>
+<li><strong>문제</strong>: 04b <strong>7절은 목표표</strong>이고 그 값은 "약 55분"이다. 53.5분은 <strong>8.2절 검산값</strong>이다. 7절을 "검산값"이라고 부르면 목표와 검산의 구분이 무너져, 05 6.4 T2(첫 벽 53.5분 ±10%)의 기준이 어디서 왔는지 추적할 수 없다.</li>
+<li><strong>조치</strong>: "밸런스 모델 <strong>8.2절 검산값</strong>. 7절 목표표의 설계 의도는 '약 55분, s≈110'이며 검산 편차 −2.7%"로 정정.</li>
+</ul>
+<h3 id="i-10-63">I-10. 기획서 6.3의 상호참조 오류 <em>(수정 완료)</em></h3>
+<ul>
+<li><strong>파일·절</strong>: <code>06_proposal_main.md</code> 6.3</li>
+<li><strong>인용(수정 전)</strong>: <code>등급별로 자동 실행 범위를 문서로 못 박습니다(10.3절).</code></li>
+<li><strong>문제</strong>: 10.3은 「상위 리스크 5」다. 권한 등급표를 소유하는 것은 **10.1 문서 3 「에이전트 권한 정책」**이며, 그 문서 설명도 "6.3절 등급표"를 역참조한다. 고객이 10.3을 펴면 권한 이야기가 없다.</li>
+<li><strong>조치</strong>: <code>(10.1절 문서 3 「에이전트 권한 정책」)</code>으로 정정.</li>
+</ul>
+<hr />
+<h2 id="4">4. 권고</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>파일·절</th>
+<th>내용</th>
+<th>권고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-1</td>
+<td><code>06</code> 10.3</td>
+<td>「상위 리스크 5」의 번호가 <strong>R1·R2·R3·R5·R7</strong>로 R4·R6이 결번. 03 8.6 원표의 id를 그대로 가져온 결과</td>
+<td>고객 문서에서는 결번이 "숨긴 리스크"로 읽힌다. <strong>R1~R5로 재번호</strong>하고 각 행에 <code>(전략 청사진 8.6 R5)</code> 식 대조 표기를 붙이거나, 표 위에 "전략 문서 리스크표에서 상위 5건만 발췌, 원 번호 유지"를 한 줄 적을 것</td>
+</tr>
+<tr>
+<td>A-2</td>
+<td><code>03</code> 2.1 vs <code>06</code> 7.1</td>
+<td>시나리오 B 최우선 영역이 03 "텍스트·<strong>로컬라이즈</strong>", 06 "텍스트·<strong>번역</strong>". B 정의도 03 "<strong>스팀</strong>이 현실적 카드", 06 "<strong>PC 플랫폼</strong>이 현실적 카드"</td>
+<td>고객 문서에서 제품명을 뺀 것은 <strong>의도된 처리로 보이며 유지 권장</strong>. 다만 03 3.4의 착수 게이트 "스팀 AI 공시 대응 포함"은 06 7.2에서 "해외 AI 공시 대응 포함"으로 이미 일반화돼 있어 일관된다. 용어집(06 부록 E)에 "로컬라이즈 = 번역·현지화" 한 줄 추가 권고</td>
+</tr>
+<tr>
+<td>A-3</td>
+<td><code>06b</code> 「제안」 표 1단계</td>
+<td>결정 지점이 "AI 활용 원칙 · 역할 정의서 확정"인데 03 6.1·06 6.2의 1단계 산출물에는 <strong>아트 스타일 가이드 v1</strong>도 있다</td>
+<td>경영진 요약은 압축이 목적이므로 누락 자체는 허용. 다만 스타일 가이드는 <strong>원화 담당자가 저자</strong>라는 점이 이 제안의 핵심 신뢰 장치이므로, 1단계 칸에 "아트 스타일 가이드 v1(원화 담당자 작성)" 추가 권고</td>
+</tr>
+<tr>
+<td>A-4</td>
+<td><code>05</code> T2.7 수용 기준 5</td>
+<td>"생성된 리포트를 <strong>사람이 읽었을 때</strong> '어느 체크포인트가 왜 움직였는지'가 파라미터 diff 표와 나란히 보임" — 유일하게 기계 판정이 불가능한 기준</td>
+<td>05 4절 머리말이 "'동작해야 한다' 같은 서술은 기준이 아니다"라고 선언했으므로 자기 규칙에 걸린다. <code>grep -c "^## " reports/diff-*.md</code> → 6개 섹션(6.3의 ①~⑥) 존재 / <code>jq '.metrics｜length'</code> → 4 같은 <strong>개수 단언</strong>으로 교체 권고</td>
+</tr>
+<tr>
+<td>A-5</td>
+<td><code>04</code> 13.1 vs <code>06</code> 8.4</td>
+<td>MVP 제외 목록에서 06에 "절벽"이 빠져 있었다</td>
+<td><strong>수정 완료</strong>(8절 R-4). 이후 GDD 13.2 확장 로드맵이 바뀌면 06 8.4도 같이 갱신할 것</td>
+</tr>
+<tr>
+<td>A-6</td>
+<td><code>01</code> 6절</td>
+<td>"출시·운영 기간: <strong>2016년경~, 8년+</strong>" — 기준일 2026-09-18에서 2016년이면 약 10년</td>
+<td>02·06의 "8년 이상"은 보수적 표기라 오류는 아니나, 같은 표에서 출시 연도와 운영 기간이 어긋나 보인다. "2016년경~(추정), 10년 내외 / 공개 확인 가능한 최소치 8년+"로 표기 권고</td>
+</tr>
+<tr>
+<td>A-7</td>
+<td><code>03</code> 6.1 제목</td>
+<td>"### 6.1 <strong>4단계</strong> (기간은 리포트 10.1을 유지)"인데 표의 번호는 0~3</td>
+<td>"0~3단계(4개 구간)"으로 제목 조정 권고. 01 통일 후 "4단계"라는 표현이 남으면 다시 1~4 체계로 오독될 여지</td>
+</tr>
+<tr>
+<td>A-8</td>
+<td><code>04</code> 8.13 vs <code>04b</code> 10절 · <code>05</code> 3.4</td>
+<td>GDD 8.13 <code>balance</code> 키 목록이 20개인데 04b 10절은 45개, 05 3.4는 47개(+<code>equip_recovery_mode</code>). <code>pity_hero</code>·<code>pity_legend</code>·<code>equip_tier_cap</code>·<code>merge_count</code> 등이 GDD에만 없다</td>
+<td>05 A-D6("balance.json이 유일한 원본")로 처리 경로는 기록돼 있으나, <strong>GDD 8.13이 정본 스키마 문서</strong>라 두 배 이상 차이는 유지보수 사고를 부른다. GDD 8.13을 04b 10절 + <code>equip_recovery_mode</code>로 동기화하고 "전 키의 정본은 04b 10절"이라고 한 줄 명시 권고</td>
+</tr>
+<tr>
+<td>A-9</td>
+<td><code>01</code> 6절</td>
+<td>대형사 사례(넥슨·넷마블·세븐나이츠·던파) 언급 17회</td>
+<td>체크리스트 B-4는 "문서당 1~2줄"이지만, 01은 <strong>경쟁작 비교표 자체가 산출물</strong>이므로 예외로 판단. 다만 <strong>고객 제출본(06/06b/06c)에는 대형사 고유명사 0건</strong>임을 확인했고 이 상태를 유지할 것</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-gdd">5. GDD 시스템 ↔ 태스크 대응표 검증 결과</h2>
+<p><strong>검증 방법</strong>: <code>04_gdd…</code> 5장의 절 목차를 직접 읽어 시스템을 열거하고, <code>05_codex_build_plan.md</code> 5.1(14행)과 <strong>한 줄씩 대조</strong>했다. 05 팀원 전달 메모의 "빈 행 0개" 주장을 그대로 믿지 않고 재확인했다.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>GDD 5장 절</th>
+<th>시스템</th>
+<th>05 5.1 대응 태스크</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.1</td>
+<td>형님(동료) 6종·해금·ATK 곡선</td>
+<td>T0.3, T1.2, T4.3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.2</td>
+<td>강화 + 자동 강화(그리디)</td>
+<td>T1.4, T4.3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>장비 드랍 + 결정적 합성</td>
+<td>T1.6, T4.3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>「뼈 갈기」(확률형 1종)</td>
+<td>T2.6(하네스, MVP) / T6.4(구현)</td>
+<td>✅ GDD 13.1 M11과 일치</td>
+</tr>
+<tr>
+<td>5.4</td>
+<td>토템·유산 = 불씨 노드</td>
+<td>T1.8, T4.4</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>스테이지·보스·시대·월드</td>
+<td>T1.1, T1.3, T4.2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>사냥터 자동 최적화 <code>f*</code></td>
+<td>T1.5</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>얼음 절벽(탑)</td>
+<td>T6.3</td>
+<td>✅ 확장</td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>보스 원정</td>
+<td>T6.3 (+ 설정 영속성 <strong>T3.4로 MVP 선반영</strong>)</td>
+<td>✅ 전작 UX 마찰(R-02) 대응이 앞당겨진 것은 <strong>가산점</strong></td>
+</tr>
+<tr>
+<td>5.7</td>
+<td>길드</td>
+<td><strong>명시적 제외</strong> + 스키마만 T0.3</td>
+<td>✅ 근거 기재(5.3)</td>
+</tr>
+<tr>
+<td>5.8</td>
+<td>탈것</td>
+<td>T0.3(스키마·1행), T6.2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.8</td>
+<td>스킨</td>
+<td>T0.3, T1.2(배수 경로), T6.2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>5.9</td>
+<td>도감·카드</td>
+<td>T1.9, T6.2</td>
+<td>✅ (회귀는 <code>--cards off</code> — A-D9 근거 기재)</td>
+</tr>
+<tr>
+<td>5.10</td>
+<td>부족 캠프</td>
+<td>T6.1</td>
+<td>✅ 확장</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>GDD 5장 10개 절 → 14개 시스템 전수가 최소 1개 태스크 또는 근거 있는 제외를 갖는다. 빈 행 0개 — 05의 자기 보고가 정확했다.</strong></li>
+<li><strong>5.2 확장 대응</strong>(GDD 3·4·6·7·10·11·12·13장)도 전 행에 태스크가 있다. 특히 GDD 13.1 M1~M11 → 태스크 매핑과 13.3 성공 판정 4개 → T2.5 / T2.4 / T2.7 / T1.1 수용 기준 5가 1:1로 닫힌다.</li>
+<li><strong>5.3 명시적 제외 5건</strong>(길드·부족 대항전 / 서버·계정 동기화 / 실 결제·광고 SDK / 형님 패시브 / Unity 포팅)은 전부 GDD 원문의 제외 선언 또는 13.3 판정 범위 밖이라는 근거를 갖는다. <strong>임의 제외 0건.</strong></li>
+</ul>
+<h3 id="51-c">5.1 실행 가능성 체크(C) 결과</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>체크 항목</th>
+<th>결과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>40개 태스크 전부에 <code>실행 명령 → 기대 결과</code> 수용 기준</td>
+<td>✅ 40/40 (T2.7 기준 5만 주관 서술 → 권고 A-4)</td>
+</tr>
+<tr>
+<td>크기 L 태스크 분할</td>
+<td>✅ L <strong>0개</strong> (S 11 / M 29). T6.5에만 "L로 커지면 2개로 쪼갠다"는 사전 분할 규칙</td>
+</tr>
+<tr>
+<td>core 무의존 · <code>Math.random</code> 금지 · 시드 RNG</td>
+<td>✅ 05 1.1 의존표 + <code>tools/check-deps.ts</code> + AGENTS.md 규칙 1·3·4 + T0.1 수용 기준 6(<strong>금지 식별자를 넣어 exit 1을 확인</strong>하는 역방향 검증)</td>
+</tr>
+<tr>
+<td><code>data/balance.json</code> 집중 · 하드코딩 금지</td>
+<td>✅ 05 3.1(단일 원본) + 3.4(전체 키) + AGENTS.md 규칙 6·7·8. <strong>"Codex가 balance.json을 수정하지 않는다"가 회귀 실패 시 행동 규칙까지 포함</strong></td>
+</tr>
+<tr>
+<td>결정성 테스트(같은 시드 = 같은 출력)</td>
+<td>✅ 05 1.2 D-1~D-4, T2.4, <code>npm run sim:determinism</code>(+<code>--matrix</code> 12조합), 판정 범위를 "동일 Node 22.x"로 좁힌 것이 정직</td>
+</tr>
+<tr>
+<td>회귀 허용 오차 · 확률 검증 N</td>
+<td>✅ ±10% 밴드(10 체크포인트) + 첫 벽 53.5분 ±10% + 확률 N 자동 산출(6.5) + 3σ 구간. <strong>단 B-2의 산식값 오류가 있었다</strong></td>
+</tr>
+<tr>
+<td><code>schemaVersion</code> + 마이그레이션</td>
+<td>✅ 05 1.5 + T3.1·T3.2(미래 세이브 로드 거부, 마이그레이션 개수 일치 테스트) + AGENTS.md 규칙 10</td>
+</tr>
+<tr>
+<td>에셋 거버넌스의 코드 강제</td>
+<td>✅ 05 1.7 7개 검사 + T0.4. <strong>05 메모가 스스로 지적한 <code>--ignore-scripts</code> 우회는 CI 독립 잡으로 부분 방어. 로컬 우회는 미해결</strong> → 6절 결정 항목 ⑥</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6">6. 첫 미팅 확인 항목으로 승격한 가정 목록</h2>
+<blockquote>
+<p>GDD 14.1 · 05 8.4 · 02 9절의 가정·미결 중 <strong>첫 미팅에서 고객이 바로 답할 수 있는 것</strong>만 모았다. 06 부록 A·B와 06c 4절을 대조한 결과, <strong>아래 ⓐ 블록(전작 시스템 상세 14건)이 현행 사전 요청·질문 목록 어디에도 없다.</strong></p>
+</blockquote>
+<h3 id="a-06c-gdd-141-a1a14">ⓐ 전작 시스템 상세 — <strong>06c 사전 요청 목록에 없음. 신설 필요</strong> <em>(GDD 14.1 A1~A14)</em></h3>
+<p>신작 GDD 전체가 이 14건 위에 서 있는데, 06c 4절 A~H 어디에도 대응 항목이 없다. E(밸런스)의 "슬롯·합성 확률의 표기 문구와 설정값"이 A2·A6을 부분적으로만 건드린다. <strong>06c 4절에 「I. 전작 시스템 상세(신작 트랙 전제 확인)」을 신설하거나, 세션 B의 기획 담당 대화 시간에 배치할 것을 권고한다.</strong> 06c는 고객 제출용이라 분량·아젠다 배분에 영향을 주므로 검수자가 직접 삽입하지 않았다. 아래를 그대로 붙여 쓸 수 있다.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>GDD</th>
+<th>가정</th>
+<th>첫 미팅 확인 질문</th>
+<th>답이 바뀌면 흔들리는 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A1</td>
+<td>"문명"은 스테이지와 별도의 진행축이다</td>
+<td>문명 단계는 무엇으로 오르고 무엇을 주는가?</td>
+<td>GDD 2장 전작 시스템 분류</td>
+</tr>
+<tr>
+<td>A2</td>
+<td>전작 장비 합성은 확률 기반이다</td>
+<td>합성 성공률과 표기 위치는? 실패 시 소멸하는가?</td>
+<td>GDD 5.3 <strong>결정적 합성</strong>(확률 없음) 전제</td>
+</tr>
+<tr>
+<td>A3</td>
+<td>토템은 영구 % 보너스이며 리셋되지 않는다</td>
+<td>토템 통화의 획득처는?</td>
+<td>GDD 5.4 불씨 노드 설계</td>
+</tr>
+<tr>
+<td>A4</td>
+<td>전작에 프레스티지(리셋) 구조가 없다</td>
+<td>전작에 환생/리셋이 있는가? 있다면 리셋/유지 목록은?</td>
+<td><strong>GDD 4.1 세대 교체 = 신작 차별화 축 ②</strong></td>
+</tr>
+<tr>
+<td>A5</td>
+<td>탈것은 전투력 배수다</td>
+<td>탈것 효과는 전투력인가 편의인가?</td>
+<td>GDD 5.8 <code>atk_mult</code> 1.00~1.05 상한</td>
+</tr>
+<tr>
+<td>A6</td>
+<td>슬롯머신은 유료 재화를 소모한다</td>
+<td>슬롯머신 매출 비중과 확률 표기 현황은?</td>
+<td><strong>진단 U-08(규제 리스크 규모) + 차별화 축 ③</strong></td>
+</tr>
+<tr>
+<td>A7</td>
+<td>스킨은 밸런스 영향이 없다</td>
+<td>스킨에 능력치가 붙는가?</td>
+<td>GDD 5.8 <code>stat_bonus ≤ 0.05</code></td>
+</tr>
+<tr>
+<td>A8</td>
+<td>월드 시스템은 스테이지 구간 확장이다</td>
+<td>월드는 별도 진행축인가?</td>
+<td>GDD 8.6 <code>stages</code> 구간 1행 규칙</td>
+</tr>
+<tr>
+<td>A9</td>
+<td>밸런스 테이블은 시트 → CSV/JSON</td>
+<td>현재 밸런스 데이터 형식과 배포 경로는?</td>
+<td><strong>진단 U-07, 03 4.4 코파일럿 커버리지</strong></td>
+</tr>
+<tr>
+<td>A10</td>
+<td>전투 로직이 화면 코드에 결합돼 있다</td>
+<td>전투 계산을 순수 클래스로 분리 가능한가?</td>
+<td><strong>진단 U-06 = 전 프로젝트의 분기점</strong></td>
+</tr>
+<tr>
+<td>A11</td>
+<td>오프라인 보상에 상한이 있다</td>
+<td>상한 시간과 감쇠율은?</td>
+<td>04b 5절 <code>offline_cap_sec</code></td>
+</tr>
+<tr>
+<td>A12</td>
+<td>형님 수는 6명 이하</td>
+<td>형님은 몇 명이고 해금 조건은?</td>
+<td>04b <code>brother_unlock_stages</code></td>
+</tr>
+<tr>
+<td>A13</td>
+<td>자사 원화 LoRA가 학습 가능하다</td>
+<td>8년치 원화 원본(레이어 파일) 보존 상태는?</td>
+<td><strong>03 4.2 아트 파이프라인 성립 여부</strong></td>
+</tr>
+<tr>
+<td>A14</td>
+<td>소과금 = 월 1~2만원</td>
+<td>실제 ARPPU와 주력 상품은?</td>
+<td>04b 소과금 프로파일 전체</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="b-02-9-05-84">ⓑ 이미 커버됨 — 확인만 <em>(02 9절 · 05 8.4)</em></h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>항목</th>
+<th>현행 커버 위치</th>
+<th>판정</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>U-06 전투 로직 분리(= 05 U-8, GDD A10)</td>
+<td>06c 세션 B QA 20분("코드를 열어 보여 주십시오") + 06c 8절 코드 열람 준비 + 06 부록 A</td>
+<td>✅ <strong>가장 잘 설계된 항목</strong>. 세 문서가 같은 20분을 가리킨다</td>
+</tr>
+<tr>
+<td>U-12 원화 담당자의 AI 경험·감정</td>
+<td>06c 세션 B 아트 20분(대표 배석 제외) + 06 7.2 1-b 게이트</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-05 QA 방식·소요 / U-11 핫픽스 사유</td>
+<td>06c 4절 F + 세션 B QA</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-07 하드코딩 비율</td>
+<td>06c 세션 B QA("밸런스 수치의 코드 하드코딩 비율")</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-08 확률 표기-구현 대조 방식</td>
+<td>06c 4절 E + 세션 B 질문 + 6절 ③ 이어지는 확인 질문</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-10 월 CS 티켓 수·유형</td>
+<td>06c 4절 H</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-13 신작 계획·장르</td>
+<td>06c 4절 A("신작·확장 문서나 메모") + 06 부록 A</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-15 BIPA 2026 참여 여부</td>
+<td>06c 4절 A + 6절 ⑤ + 06 부록 D</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>U-18 PC 버전 성과</td>
+<td>06c 4절 B</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>05 U-9 실제 세션 길이 분포</td>
+<td><strong>없음</strong></td>
+<td>⚠ 06c 4절 B에 "세션 길이·일 접속 횟수 분포(있으면)" 1줄 추가 권고</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="c">ⓒ 첫 미팅에서 답할 수 없는 것 — 승격하지 않음</h3>
+<p><code>04b</code> 11절 미검증 1·3·5, <code>05</code> 8.4 U-1~U-5·U-7(전부 <strong>시뮬레이터 실행 후 측정</strong>으로만 해소), 02 U-17·U-19·U-21(진단 기간 관찰). 이들은 미팅 질문지에 올리면 "모른다"만 쌓이므로 그대로 둔다.</p>
+<hr />
+<h2 id="7">7. 잔여 리스크와 재검수 필요 여부</h2>
+<h3 id="71-7">7.1 사용자(컨설턴트) 결정이 필요한 항목 — <strong>7건</strong></h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>항목</th>
+<th>양쪽 논거</th>
+<th>검수자 권고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td><strong>CS 착수 1번의 프레이밍</strong> (03 메모 ①, 06 메모 ①)</td>
+<td><strong>종속 프레이밍(현행 06 7.3)</strong>: "요청하신 두 영역을 가장 빠르고 안전하게 가동하기 위해 앞의 2~3주를 낭비하지 않는 것" — 문장이 매끄럽고 α 요청 축을 지킨다. 그러나 대표가 "그래서 결국 CS부터 하자는 거 아니냐"고 되물으면 <strong>방어가 한 겹뿐</strong>이다. / <strong>별도 트랙 분리</strong>: Quick Win을 순위 밖 트랙으로 빼면 순위 다툼 자체가 사라지지만, "Quick Win = 곁다리"로 읽혀 QW-2의 매출 직결 논거가 약해진다</td>
+<td><strong>현행 종속 프레이밍 유지 + 방어 한 겹 추가</strong>를 권한다. 06 7.2 표의 1-a 행 「착수 게이트」 칸에 "<strong>아트·QA 게이트 통과 대기 시간을 메우는 용도</strong>"를 명기하면, 표와 본문 두 곳에서 같은 논리가 나와 구두 되물음에 두 번 답할 수 있다. 문서 구조 변경 없이 한 칸으로 해결된다<br><strong>→ 리더 결정: 현행 종속 프레이밍 유지 + 06 7.2 표 1-a 「착수 게이트」 칸에 방어 문장("1-b·1-c의 착수 게이트가 열리기를 기다리는 2~3주를 메우는 용도이며, 아트·QA보다 앞세우는 것이 아닙니다") 추가 (08 참조)</strong></td>
+</tr>
+<tr>
+<td>②</td>
+<td><strong>H2(전작 유저 무료 이관) 가설의 노출 수위</strong> (03 메모 ②, 06 메모 ③)</td>
+<td><strong>현행(비노출)</strong>: 06 8절은 차별화 3축 + 성공 판정 4기준만 싣고 H2를 뺐다. 전략가가 "가장 취약하다"고 밝힌 지점이 고객 문서에서 사라졌다. / <strong>노출</strong>: 8절 끝에 "이 트랙의 착수 여부는 전작 유저의 자체 유입이 성립하는지를 먼저 검증한 뒤 결정합니다" 한 줄을 넣으면 정직하지만, 신작 트랙 전체가 조건부로 읽힌다</td>
+<td><strong>한 줄 추가를 권한다.</strong> 06 8절은 이미 "제전제: 방치형 유지는 귀사의 결정"이라는 조건부 문장으로 시작하므로 조건이 하나 더 붙어도 톤이 깨지지 않는다. 오히려 <strong>H2가 기각되는 상황이 실제로 오면, 미리 쓰지 않은 쪽이 훨씬 비싸다</strong>(9절 전체가 무너진다는 것이 원저자 자신의 판단이다). 부록 A의 "신작 계획 단계와 장르 전제 재확인"에만 맡기면 고객은 그 연결을 못 본다<br><strong>→ 리더 결정: 노출한다. 06 8절 말미에 8.7 「이 트랙이 서 있는 가장 취약한 전제」를 신설해 H2 가설과 "기각 시 신작 트랙 범위 재설정"을 명기 (08 참조)</strong></td>
+</tr>
+<tr>
+<td>③</td>
+<td><strong>의존 종료 T+12개월의 표현 수위</strong> (03 메모 ③, 06 메모 ②)</td>
+<td><strong>현행(개월 수 + 유보)</strong>: 06 11.3이 T+12개월을 쓰고 11.2 말미에 "여력이 부족하면 종료 목표 시점을 조정해 다시 제시하겠다"를 붙였다. 읽는 사람에 따라 "12개월"만 기억하거나 "안 지킬 수도 있다"로만 기억한다. / <strong>개월 수 삭제(조건만)</strong>: 더 정직하지만, <strong>락인 우려 해소라는 이 문장의 목적이 사라진다</strong>(03 메모가 "종료 조건을 먼저 쓰는 문장이 계약을 앞당긴다"고 한 그 효과)</td>
+<td><strong>현행 유지를 권한다.</strong> 다만 두 문장이 <strong>서로 다른 절(11.2 / 11.3)에 흩어져 있는 것</strong>이 혼선의 원인이다. 유보 문장을 11.3 말미로 옮겨 "목표 시점 → 조건 3개 → 조정 규칙"이 한 흐름으로 읽히게 하고, "조정 시에도 <strong>조건 3개는 바뀌지 않습니다</strong>"를 덧붙이면 약속과 유보가 충돌하지 않는다<br><strong>→ 리더 결정: T+12개월 유지. 11.2의 유보 문장을 11.3 말미로 옮기고 "시점을 조정해도 종료 조건 3개는 불변"을 덧붙임 (08 참조)</strong></td>
+</tr>
+<tr>
+<td>④</td>
+<td><strong>확률 단위 규격: ppm ↔ 부동소수</strong> (I-6)</td>
+<td>상세 논거는 3절 I-6</td>
+<td><strong>ppm 통일 권고.</strong> 유지하려면 06 부록 E의 ppm 항목을 <strong>삭제</strong>해야 한다. 어느 쪽이든 한쪽은 반드시 바꿔야 하며, 현 상태로 제출하면 고객이 별첨을 열 때 드러난다<br><strong>→ 리더 결정: 정수 ppm으로 통일. 04 8.0(변환 규칙 <code>p = ppm / 1_000_000</code>)·7.3·8.4·8.13, 04b 8.4·10, 05 3.1·3.3·3.4·1.6·2절·T0.3·T1.6·T2.6, 05b 규칙 7-1을 <code>*_ppm</code> 정수(0~1,000,000)로 갱신. A-D14는 "결정 완료: ppm 채택" (08 참조)</strong></td>
+</tr>
+<tr>
+<td>⑤</td>
+<td><strong><code>equip_recovery_mode</code> 이중 모드 유지 여부</strong> (05 메모 ②)</td>
+<td><strong>현행(이중 모드)</strong>: 회귀는 <code>instant</code>(밸런스 모델 근사), 실게임 기본은 <code>drop_wait</code>. 원저자 본인이 "문제를 푼 게 아니라 나중으로 미룬 것", "실게임 기본값이 회귀 게이트에 걸리지 않는 구성은 장기적으로 위험"이라고 적었다. / <strong>단일 모드</strong>: T2.7 격차 리포트를 받은 뒤 기획이 목표 벽 표를 <code>drop_wait</code> 기준으로 재검산하고 회귀 기준을 옮기면 위험이 사라지지만, <strong>재검산 전까지 Phase 2 회귀 게이트가 멈춘다</strong></td>
+<td><strong>이중 모드를 한시적으로 유지하되 종료 조건을 못 박을 것</strong>을 권한다. 05 8.1 D3 행에 "<strong>T2.7 리포트 수령 후 2주 내 기획 재검산 → 회귀 기준을 <code>drop_wait</code>로 이관, 그 시점에 <code>instant</code>는 diff 전용으로 강등</strong>"을 기한과 함께 적으면 "미룬 것"이 "일정이 있는 것"으로 바뀐다. 기한 없는 이중 모드는 영구화된다<br><strong>→ 리더 결정: 이중 모드 한시 유지. 05 8.1 D3에 "T2.7 리포트 후 2주 내 기획 재검산 → 회귀 기준을 <code>drop_wait</code>로 이관, 미이관 시 <code>instant</code> 모드 삭제" 기한을 명기 (08 참조)</strong></td>
+</tr>
+<tr>
+<td>⑥</td>
+<td><strong>에셋 게이트의 로컬 우회</strong> (05 메모 3)</td>
+<td><code>prebuild</code>/<code>pretest</code> 훅은 <code>npm ci --ignore-scripts</code>로 우회된다. CI 독립 잡이 머지는 막지만 <strong>로컬 커밋은 통과</strong>한다</td>
+<td><strong>pre-commit 훅 추가를 권한다</strong>(T0.4 산출에 <code>.husky/pre-commit</code> 또는 <code>core.hooksPath</code> 설정 1줄). 이 게이트는 "핵심 캐릭터 원화는 사람" 거버넌스를 <strong>코드로 강제</strong>하는 유일한 장치이고(03 8.1, 06 10.2 ②), 그 약속은 고객 문서에 이미 적혀 있다. 로컬에서 뚫리는 게이트는 약속의 근거가 되지 못한다<br><strong>→ 리더 결정: pre-commit 훅 도입, 관리자는 <code>simple-git-hooks</code>로 지정. 05 T0.4에 수용 기준 5·6 추가, 05b AGENTS.md에 규칙 13-1(<code>--ignore-scripts</code> 우회 금지) 추가 (08 참조)</strong></td>
+</tr>
+<tr>
+<td>⑦</td>
+<td><strong>확률 검증 채택 N (1,800,000 유지 여부)</strong> (B-2 후속)</td>
+<td><strong>유지</strong>: 산식값의 10배 여유. 규제 증거로서 표본이 크면 클수록 방어에 유리. / <strong>179,100~200,000으로 하향</strong>: T2.6 수용 기준 5(60초 이내)를 확실히 만족. 산식과 값이 일치해 설명이 단순해진다</td>
+<td><strong>1,800,000 유지를 권한다.</strong> 05 6.5에 "산식값의 약 10배 여유"라고 명기해 두었으므로 이제 모순이 아니다. 단 <strong>T2.6을 처음 돌린 시점에 60초를 넘으면 200,000으로 내린다</strong>는 폴백을 기획과 사전 합의할 것<br><strong>→ 리더 결정: 채택 N = 1,800,000 유지. 05 T2.6 수용 기준 5에 "60초 초과 시 <code>PROB_N_PROFILE=ci</code>에서 N=200,000 폴백 허용(산식 최소 179,100 이상 단언)"을 추가 (08 참조)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="72">7.2 잔여 리스크</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>리스크</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L-1</td>
+<td><strong>A-D7(100ms 정수 틱 양자화)의 누적 편차</strong> — 05 원저자가 스스로 "D30이면 수십만 웨이브라 이론상 무시할 수 없다"고 밝힌 항목</td>
+<td>미해소. <strong>T2.5 첫 실행 시 편차 폭이 ±5%를 넘으면 재검토</strong>라는 원저자의 트리거가 05 8.4 U-3에 기록돼 있다. 검수자는 이 트리거가 문서에 남아 있는 것으로 충분하다고 판단한다</td>
+</tr>
+<tr>
+<td>L-2</td>
+<td><strong>사전 계산 테이블이 <code>Math.pow</code>보다 부정확할 수 있음</strong> (05 메모 ③)</td>
+<td>미해소. 반복 곱의 오차는 i에 비례 누적된다. 안전망은 T1.1 수용 기준 2(상대오차 1e-3)뿐이고, <strong>s=1200 근처에서 1e-3을 못 지킬 경우의 구간별 재정규화 설계는 아직 없다.</strong> 05 8.4에 U 항목으로 등록돼 있지 않다 → <strong>U-10으로 추가 등록 권고</strong></td>
+</tr>
+<tr>
+<td>L-3</td>
+<td><strong>T2.5의 10분 CI 제한</strong> (05 메모 3)</td>
+<td>미해소. 넘으면 야간 잡으로 내려야 하는데 그러면 "배포 전 곡선 검증"이라는 목적이 흐려진다. 구현 후에만 판정 가능</td>
+</tr>
+<tr>
+<td>L-4</td>
+<td><strong>지원사업 금액 1,000만 원의 출처 미확인</strong> (06 메모 #7)</td>
+<td>06 부록 D·03 6.3·01 7절 모두 <code>(추정, 원문 미확인)</code> + "공식 공고 확인 필요"로 표기돼 <strong>일관되게 보호</strong>되고 있다. <strong>고객 제출 전 공고 확인이 안 되면 금액 행을 삭제할 것</strong> — 06 메모의 원저자 권고에 동의한다</td>
+</tr>
+<tr>
+<td>L-5</td>
+<td><strong>진단 실측으로 병목 1·2위 순서가 뒤집힐 가능성</strong></td>
+<td>02 4.1 머리말과 U-05·U-10에 명시, 06 10.3 "그 외 관리 대상"에 "7.2절 표를 v1으로 명시하고 진단 후 갱신을 계약에 포함"으로 장치화됨. <strong>처리 완료로 본다</strong></td>
+</tr>
+<tr>
+<td>L-6</td>
+<td><strong>GDD 8.13 <code>balance</code> 키 목록의 이중화</strong> (권고 A-8)</td>
+<td>미해소. A-D6로 우회 경로는 있으나 정본 문서가 둘로 갈라진 상태</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="73">7.3 재검수 필요 여부</h3>
+<p><strong>필요하다. 단 범위는 변경된 경계면으로 한정한다.</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>재검수 대상</th>
+<th>트리거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>확률 단위(ppm/부동소수) 관련 전 지점 — <code>06</code> 부록 E, <code>03</code> 4.3.1, <code>04</code> 7.3·8.0·8.13, <code>05</code> 3.1·3.4·6.5, T0.3·T2.6</td>
+<td>결정 항목 ④가 정해지는 즉시</td>
+</tr>
+<tr>
+<td><code>06</code> 7.2·8절·11.2/11.3</td>
+<td>결정 항목 ①②③이 정해지는 즉시</td>
+</tr>
+<tr>
+<td><code>05</code> 6.1(exit code·<code>sim:replay</code>), 8.1 D3(기한)</td>
+<td>결정 항목 ⑤⑦</td>
+</tr>
+<tr>
+<td><code>06c</code> 4절 — 「I. 전작 시스템 상세」 신설</td>
+<td>6절 ⓐ 반영 시</td>
+</tr>
+<tr>
+<td><code>04b</code> 7절 목표 벽 표</td>
+<td><strong>T2.7 장비 모드 격차 리포트 수령 후</strong> (기획 재검산 — GDD 메모 3-5가 요구한 회신 사항, 05 D3에서 미결)</td>
+</tr>
+<tr>
+<td>전 문서의 단계 번호</td>
+<td>이번 검수에서 0~3으로 통일함. <strong>다음 개정 시 1~4 표기가 다시 들어오지 않았는지만 확인</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>재검수하지 않아도 되는 경계면</strong>(이번에 전수 확인 완료): KPI 4개 문자열·정의·기준선 시점 / 시나리오 A/B/C 명칭·정의·핵심 KPI / 병목 상위 5 점수와 순위 / 병목 순위↔매트릭스 순위의 이유 병기 / Quick Win 3개 / 로드맵 단계·기간·의존 종료 조건 / 거버넌스 5문서 / GDD 벽 정의↔밸런스 목표표 / GDD 5장↔태스크 대응 / 40태스크 수용 기준 형식 / 고객 제출 3종(06·06b·06c)의 내부 표현 잔재.</p>
+<hr />
+<h2 id="8">8. 직접 수정 내역</h2>
+<blockquote>
+<p>리더 위임에 따라 기계적으로 처리한 것만. 총 <strong>28곳 · 4개 파일</strong>. 판단이 필요한 항목은 손대지 않았다.</p>
+</blockquote>
+<h3 id="81-01_market_analyst_briefmd-03-9">8.1 <code>01_market_analyst_brief.md</code> — 로드맵 단계 번호 체계 0~3 통일 (9곳)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>절</th>
+<th>변경 전 → 변경 후</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M-1</td>
+<td>5절 본문(지원사업 2027 회차 예상)</td>
+<td><code>컨설팅 **1~2단계**(진단·Quick Win)를 2027년 상반기에 끝내두면</code> → <code>컨설팅 **0~1단계**(진단·Quick Win)를 …</code></td>
+</tr>
+<tr>
+<td>M-2</td>
+<td>5절 「귀사는?」 질문</td>
+<td><code>숫자로 답해 주십시오(**1=진단, 2=Quick Win, 3=파이프라인화, 4=조직화**).</code> → <code>숫자로 답해 주십시오(**0=진단, 1=Quick Win, 2=파이프라인화, 3=조직화**).</code></td>
+</tr>
+<tr>
+<td>M-3</td>
+<td>7절 머리글</td>
+<td><code>컨설팅 로드맵 단계: **1=진단 / 2=Quick Win / 3=파이프라인화 / 4=조직화·내재화**</code> → <code>… **0=진단 / 1=Quick Win / 2=파이프라인화 / 3=조직화·내재화** (진단 8장·전략 청사진 6.1·기획서 6.2와 동일 체계)</code></td>
+</tr>
+<tr>
+<td>M-4</td>
+<td>7절 부산 표 · BIPA 행</td>
+<td><code>미참여면 **2027 회차를 3~4단계와 연결**</code> → <code>… **2~3단계와 연결**</code></td>
+</tr>
+<tr>
+<td>M-5</td>
+<td>7절 부산 표 · 전국 연계 행</td>
+<td><code>**2단계(Quick Win) 비용 일부를 여기서 회수 가능**</code> → <code>**1단계(Quick Win) …**</code></td>
+</tr>
+<tr>
+<td>M-6</td>
+<td>7절 부산 표 · 게임체인저 행</td>
+<td><code>신청 이력 확인 필요. **1단계**에서 점검</code> → <code>… **0단계**에서 점검</code></td>
+</tr>
+<tr>
+<td>M-7</td>
+<td>7절 부산 표 · 센텀시티 행</td>
+<td><code>채용·협업 네트워크. **4단계**</code> → <code>… **3단계**</code></td>
+</tr>
+<tr>
+<td>M-8</td>
+<td>10절 C-2 (AI 기본법 가이드라인)</td>
+<td><code>아트 AX 거버넌스 문서를 작성하는 **2단계 초입** 시점에 재확인해야 한다.</code> → <code>아트 AX 거버넌스 문서(AI 활용 원칙)를 확정하는 **1단계에 이어, 2단계(파이프라인화) 초입** 시점에 재확인해야 한다(전략 청사진 8.1의 '재확인 일정'과 동일 시점).</code> — 번호 변환과 동시에 03 8.1의 재확인 시점에 맞춤</td>
+</tr>
+<tr>
+<td>M-9</td>
+<td>팀원 전달 메모 (2)-4</td>
+<td><code>**1~2단계**(진단·Quick Win)를 끝내면 … 이것이 **3~4단계** 자금 조달 경로</code> → <code>**0~1단계** … **2~3단계** 자금 조달 경로</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>7절 지스타 행의 "2027년을 목표로 <strong>3단계</strong> 완료 시점과 맞춘다"는 <strong>그대로 두었다.</strong> 새 체계에서 3단계 = 조직화 = T+12개월이라, 03 6.3·06 부록 D의 "3단계 완료 시점의 대외 포지셔닝"과 오히려 정확히 일치하게 된다.</p>
+</blockquote>
+<h3 id="82-04_gdd_primitive_brothers_2md-rng-5">8.2 <code>04_gdd_primitive_brothers_2.md</code> — 확률 검증 수치·출처·RNG 명칭 (5곳)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>절</th>
+<th>변경 전 → 변경 후</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G-1</td>
+<td>3.3 벽 정의</td>
+<td><code>(밸런스 모델 **7절 검산값**)</code> → <code>(밸런스 모델 **8.2절 검산값**. 7절 목표표의 설계 의도는 "약 55분, s≈110"이며 검산 편차 −2.7%)</code></td>
+</tr>
+<tr>
+<td>G-2</td>
+<td>7.3 검증 방식 표 · 전설 행</td>
+<td><code>\| 0.005 (0.5%) \| **0.000212** \| **[0.000288, 0.000712]** \| **42.4%** \| N = 1,800,000 \|</code> → <code>\| 0.005 (0.5%) \| **0.000669** \| **[0.004331, 0.005669]** \| **13.4%** \| N = 1,800,000 \|</code> (p=0.005·N=100,000 기준 재계산)</td>
+</tr>
+<tr>
+<td>G-3</td>
+<td>7.3 「주의(코딩 에이전트 필독)」</td>
+<td><code>N=100,000은 상대오차 **42%**로 사실상 검증력이 없다 … **0.5%면 N ≈ 1.8e6**</code> → <code>N=100,000은 3σ 상대오차 **13.4%**로 ±10% 기준을 만족하지 못한다 … **0.5%의 산식값은 N ≈ 1.8e5(179,100)이며, 본 설계는 여유를 두어 N = 1,800,000을 채택한다**(빌드 플랜 6.5). 채택 N의 3σ는 0.005 ± 0.000158이다.</code></td>
+</tr>
+<tr>
+<td>G-4</td>
+<td>13.1 M1</td>
+<td><code>시드 기반 RNG(**xorshift128+**)</code> → <code>시드 기반 RNG(**</code>xoshiro128**<code>** — 32비트 정수 연산만 사용. 빌드 플랜 가정 A-D5로</code>xorshift128+<code>에서 대체)</code></td>
+</tr>
+<tr>
+<td>G-5</td>
+<td>팀원 전달 메모 3-9</td>
+<td><code>0.5%는 N=100,000에서 **상대오차 42%**다.</code> → <code>0.5%는 N=100,000에서 **3σ 상대오차 13.4%**로 ±10% 기준을 넘는다(검수 시 정정된 값).</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="83-05_codex_build_planmd-n-8">8.3 <code>05_codex_build_plan.md</code> — 명령 표·확률 N·스키마 필드·이탈 기록 (8곳)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>절</th>
+<th>변경 전 → 변경 후</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P-1</td>
+<td>2절 npm 스크립트 표</td>
+<td><code>sim:regress</code> 설명 <code>목표 벽 표 10 체크포인트 + 첫 벽 + **확률 + 천장** 회귀</code> → <code>목표 벽 표 10 체크포인트 ±10% + 첫 벽 + 격차 + D1 프레스티지 (13 단언)</code> · <strong><code>npm run sim:prob</code> 행 신설</strong>(<code>확률 표기 검증 4종 + 천장 단언 (6.4 T5·T6)</code>) — AGENTS.md·6.1·6.4와 일치</td>
+</tr>
+<tr>
+<td>P-2</td>
+<td>2절 npm 스크립트 표</td>
+<td><code>npm run sim:long -- --days 90</code> → <code>npm run sim:long -- --days 90</code> / <code>npm run sim:long -- --all</code> 병기, 설명에 <code>게이트 아님</code> 추가</td>
+</tr>
+<tr>
+<td>P-3</td>
+<td>6.5 시행수 표 · 전설 행</td>
+<td><code>\| 전설 \| 0.005 \| **1,791,000** \| **1,800,000** \|</code> → <code>\| 전설 \| 0.005 \| **179,100** \| **1,800,000** (산식값의 약 10배 여유) \|</code></td>
+</tr>
+<tr>
+<td>P-4</td>
+<td>6.5 표 아래 문단</td>
+<td><code>전설의 **상대오차가 42%**라 검증력이 사실상 0이다.</code> → <code>전설의 **3σ 상대오차가 13.4%**로 ±10% 기준을 못 넘는다. … **전설의 채택 N(1,800,000)은 산식값(179,100)보다 한 자릿수 크다 — 규제 증거용 여유분이며, T2.6 수용 기준 5(60초 이내)를 못 지키면 산식값 기준으로 내리는 것을 기획과 합의한다.**</code></td>
+</tr>
+<tr>
+<td>P-5</td>
+<td>3.3 표 · <code>monsters</code> 행</td>
+<td>제약 칸 말미에 추가 → <code>**GDD 8.7의</code>drop_table_id<code>는 확장 테이블</code>drop_tables<code>참조라 MVP에서 선택 필드(null 허용),</code>palette_variants<code>는</code>assets/_index.json<code>항목 배열로 선택 필드**</code></td>
+</tr>
+<tr>
+<td>P-6</td>
+<td>3.3 표 · <code>events</code> 행</td>
+<td>제약 칸 말미에 추가 → <code>**GDD 8.11의</code>reward_items<code>·</code>condition<code>·</code>banner_asset_id<code>는 MVP 로더가 읽지 않으므로 선택 필드로 두되 스키마에는 정의한다**</code></td>
+</tr>
+<tr>
+<td>P-7</td>
+<td>3.3 표 · <code>shop_products</code> 행</td>
+<td>필수 필드 칸 → <code>… is_probabilistic **(</code>limit_per_account<code>·</code>visible_condition<code>은 null 허용 선택 필드)**</code></td>
+</tr>
+<tr>
+<td>P-8</td>
+<td>8.3 가정 표</td>
+<td><strong>A-D14 행 신설</strong> — 확률값을 부동소수 0~1로 관리한 것이 03 4.3.1·03 메모 (2)-①(d)·06 부록 E의 정수 ppm 규격에서 <strong>이탈</strong>했음을 기록, "정합 필요 — 기획 담당·전략 담당 판단 대상"으로 표시. <strong>A-D15 행 신설</strong> — 시뮬레이터 CLI·exit code 규약·테이블 JSON 포맷이 03 메모 (2)-②의 규격(<code>sim run</code>/<code>sim diff</code>/<code>sim verify-odds</code>/<code>sim replay</code>, exit 0/1/2, <code>schema_version</code>·<code>generated_at</code>·<code>source</code>·<code>checksum</code>·<code>columns</code>/<code>rows</code>)과 다름을 기록</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="84-06_proposal_mainmd-6">8.4 <code>06_proposal_main.md</code> — 제품명·상호참조·별첨 상태 (6곳)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>절</th>
+<th>변경 전 → 변경 후</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R-1</td>
+<td>2.2 확인된 사실 F-10</td>
+<td><code>**Freshdesk** 기반 CS 채널 운영</code> → <code>**외부 SaaS 기반 CS 채널(티켓 시스템) 운영 — 제품명은 부록 C 참조**</code> (부록 C의 동일 제품명은 규칙상 허용이므로 유지)</td>
+</tr>
+<tr>
+<td>R-2</td>
+<td>6.3</td>
+<td><code>자동 실행 범위를 문서로 못 박습니다(**10.3절**).</code> → <code>…(**10.1절 문서 3 「에이전트 권한 정책」**).</code></td>
+</tr>
+<tr>
+<td>R-3</td>
+<td>8.6 별첨 안내 표</td>
+<td><code>\| **Codex 빌드 플랜** \| … \| **작성 중** — 완성 시 이 기획서의 별첨으로 추가 전달 \|</code> → <code>\| **빌드 플랜 (코딩 에이전트 실행용)** \| 시뮬레이터-퍼스트 구현 구조(코어→시뮬레이터→렌더러), 데이터 테이블 스키마, GDD 시스템↔태스크 전수 대응표, 회귀·확률 검증 명세, 전작 시뮬레이터와의 공유 범위 \| **제공** — **Phase 0~6(7단계) · 태스크 40개**(P0 4 / P1 10 / P2 8 / P3 4 / P4 5 / P5 4 / P6 5), 전 태스크가</code>실행 명령 → 기대 결과<code>형식의 수용 기준을 가집니다. 저장소 규칙 문서(에이전트 작업 규칙) 1건 동반 \|</code></td>
+</tr>
+<tr>
+<td>R-4</td>
+<td>8.4 MVP 제외 목록</td>
+<td><code>캠프, 도감 UI, 상점 결제, 시즌 패스, 원정, …</code> → <code>캠프, 도감 UI, 상점 결제, 시즌 패스, **절벽**, 원정, …</code> (GDD 13.1과 일치)</td>
+</tr>
+<tr>
+<td>R-5</td>
+<td>팀원 전달 메모 (1) 표 · 1행</td>
+<td>말미에 추가 → <code>**→ 검수(07)에서 처리 완료:</code>01_market_analyst_brief.md<code>5·7·10절을 0~3 체계로 직접 수정했다**</code></td>
+</tr>
+<tr>
+<td>R-6</td>
+<td>팀원 전달 메모 (1) 표 · 6행</td>
+<td>말미에 추가 → <code>**→ 검수(07)에서 처리 완료: 05가 제출되어 8.6절을 '제공 / Phase 0~6 · 태스크 40개'로 갱신했고, 별첨 명칭에서 제품명을 제거했다**</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="85">8.5 수정하지 않은 것 (의도적)</h3>
+<ul>
+<li><strong><code>06c_first_meeting_kit.md</code></strong> — 고객 제출용이며 내부 표현 잔재가 <strong>0건</strong>이라 손댈 것이 없었다. 「전작 시스템 상세」 블록 신설은 아젠다·분량 판단이 필요해 6절 ⓐ에 붙여 쓸 형태로만 제시했다.</li>
+<li><strong><code>06b_executive_summary.md</code></strong> — KPI 4개·단계·기간·의존 종료 조건이 전부 정본과 일치. 권고 A-3(아트 스타일 가이드 1줄 추가)만 남겼다.</li>
+<li><strong><code>02</code>·<code>03</code>·<code>04b</code></strong> — 경계면 불일치가 발견되지 않았다. 03에 대한 지적(I-6·I-7)은 <strong>05 쪽에 이탈을 기록</strong>하는 방식으로 처리했다. 03의 ppm 규칙 자체는 검수자가 옳다고 보므로 삭제하지 않았다.</li>
+<li><strong>각 문서의 <code>## 팀원 전달 메모</code></strong> — 삭제하지 않았다. 06 메모 2개 행에만 처리 결과 주석을 덧붙였다.</li>
+</ul><div class="pn"><a class="prev" href="meeting-kit.html"><small>← 이전</small>첫 미팅 키트</a><span></span></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>

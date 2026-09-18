@@ -1,0 +1,2611 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Codex 빌드 플랜 · game-assistant</title><meta name="description" content="TypeScript 모노레포(core/sim/web), 41 태스크(P0~P6), 시뮬레이터 CLI·회귀 명세, 실행 가이드"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="on">원시인 형님 2</a><a href="../harness/index.html" class="">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="../gdd/gdd.html">원시인 형님 2</a> / Codex 빌드 플랜</div><h1>Codex 빌드 플랜</h1><p class="sub">TypeScript 모노레포(core/sim/web), 41 태스크(P0~P6), 시뮬레이터 CLI·회귀 명세, 실행 가이드</p><div class="badges"><span class="badge">41 태스크</span><span class="badge">P0~P6</span><span class="badge">독자: Codex · 테크니컬 디렉터</span></div></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#0">0. 이 문서를 읽는 법</a>
+<a href="#1">1. 아키텍처</a>
+<a class="l3" href="#11">1.1 패키지 경계와 의존 방향</a>
+<a class="l3" href="#12">1.2 결정성 계약 (가장 중요한 절)</a>
+<a class="l3" href="#13">1.3 코어 상태 모델</a>
+<a class="l3" href="#14-gdd-32">1.4 틱 파이프라인 (GDD 3.2 표의 구현)</a>
+<a class="l3" href="#15">1.5 저장 포맷과 마이그레이션</a>
+<a class="l3" href="#16">1.6 테이블 로딩과 스키마 검증</a>
+<a class="l3" href="#17">1.7 에셋 거버넌스 게이트 (빌드 실패 규칙)</a>
+<a class="l3" href="#18">1.8 분석 이벤트 배출 경로</a>
+<a class="l3" href="#19-2-unityc-1">1.9 2차 트랙 — Unity/C# 포팅 (1절)</a>
+<a href="#2">2. 저장소 구조와 데이터 파일</a>
+<a href="#3">3. 데이터 테이블 스키마</a>
+<a class="l3" href="#31">3.1 공통 규칙</a>
+<a class="l3" href="#32-mvp">3.2 MVP 초기 행 수</a>
+<a class="l3" href="#33-json-schema">3.3 테이블별 필드 제약 (JSON Schema 요약)</a>
+<a class="l3" href="#34-databalancejson">3.4 data/balance.json (단일 원본, 전체 키)</a>
+<a href="#4-phase">4. Phase별 태스크 카드</a>
+<a class="l3" href="#phase-0-4">Phase 0 — 스캐폴드 (4태스크)</a>
+<a class="l3" href="#phase-1-10">Phase 1 — 결정적 코어 룰 (10태스크)</a>
+<a class="l3" href="#phase-2-9">Phase 2 — 헤드리스 시뮬레이터와 밸런스 회귀 (9태스크)</a>
+<a class="l3" href="#phase-3-4">Phase 3 — 저장·영속성·회귀 시나리오 (4태스크)</a>
+<a class="l3" href="#phase-4-mvp-5">Phase 4 — 렌더러 MVP (5태스크)</a>
+<a class="l3" href="#phase-5-4">Phase 5 — 분석 이벤트·수익모델 스텁 (4태스크)</a>
+<a class="l3" href="#phase-6-5-v11v13">Phase 6 — 확장 (5태스크, v1.1~v1.3)</a>
+<a href="#5-gdd">5. GDD 시스템 ↔ 태스크 대응표</a>
+<a class="l3" href="#51-gdd-5">5.1 GDD 5장 시스템 (전수)</a>
+<a class="l3" href="#52-gdd-3467101112">5.2 GDD 3·4·6·7·10·11·12장 대응</a>
+<a class="l3" href="#53">5.3 명시적 제외 목록 (근거 포함)</a>
+<a href="#6">6. 시뮬레이터 · 회귀 테스트 명세</a>
+<a class="l3" href="#61-cli">6.1 CLI</a>
+<a class="l3" href="#62-3">6.2 봇 3종 요약</a>
+<a class="l3" href="#63">6.3 출력물</a>
+<a class="l3" href="#64-94-t1t7">6.4 회귀 단언 목록 (밸런스 모델 9.4 T1~T7 대응)</a>
+<a class="l3" href="#65-9">6.5 확률 검증 시행수 (모호 지점 9의 결정)</a>
+<a href="#7-codex">7. Codex 실행 가이드</a>
+<a class="l3" href="#71-1">7.1 저장소 준비 순서 (사람이 1회 수행)</a>
+<a class="l3" href="#72">7.2 태스크별 프롬프트 템플릿</a>
+<a class="l3" href="#73-2">7.3 실제 프롬프트 예시 2개</a>
+<a class="l3" href="#74">7.4 실패 시 대응</a>
+<a class="l3" href="#75-phase">7.5 사람 검토 포인트 (각 Phase 종료 시)</a>
+<a href="#8">8. 가정 · 미결 목록</a>
+<a class="l3" href="#81-4">8.1 리더 결정 4건 (디렉터 회신 요청에 대한 응답)</a>
+<a class="l3" href="#82-gdd-10">8.2 GDD 모호 지점 10개 처리</a>
+<a class="l3" href="#83">8.3 본 빌드 플랜이 추가로 도입한 가정</a>
+<a class="l3" href="#84">8.4 미결·미검증 (측정 후 판단)</a></aside><article class="md"><h1 id="2-codex-v1">원시인 형님 2 — Codex 빌드 플랜 v1</h1>
+<blockquote>
+<p>작성: codex-build-planner · 2026-09-18 · 썬더게임즈(부산) 신작 트랙
+입력: <code>04_gdd_primitive_brothers_2.md</code> (GDD v0.1), <code>04b_balance_model.md</code> (bal_v1), <code>02_diagnostician_studio_diagnosis.md</code> (팀원 전달 메모 3)
+출력 대상: OpenAI Codex(에이전틱 코딩 도구)의 자율 구현 세션
+동반 산출물: <code>05b_AGENTS.md</code> (저장소 루트 <code>AGENTS.md</code>로 배치)</p>
+</blockquote>
+<hr />
+<h2 id="0">0. 이 문서를 읽는 법</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>읽는 사람</th>
+<th>읽어야 할 절</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex 세션 1개(태스크 1개 수행)</td>
+<td><code>AGENTS.md</code> 전체 + 본 문서 1·2·3절 + 자기 태스크 카드 1장</td>
+</tr>
+<tr>
+<td>사람 검토자(Phase 종료 시)</td>
+<td>5절(대응표) + 6절(회귀 기준) + 7.4(검토 포인트)</td>
+</tr>
+<tr>
+<td>기획 담당(game-design-director)</td>
+<td>8절(가정·미결) — <strong>회신 요청 4건에 대한 리더 결정이 여기 있다</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>설계 전제 3줄.</strong> 코딩 에이전트는 모호함에 약하고 테스트로 완료를 증명할 수 있는 작업에 강하다. 그래서 (1) 렌더링 없는 결정적 코어를 먼저 만들어 모든 규칙을 유닛 테스트로 못 박고, (2) 그 코어를 그대로 돌리는 헤드리스 시뮬레이터로 밸런스를 회귀 테스트하고, (3) 마지막에 렌더러를 붙인다. 이 순서는 진단자 전달 메모의 "로직 추출 → 결정론적 실행 환경 → 회귀 시나리오 → 곡선 리포트" 권고와 동일하며, 신작에서는 리팩터링 없이 처음부터 이 형태로 짓는다.</p>
+<p><strong>총 태스크 41개</strong> (P0:4 / P1:10 / P2:<strong>9</strong> / P3:4 / P4:5 / P5:4 / P6:5). 각 태스크 = Codex 1세션(S: 30분 미만 / M: 60분 미만). P2가 8→9로 늘어난 것은 리더 결정(I-7)에 따라 <code>sim replay</code> 재현 태스크 <strong>T2.9</strong>를 신설했기 때문이다.</p>
+<hr />
+<h2 id="1">1. 아키텍처</h2>
+<h3 id="11">1.1 패키지 경계와 의존 방향</h3>
+<pre><code>                       ┌───────────────────────────────┐
+                       │   data/*.json  +  data/schema │
+                       │   assets/_index.json          │
+                       └───────────────┬───────────────┘
+                                       │ (파일 읽기 + 스키마 검증)
+                                       v
+   ┌───────────────┐          ┌──────────────────┐
+   │ packages/core │ &lt;────────│  packages/data   │   ajv 2020-12
+   │  의존성 0     │  주입     │  로더·검증·매니페스트 │
+   │  순수 TS      │──────────&gt;└──────────────────┘
+   └───┬───────┬───┘   (타입만 역참조 없음: core는 plain object를 받는다)
+       │       │
+       │       └───────────────────────────┐
+       v                                   v
+ ┌──────────────┐                   ┌──────────────┐
+ │ packages/sim │  헤드리스 CLI      │  apps/web    │  PixiJS PWA
+ │  tsx 실행    │  CSV·MD 리포트     │  렌더러 전용  │  읽기 전용 셀렉터
+ └──────┬───────┘                   └──────┬───────┘
+        │                                  │
+        └──────────&gt; reports/ &lt;────────────┘ (e2e 스크린샷: tests/e2e/__screenshots__)
+</code></pre>
+<p><strong>의존 규칙 (CI에서 강제)</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>패키지</th>
+<th>허용 의존</th>
+<th>금지</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>packages/core</code></td>
+<td><strong>없음</strong> (devDependencies의 vitest만)</td>
+<td>DOM, <code>window</code>, <code>document</code>, <code>setTimeout</code>, <code>Date.now()</code>, <code>Math.random()</code>, <code>fs</code>, <code>process</code>, npm 런타임 의존성 전부</td>
+</tr>
+<tr>
+<td><code>packages/data</code></td>
+<td><code>ajv</code>, <code>ajv-formats</code>, <code>node:fs</code>, <code>node:crypto</code></td>
+<td>core 내부 구현 import (공개 타입만)</td>
+</tr>
+<tr>
+<td><code>packages/sim</code></td>
+<td><code>core</code>, <code>data</code>, <code>node:*</code></td>
+<td>DOM, PixiJS</td>
+</tr>
+<tr>
+<td><code>apps/web</code></td>
+<td><code>core</code>, <code>data</code>, <code>pixi.js</code></td>
+<td>게임 규칙 구현(계산식을 여기 쓰면 태스크 실패)</td>
+</tr>
+</tbody>
+</table></div>
+<p>강제 방법: <code>tools/check-deps.ts</code>가 각 패키지 <code>package.json</code>의 <code>dependencies</code>와 소스의 import 목록을 대조하고, <code>packages/core/src/**</code>에 대해 금지 식별자(<code>Math.random</code>, <code>Date.now</code>, <code>document</code>, <code>window</code>, <code>setTimeout</code>, <code>performance</code>)를 정규식으로 검사한다. <code>npm run check:deps</code>가 CI 필수 게이트다.</p>
+<h3 id="12">1.2 결정성 계약 (가장 중요한 절)</h3>
+<p>프로토타입 성공 판정 기준 13.3-2 "동일 시드 2회 실행 결과가 바이트 단위로 동일"을 만족시키기 위한 4개 규칙이다. <strong>이 4개가 깨지면 밸런스 회귀 전체가 무의미하다.</strong></p>
+<p><strong>(D-1) 시간은 정수 틱으로만 흐른다.</strong>
+- <code>TICK_MS = 100</code> 고정. 코어 상태의 시간 필드는 <code>tick: number</code>(정수, 100ms 단위)뿐이다. 초 단위 실수 누적 변수를 상태에 두지 않는다.
+- 렌더러는 실시간 경과를 <code>floor(elapsedMs / 100)</code>틱으로 환산해 <code>stepTicks(n)</code>을 호출한다. 배속 ×10/×100/×1000은 한 프레임에 <code>stepTicks(n × 배속)</code>을 호출하는 것일 뿐, 별도 코드 경로가 아니다.
+- 시뮬레이터는 "다음 이벤트까지 걸리는 시간"을 해석적으로 구한 뒤 <strong><code>ceil(t_required_sec × 10)</code> 틱으로 올림</strong>해서 <code>stepTicks()</code>에 넘긴다. 즉 시뮬레이터와 렌더러는 <strong>같은 함수, 같은 양자화</strong>를 쓴다. 이것이 "렌더러를 제거해도 헤드리스 시뮬레이터가 동일 결과를 낸다"(GDD 12.3)의 구현이다.
+- 부작용: 밸런스 모델 9.2의 의사코드는 연속 시간을 쓴다. 100ms 양자화로 미세 편차가 생기며 이는 ±10% 회귀 밴드가 흡수한다(8절 U-3에 리스크로 등록).</p>
+<p><strong>(D-2) 난수는 <code>xoshiro128**</code> 한 곳에서만 나온다.</strong>
+- 상태 = <code>Uint32Array(4)</code>. 연산은 <code>Math.imul</code>·<code>&gt;&gt;&gt;</code>·<code>^</code>·<code>&lt;&lt;</code>만 사용 → 전부 32비트 정수 연산이라 엔진·플랫폼 간 결과가 정의상 동일하다.
+- <code>next()</code>는 <code>uint32</code>를 반환하고, <code>nextFloat()</code>는 <code>next() / 2**32</code>(정확한 f64)만 제공한다. <code>Math.random()</code> 사용은 <code>check:deps</code>에서 실패 처리한다.
+- 스트림 분리: 드랍/합성/뼈 갈기/몬스터 선택은 각각 <strong>독립 RNG 인스턴스</strong>를 쓴다(<code>rng.fork(streamId)</code>가 seed를 <code>splitmix32</code>로 파생). 한 스트림의 소비 횟수가 바뀌어도 다른 스트림의 시퀀스가 밀리지 않는다 → 기능 추가 시 회귀 곡선이 통째로 흔들리는 사고를 막는다.
+- RNG 상태는 저장 포맷에 그대로 직렬화된다(<code>rng: {main:[u32×4], drop:[...], craft:[...]}</code>).
+- <strong>GDD 13.1 M1은 <code>xorshift128+</code>를 적었다.</strong> xorshift128+는 64비트 상태라 JS에서 BigInt(느림) 또는 분할 구현(엔진 간 차이 위험)이 필요하다. 32비트 정수만 쓰는 <code>xoshiro128**</code>로 대체한다 → 가정 A-D5로 기록.</p>
+<p><strong>(D-3) 거듭제곱은 <code>Math.pow</code>를 쓰지 않는다.</strong> (리더 결정 ①)
+- <code>g^n</code> 형태(<code>1.058^(s-1)</code>, <code>1.052^(s-1)</code>, <code>1.075^L</code>, <code>1.05^A</code>, <code>1.20^k</code>)는 전부 <strong>로드 시 1회 생성하는 사전 계산 테이블</strong>에서 읽는다. 테이블은 <code>pow[0]=1; pow[i]=pow[i-1]*g</code> 반복 곱으로 만든다.
+- 사전 계산 범위: 스테이지 <code>1..STAGE_TABLE_MAX(=2000)</code>, 강화 레벨 <code>0..LEVEL_TABLE_MAX(=4000)</code>, 노드 <code>0..NODE_TABLE_MAX(=4000)</code>, 장비 등급 <code>0..40</code>.
+- 범위를 벗어나면 <strong>예외를 던진다</strong>(조용한 <code>Math.pow</code> 폴백 금지). 범위 확장은 balance.json이 아니라 <code>core/constants.ts</code>의 상수 변경 + 회귀 재실행으로 처리한다.
+- 대수 표현은 IEEE754 f64. bal_v1의 D30 값(HP≈1.07e26, M≈3.02e12, D30 소과금 s=1150에서 HP≈1.2e32)은 f64 범위(≈1.8e308) 안이다. 1e300 초과 대비 로그 공간/<code>{mantissa,exponent}</code> 전환은 <strong>확장 태스크 P6.5</strong>로만 명시하고 MVP에서는 하지 않는다.</p>
+<p><strong>(D-4) 결정성 테스트의 범위를 좁게 정의한다.</strong> (리더 결정 ①)
+- 판정: <strong>동일 Node LTS 버전(22.x, <code>.nvmrc</code> 고정) · 동일 시드 → 출력 바이트 동일.</strong> 다른 엔진(브라우저 JS, 향후 C#)과의 바이트 동일성은 요구하지 않는다.
+- 측정: <code>sim</code> 실행 결과 디렉터리 전체의 SHA-256을 찍어 두 번 실행분을 비교한다(<code>npm run sim:determinism</code>).
+- 브라우저와 Node 사이는 "동일 시드 → 동일 최종 스테이지·골드(상대오차 0)"를 Playwright 테스트로 별도 확인한다(P4.5). 여기서 차이가 나면 (D-1)~(D-3) 중 하나가 깨진 것이다.</p>
+<h3 id="13">1.3 코어 상태 모델</h3>
+<pre><code class="language-ts">// packages/core/src/state.ts  (전부 plain data. 클래스 메서드에 상태를 숨기지 않는다)
+type GameState = {
+  schemaVersion: number;        // 저장 포맷 버전 (1.5절)
+  dataVersion: number;          // balance.json의 version. 분석 이벤트 data_version과 동일 값
+  tick: number;                 // 100ms 단위 정수 경과 시간 (D-1)
+  rng: RngBundle;               // 스트림별 uint32 상태 (D-2)
+  run: {                        // 세대 교체로 리셋되는 것 (GDD 4.1 리셋 열)
+    stage: number; runBest: number; gold: number;
+    levels: number[];           // 형님별 L_i (index = brothers.slot)
+    unlocked: boolean[];
+    equip: { tier: number; owned: number[] };   // owned[k] = k등급 보유 수
+    campLevels: Record&lt;string, number&gt;;
+    startedAtTick: number;
+  };
+  account: {                    // 절대 리셋되지 않는 것 (GDD 4.1 유지 열 12종)
+    bestEver: number; ember: number; nodes: Record&lt;Branch, number&gt;;
+    codexKills: Record&lt;string, number&gt;; cards: string[];
+    skins: string[]; equippedSkin: Record&lt;string, string|null&gt;;
+    mounts: string[]; campUnlocked: string[];
+    seasonPass: { level: number; xp: number; premium: boolean };
+    achievements: Record&lt;string, number&gt;; stats: Record&lt;string, number&gt;;
+    mailbox: MailItem[];        // 미수령 상품 (11.3-2)
+    pity: { grind: number };    // 천장 카운터. 세대 교체로 리셋되지 않음 (GDD 7.3)
+    prestigeCount: number; purchases: string[];
+    settings: Record&lt;string, unknown&gt;;  // 보스 원정 설정 등 (11.3-3)
+  };
+  wallWindow: { samples: Array&lt;[tick:number, best:number]&gt; };  // 30분 이동창
+};
+</code></pre>
+<p><strong>불변식 (테스트로 단언)</strong>
+- <code>run</code> 밖의 필드는 <code>prestige()</code>가 절대 건드리지 않는다. <code>prestige()</code>는 <code>state.run</code>을 통째로 새로 만들고 <code>state.account</code>는 얕은 복사조차 하지 않는다(참조 유지). → GDD 4.1 유지 자산 12종 보존이 구조로 보장된다.
+- <code>GameState</code>는 JSON 직렬화 가능(함수·Map·Set·undefined 금지). 저장·복원·비교가 전부 <code>JSON.stringify</code>로 끝난다.</p>
+<h3 id="14-gdd-32">1.4 틱 파이프라인 (GDD 3.2 표의 구현)</h3>
+<pre><code>stepTicks(state, n, tables):
+  for each &quot;구간&quot;(다음 이벤트까지 정수 틱 수):
+    1. dps  = computeDps(state, tables)            // 3.1 모든 배수의 곱
+    2. 전투 해상도:
+         일반: t_req = max(n_mob*HP(s)/dps, t_min_kill*n_mob)
+         보스: t_req = max(m_boss*HP(s)/dps, t_min_kill*1)
+         ticksNeeded = ceil(t_req * 10)
+    3. ticksNeeded가 보스 타이머(300틱)를 넘으면 → wall_hit 발행 + f* 파밍 모드
+    4. 처치 처리: gold += G(s)*배수, codexKills++, 드랍 롤(drop 스트림)
+    5. 웨이브 소진 → s += 1, runBest 갱신
+    6. autoUpgrade가 켜져 있으면 buyGreedy() (1.4의 그리디)
+    7. wallWindow 갱신 → 정체 감지 → 프레스티지 힌트/자동 프레스티지
+</code></pre>
+<ul>
+<li>보스 타임아웃 판정은 <strong>틱 단위 정수 비교</strong>(<code>ticksNeeded &gt; boss_timer_sec*10</code>)로 한다. 실수 비교(<code>t_req &gt; 30.0</code>)를 쓰면 경계에서 플랫폼 차이가 난다.</li>
+<li>f* 파밍 모드에서는 스테이지가 오르지 않고 <code>rate(f*) = G(f*)/t_min_kill</code>로 골드만 누적한다(밸런스 모델 4.3).</li>
+</ul>
+<h3 id="15">1.5 저장 포맷과 마이그레이션</h3>
+<pre><code class="language-jsonc">{
+  &quot;schemaVersion&quot;: 1,          // 저장 포맷 버전 (코드가 소유)
+  &quot;dataVersion&quot;: 1,            // balance.json version (데이터가 소유)
+  &quot;savedAtMs&quot;: 1789500000000,  // 벽시계. 오프라인 계산에만 쓰고 룰에는 쓰지 않는다
+  &quot;state&quot;: { /* GameState */ }
+}
+</code></pre>
+<ul>
+<li><code>packages/core/src/save/migrations.ts</code>에 <code>Record&lt;number, (save) =&gt; save&gt;</code> 레지스트리. <code>load()</code>는 <code>schemaVersion</code>이 현재보다 낮으면 등록된 마이그레이션을 순서대로 적용하고, 높으면 <strong>로드를 거부</strong>한다(미래 세이브 손상 방지).</li>
+<li>마이그레이션 없이 필드를 추가·제거·개명하면 P3.2의 테스트가 실패한다(<code>SCHEMA_VERSION</code>과 마이그레이션 개수가 일치해야 한다).</li>
+<li>오프라인 경과 시간은 <code>Date.now() - savedAtMs</code>로 <strong>어댑터(<code>apps/web</code>, <code>packages/sim</code>)에서만</strong> 계산해 <code>applyOffline(state, elapsedSec, opts)</code>에 초 단위 정수로 넘긴다. 코어는 벽시계를 모른다.</li>
+</ul>
+<h3 id="16">1.6 테이블 로딩과 스키마 검증</h3>
+<ol>
+<li><code>packages/data/src/load.ts</code>가 <code>data/*.json</code>을 읽는다.</li>
+<li><strong>ajv(draft 2020-12, <code>strict: true</code>, <code>allErrors: true</code>)</strong> 로 <code>data/schema/{table}.schema.json</code>을 컴파일해 검증한다. 자체 검증기가 아니라 ajv를 쓴다 — 스키마가 문서이자 테스트가 되고, 신규 테이블 추가 시 코드 변경이 0줄이기 때문이다.</li>
+<li><strong>확률 필드 규칙 검사</strong>: 이름이 <code>*_ppm</code>으로 끝나는 전 필드는 <code>Number.isInteger(v) &amp;&amp; 0 &lt;= v &lt;= 1_000_000</code>이어야 한다(스키마 <code>type: integer</code> + <code>minimum</code>/<code>maximum</code>으로 1차, 로더가 2차로 단언). 시행 단위 확률 집합(<code>drop_rates_ppm.&lt;system&gt;</code>)은 <strong>정수 합이 정확히 1,000,000</strong>이어야 한다. 위반 시 <strong>기동 실패</strong>. 같은 규칙을 <code>tools/check-deps.ts</code>가 소스 쪽에서도 검사한다 — 코드·테스트에 부동소수 확률 리터럴(<code>0.005</code> 등)을 쓰면 exit 1.</li>
+<li><strong>공통 메타 검증</strong>: 모든 데이터 파일의 <code>schema_version</code>·<code>generated_at</code>·<code>checksum</code> 3필드 존재를 확인하고, <code>checksum</code>을 본문에서 재계산해 대조한다(3.1). <code>data/_manifest.json</code>의 <code>checksum</code>(파일 내용 SHA-256, 개행 정규화 후)과도 교차 대조한다. 불일치 시 <strong>기동 실패</strong>.</li>
+<li>참조 무결성 검사(스키마로는 못 잡는 것): <code>brothers.skin_ids ⊆ skins.id</code>, <code>monsters.codex_id ∈ collection.id</code>, <code>equipment.merge_from ∈ equipment.id</code>, <code>stages.monster_pool ⊆ monsters.id</code>, <code>*.asset_id ∈ assets/_index.json</code>.</li>
+<li>파생 테이블 생성(1회): 스테이지 HP/골드 테이블, 강화 비용 테이블, 노드 비용 누적 테이블 (D-3).</li>
+<li>결과를 <code>Tables</code> 불변 객체로 얼려(<code>Object.freeze</code> 재귀) 코어에 주입한다.</li>
+</ol>
+<p><strong>스키마 위반 = 기동 실패</strong>(GDD 13.1 M2). 경고 후 진행하는 경로를 만들지 않는다.</p>
+<h3 id="17">1.7 에셋 거버넌스 게이트 (빌드 실패 규칙)</h3>
+<p>GDD 8.1을 코드로 강제한다. <code>tools/validate-assets.ts</code>:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>검사</th>
+<th>실패 조건</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>origin</code> 필수</td>
+<td><code>"human"</code> | <code>"ai"</code> 이외 값</td>
+</tr>
+<tr>
+<td><strong>AI 산출물 추적</strong></td>
+<td><code>origin==="ai"</code>인데 <code>source_id</code>가 비었거나 <code>_index.json</code>에 없음</td>
+</tr>
+<tr>
+<td><strong>사람 감수</strong></td>
+<td><code>origin==="ai"</code>인데 <code>reviewed_by</code>가 비었거나 <code>reviewed_at</code>이 ISO8601이 아님</td>
+</tr>
+<tr>
+<td>디렉터리 분리</td>
+<td><code>origin==="human"</code>인데 경로가 <code>assets/source/</code>로 시작하지 않음 / <code>origin==="ai"</code>인데 <code>assets/gen/</code>로 시작하지 않음</td>
+</tr>
+<tr>
+<td>id 규칙</td>
+<td><code>{kind}_{family}_{index}[_{variant}]</code> 정규식 불일치 (<code>^(bro\|mon\|eqp\|skn\|mnt\|tot\|bg\|ui\|fx\|card)_[a-z0-9_]+_\d{3}(_[a-z]\d{2}\|_icon\|_silh)?$</code>)</td>
+</tr>
+<tr>
+<td>변형 일관성</td>
+<td>variant가 있는데 <code>source_id</code>가 없음 / <code>source_id</code>의 <code>origin</code>이 <code>"ai"</code>임(AI의 AI 변형 금지)</td>
+</tr>
+<tr>
+<td>고아 참조</td>
+<td>테이블이 참조하는 <code>asset_id</code>가 인덱스에 없음</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>실행 지점: <code>npm run validate:assets</code> — <strong><code>prebuild</code> 스크립트와 <code>pretest</code> 스크립트에 연결</strong>해서 <code>npm run build</code>/<code>npm test</code>가 자동으로 통과해야만 진행되게 한다. CI에서도 독립 잡으로 돈다.</li>
+<li>스프라이트 애니메이션 프레임(<code>kind=fx</code> 중 <code>anim_</code> 접두)은 <code>origin==="human"</code>만 허용한다(GDD 9.2: 프레임 간 일관성은 현 시점 AI 한계).</li>
+</ul>
+<h3 id="18">1.8 분석 이벤트 배출 경로</h3>
+<ul>
+<li>코어는 <code>EventSink</code> 인터페이스(<code>emit(name, payload)</code>)만 안다. I/O는 하지 않는다.</li>
+<li>공통 필드(GDD 11.1) 14개는 코어의 <code>withCommon()</code>이 주입하며, <strong><code>data_version</code>은 <code>state.dataVersion</code>에서 자동으로 채운다</strong>(누락 시 타입 에러가 나도록 필수 필드로 선언). GDD 모호 지점 10번의 대응이다.</li>
+<li>싱크 구현: <code>sim</code> → <code>reports/{runId}/events.jsonl</code>, <code>web</code> → IndexedDB 버퍼 + 다운로드 버튼, 향후 서버 → HTTP 배치.</li>
+</ul>
+<h3 id="19-2-unityc-1">1.9 2차 트랙 — Unity/C# 포팅 (1절)</h3>
+<p>진단자 전달 메모의 추정 스택은 Unity/C#이고 <strong>U-06(전투 로직이 화면 갱신 코드와 분리되어 있는가)이 미확인</strong>이다. 본 빌드 플랜은 그 값과 무관하게 진행할 수 있도록 설계했다: 웹 프로토타입의 <code>packages/core</code>가 <strong>신작의 규칙 원본</strong>이 되고, Unity 클라이언트는 이 원본을 1:1 포팅한 <code>PrimitiveCore</code> C# 클래스 라이브러리(MonoBehaviour 상속 금지, <code>UnityEngine</code> using 금지)를 참조한다. 포팅 시 지켜야 할 4가지는 (a) 같은 <code>data/*.json</code>을 그대로 로드(파서만 교체), (b) <code>xoshiro128**</code>을 <code>uint</code> 연산으로 동일 구현(C#의 <code>uint</code>는 JS의 <code>Math.imul</code> 결과와 정의상 일치), (c) 시간은 <code>long tick</code>(100ms), (d) 사전 계산 테이블을 <code>double[]</code>로 동일 절차 생성. 검증은 <strong>교차 골든 테스트</strong> — TS 시뮬레이터가 시드별 최종 상태를 <code>golden/{seed}.json</code>으로 뽑고, C# 테스트가 같은 시드로 같은 JSON을 만들어 비교한다(허용 오차: 스테이지·레벨·노드 수는 완전 일치, 골드는 상대오차 1e-9). 진단 결과 전작 전투 로직이 "혼재됨"으로 나오면 이 라이브러리가 <strong>추출 대상이 아니라 교체 대상</strong>이 되므로, 리팩터링 견적이 아니라 신규 작성 견적으로 바뀐다는 점을 경영진 보고에 반영해야 한다. 포팅 태스크 카드는 프로토타입 성공 판정(GDD 13.3) 통과 후에 별도 문서로 분해한다.</p>
+<hr />
+<h2 id="2">2. 저장소 구조와 데이터 파일</h2>
+<pre><code>primitive-brothers-2/
+├─ AGENTS.md                     ← 05b_AGENTS.md를 그대로 배치
+├─ .nvmrc                        ← &quot;22&quot;
+├─ package.json                  ← npm workspaces 루트
+├─ tsconfig.base.json
+├─ vitest.workspace.ts
+├─ playwright.config.ts
+├─ .github/workflows/ci.yml
+├─ docs/
+│   ├─ GDD.md                    ← 04_gdd_primitive_brothers_2.md 복사본
+│   ├─ BALANCE.md                ← 04b_balance_model.md 복사본
+│   ├─ BUILD_PLAN.md             ← 본 문서 복사본
+│   └─ ASSUMPTIONS.md            ← 8절을 초기 내용으로. Codex가 추가한다
+├─ data/
+│   ├─ brothers.json  upgrades.json  equipment.json  totems.json
+│   ├─ stages.json    monsters.json  skins.json      mounts.json
+│   ├─ collection.json events.json   shop_products.json  balance.json
+│   ├─ _manifest.json
+│   └─ schema/{같은 이름}.schema.json  (+ 확장 전용 5종)
+├─ assets/
+│   ├─ source/                   ← 사람 원화만
+│   ├─ gen/                      ← AI 변형만
+│   └─ _index.json
+├─ packages/
+│   ├─ core/   src/{rng,state,tables,combat,upgrade,equip,offline,prestige,codex,save,format,events}.ts
+│   ├─ data/   src/{load,validate,manifest,integrity}.ts
+│   └─ sim/    src/{cli,profiles,bots,schedule,report,regress,diff}.ts
+├─ apps/web/   src/{main,render/*,ui/*,bind/*}.ts  + index.html + manifest.webmanifest
+├─ tools/      validate-assets.ts  gen-manifest.ts  gen-equipment.ts  check-deps.ts
+├─ tests/e2e/  *.spec.ts  __screenshots__/
+└─ reports/    {runId}/{summary.json,gold_curve.csv,stage_curve.csv,walls.csv,report.md,events.jsonl}
+</code></pre>
+<p><strong>npm 스크립트 (루트 <code>package.json</code>)</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>스크립트</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>npm ci</code></td>
+<td>설치 (Node 22.x 고정)</td>
+</tr>
+<tr>
+<td><code>npm test</code></td>
+<td><code>vitest run</code> 전 워크스페이스 (pretest에서 <code>validate:assets</code>, <code>check:deps</code>)</td>
+</tr>
+<tr>
+<td><code>npm test -w packages/core</code></td>
+<td>코어 유닛 테스트만</td>
+</tr>
+<tr>
+<td><code>npm run sim -- --days 7 --bot balanced --seed 42</code></td>
+<td>시뮬레이터 1회 실행</td>
+</tr>
+<tr>
+<td><code>npm run sim:regress</code></td>
+<td>목표 벽 표 10 체크포인트 ±10% + 첫 벽 + 격차 + D1 프레스티지 (13 단언)</td>
+</tr>
+<tr>
+<td><code>npm run sim:prob</code></td>
+<td>확률 표기 검증 4종 + 천장 단언 (6.4 T5·T6)</td>
+</tr>
+<tr>
+<td><code>npm run sim:diff -- --base bal_v1 --head bal_v2</code></td>
+<td>곡선 diff 마크다운 리포트</td>
+</tr>
+<tr>
+<td><code>npm run sim:determinism</code></td>
+<td>동일 시드 2회 실행 SHA-256 비교</td>
+</tr>
+<tr>
+<td><code>npm run sim:replay -- --run &lt;run.json&gt;</code></td>
+<td>기록된 실행을 시드 + 테이블 checksum으로 재현 (규격 <code>sim replay</code> 별칭, T2.9). 재현 실패·checksum 불일치는 <strong>exit 2</strong></td>
+</tr>
+<tr>
+<td><code>npm run sim:long -- --days 90</code> / <code>npm run sim:long -- --all</code></td>
+<td>60/90일 장기 프로파일 (리포트 전용, 게이트 아님)</td>
+</tr>
+<tr>
+<td><code>npm run dev -w apps/web</code></td>
+<td>렌더러 개발 서버</td>
+</tr>
+<tr>
+<td><code>npm run e2e</code></td>
+<td>Playwright 스크린샷 + 콘솔 에러 검사</td>
+</tr>
+<tr>
+<td><code>npm run validate:assets</code></td>
+<td>에셋 거버넌스 게이트 (1.7)</td>
+</tr>
+<tr>
+<td><code>npm run check:deps</code></td>
+<td>의존 방향·금지 식별자 검사 (1.1) + <strong>확률 리터럴 검사</strong>(소스·테스트에 부동소수 확률 금지, <code>*_ppm</code> 정수 0~1,000,000 규칙 — 1.6)</td>
+</tr>
+<tr>
+<td><code>npm run build</code></td>
+<td>전 패키지 빌드 (prebuild에서 validate:assets)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>도구 버전 고정</strong>: Node 22 LTS(<code>.nvmrc</code>=<code>22</code>, <code>package.json engines.node="&gt;=22 &lt;23"</code>), TypeScript 5.x, vitest, tsx, Playwright, ajv 8.x, pixi.js 8.x. 패키지 매니저는 npm(워크스페이스). <code>package-lock.json</code>을 커밋한다.</p>
+<hr />
+<h2 id="3">3. 데이터 테이블 스키마</h2>
+<h3 id="31">3.1 공통 규칙</h3>
+<ul>
+<li>JSON 배열 1테이블 1파일(<code>balance.json</code>만 단일 객체). 첫 필드 <code>id</code>(string, snake_case, 전역 유일).</li>
+<li>JSON Schema draft 2020-12. 모든 스키마에 <code>"additionalProperties": false</code>, <code>"required"</code> 전량 명시, 수치에 <code>minimum</code>/<code>maximum</code> 명시.</li>
+<li><strong>확률·비율은 정수 ppm(백만분율)이다.</strong> 필드명은 <code>*_ppm</code> 접미, 값은 <strong>0~1,000,000 정수</strong>, 스키마는 <code>"type": "integer"</code> + <code>"minimum": 0</code> + <code>"maximum": 1000000</code>. 로드 시 <code>p = ppm / 1_000_000</code>으로 변환해 코어에 넘기고, 파일·코드·테스트에 부동소수 확률을 쓰지 않는다(GDD 8.0, 전략 청사진 4.3.1, 기획서 부록 E). 시행 단위 확률 집합은 <strong>정수 합 = 1,000,000</strong> 단언. 시간은 초, 배수는 <code>number</code>.</li>
+<li><strong>테이블 JSON 공통 메타 3필드(전 파일 필수)</strong>: <code>schema_version</code>(문자열, 예 <code>"1.0"</code>), <code>generated_at</code>(ISO8601 UTC), <code>checksum</code>(<code>"sha256:&lt;hex&gt;"</code> — 본문 직렬화·개행 정규화 후). 배열 테이블은 <code>{schema_version, table, generated_at, source, checksum, rows}</code> 봉투로 싸고 <code>rows</code>가 기존 배열이다(<code>balance.json</code>은 <code>rows</code> 대신 <code>row</code> 단일 객체). 로더는 3필드 누락 시 <strong>기동 실패</strong>하고 <code>checksum</code>을 재계산해 대조한다. 근거: 확률 검증 리포트가 "어느 테이블로 돌린 결과인가"를 가리키는 앵커이며 <code>sim replay</code>(T2.9)의 재현 키다(전략 청사진 팀원 전달 메모 (2)-①(e)) → 8.3 A-D15.</li>
+<li><strong><code>data/balance.json</code>이 모든 튜닝 파라미터의 유일한 원본이다.</strong> <code>stages.json</code>/<code>upgrades.json</code>의 곡선 필드(<code>hp0</code>, <code>hp_growth</code>, <code>cost_growth</code> 등)는 <strong>선택 필드</strong>이며, 생략하면 로더가 balance 값을 상속한다(<code>resolveStageParams()</code>). MVP 테이블은 전부 생략한다. GDD 8.3/8.6 예시 JSON에는 값이 박혀 있으나 그것은 문서용 예시이고 구현은 상속 규칙을 따른다 → 가정 A-D6.</li>
+</ul>
+<h3 id="32-mvp">3.2 MVP 초기 행 수</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>파일</th>
+<th>MVP 행 수</th>
+<th>내용</th>
+<th>확장 시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>brothers.json</code></td>
+<td><strong>4</strong></td>
+<td><code>bro_thak</code>(slot0) <code>bro_urg</code>(1) <code>bro_gom</code>(2) <code>bro_ddol</code>(3). <code>unlock_stage</code> 1/12/35/75</td>
+<td>+2행 (150, 280)</td>
+</tr>
+<tr>
+<td><code>upgrades.json</code></td>
+<td><strong>4</strong></td>
+<td>형님별 <code>atk</code> 트랙 1개씩</td>
+<td>전역·캠프 트랙 추가</td>
+</tr>
+<tr>
+<td><code>equipment.json</code></td>
+<td><strong>13</strong></td>
+<td><code>eqp_bone_club_t0..t12</code> (weapon 1계열). <code>tools/gen-equipment.ts</code>가 생성</td>
+<td>계열 추가 = 13행씩</td>
+</tr>
+<tr>
+<td><code>totems.json</code></td>
+<td><strong>4</strong></td>
+<td>계열 1행씩(<code>fire</code>/<code>hunt</code>/<code>step</code>/<code>hide</code>). <strong>MVP 로더는 <code>fire</code>만 활성</strong></td>
+<td>로더 플래그만 해제</td>
+</tr>
+<tr>
+<td><code>stages.json</code></td>
+<td><strong>1</strong></td>
+<td><code>stg_w1_main</code> (1~1000, type=normal)</td>
+<td><code>stg_w2_main</code>, tower/raid 행</td>
+</tr>
+<tr>
+<td><code>monsters.json</code></td>
+<td><strong>6</strong></td>
+<td>툰드라 팔레트 6종</td>
+<td>월드당 6종</td>
+</tr>
+<tr>
+<td><code>skins.json</code></td>
+<td><strong>2</strong></td>
+<td><code>skn_thak_basic</code>(free, bonus 0), <code>skn_thak_ice</code>(pass, +0.05)</td>
+<td>형님×3종</td>
+</tr>
+<tr>
+<td><code>mounts.json</code></td>
+<td><strong>1</strong></td>
+<td><code>mnt_sabertooth</code> (MVP 미지급, 스키마 검증용)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>collection.json</code></td>
+<td><strong>6</strong></td>
+<td>monsters와 1:1</td>
+<td></td>
+</tr>
+<tr>
+<td><code>events.json</code></td>
+<td><strong>1</strong></td>
+<td>샘플 <code>evt_glacier_boss_s1</code> (MVP 로더는 읽기만)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>shop_products.json</code></td>
+<td><strong>9</strong></td>
+<td>GDD 7.2 표 전량</td>
+<td></td>
+</tr>
+<tr>
+<td><code>balance.json</code></td>
+<td><strong>1</strong> (객체)</td>
+<td>3.4의 전 키</td>
+<td></td>
+</tr>
+<tr>
+<td><code>_manifest.json</code></td>
+<td>12 항목</td>
+<td><code>{table, version, checksum}</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>assets/_index.json</code></td>
+<td><strong>약 34</strong></td>
+<td>형님4 + 몬스터6 + 장비1+팔레트12 + UI·배경 약 10 + 카드 1</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MVP 총 행 수 약 60.</strong> "신규 몬스터 1종 = 코드 0줄 + 테이블 1행"(GDD 13.3-4)을 P1.1 태스크의 수용 기준으로 검증한다.</p>
+<h3 id="33-json-schema">3.3 테이블별 필드 제약 (JSON Schema 요약)</h3>
+<p>GDD 8.2~8.12를 그대로 옮기되, 스키마로 강제해야 하는 제약을 <strong>굵게</strong> 표시한다.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>테이블</th>
+<th>필수 필드</th>
+<th>스키마 강제 제약</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>brothers</code></td>
+<td>id, name_ko, slot, atk0, cost0, unlock_stage, passive_id, asset_id, skin_ids</td>
+<td><code>slot</code> 0~5 <strong>유일</strong>, <code>name_ko</code> 1~16자, <code>atk0&gt;0</code>, <code>cost0&gt;0</code>, <code>unlock_stage≥1</code>, <code>passive_id</code> null 허용</td>
+</tr>
+<tr>
+<td><code>upgrades</code></td>
+<td>id, target_type, target_id, stat, curve, base_value, cost0</td>
+<td><code>target_type</code> enum, <code>stat</code> enum, <code>curve</code> enum, <code>lin_coeff</code> 0~1, <code>step_every≥1</code>, <code>step_mult</code> 1~3, <code>cost_growth</code> 1.0~1.2, <code>max_level</code> null 허용</td>
+</tr>
+<tr>
+<td><code>equipment</code></td>
+<td>id, name_ko, slot, tier, mult, merge_count, drop_stage_min, drop_weight_ppm, asset_id</td>
+<td><code>tier</code> 0~40, <strong><code>mult == equip_tier_mult^tier</code> (로더 파생 검사, 오차 1e-12)</strong>, <code>merge_count == 4</code>, <strong><code>drop_weight_ppm</code> 정수 0~1,000,000</strong>(0.35 → <code>350000</code>), <code>merge_from</code> null 또는 tier-1 항목</td>
+</tr>
+<tr>
+<td><code>totems</code></td>
+<td>id, branch, order, cost_base, cost_slope, effect_stat, effect_value, effect_kind, requires</td>
+<td><code>branch</code> enum 4종 <strong>유일</strong>, <strong><code>order == 0</code> (계열 1행 규칙 — 589행 금지)</strong>, <code>cost_slope &gt; 0</code>, <code>effect_kind</code> enum</td>
+</tr>
+<tr>
+<td><code>stages</code></td>
+<td>id, type, range_from, world_id, monster_pool</td>
+<td><code>range_to</code> null 허용, <code>range_from ≤ range_to</code>, <strong>구간 중첩 금지(로더 검사)</strong>, <code>monster_pool</code> minItems 1</td>
+</tr>
+<tr>
+<td><code>monsters</code></td>
+<td>id, name_ko, family, rank, hp_mult, gold_mult, codex_id, asset_id</td>
+<td><code>hp_mult</code> 0.8~1.3, <code>gold_mult</code> 0.8~1.3, <code>rank</code> enum. <strong>GDD 8.7의 <code>drop_table_id</code>는 확장 테이블 <code>drop_tables</code> 참조라 MVP에서 선택 필드(null 허용), <code>palette_variants</code>는 <code>assets/_index.json</code> 항목 배열로 선택 필드</strong></td>
+</tr>
+<tr>
+<td><code>skins</code></td>
+<td>id, brother_id, name_ko, rarity, stat_bonus, acquire, asset_id, source_asset_id</td>
+<td><strong><code>stat_bonus.value ≤ 0.05</code> (GDD 5.8 상한, 스키마 <code>maximum</code>)</strong>, <code>product_id</code> null 허용</td>
+</tr>
+<tr>
+<td><code>mounts</code></td>
+<td>id, name_ko, offline_cap_add_sec, start_stage_add, atk_mult, acquire, asset_id</td>
+<td><code>offline_cap_add_sec</code> 0~14400, <code>start_stage_add</code> 0~50, <strong><code>atk_mult</code> 1.00~1.05</strong></td>
+</tr>
+<tr>
+<td><code>collection</code></td>
+<td>id, monster_id, tiers, rewards, card_asset_id, persist_on_prestige</td>
+<td><code>tiers</code> = <code>[10,100,1000]</code> 고정 길이 3 오름차순, <code>rewards</code> 길이 == tiers 길이, <strong><code>persist_on_prestige</code> const true</strong></td>
+</tr>
+<tr>
+<td><code>events</code></td>
+<td>id, type, start_at, end_at, reward_hours, repeat</td>
+<td><code>start_at</code>/<code>end_at</code> <code>format: date-time</code>, <strong><code>reward_hours</code> 0.5~10 (절대 수치 금지 — GDD 6.3)</strong>, <code>end_at &gt; start_at</code>. <strong>GDD 8.11의 <code>reward_items</code>·<code>condition</code>·<code>banner_asset_id</code>는 MVP 로더가 읽지 않으므로 선택 필드로 두되 스키마에는 정의한다</strong></td>
+</tr>
+<tr>
+<td><code>shop_products</code></td>
+<td>id, name_ko, price_krw, store_sku, kind, grants, is_probabilistic (<code>limit_per_account</code>·<code>visible_condition</code>은 null 허용 선택 필드)</td>
+<td><code>price_krw ≥ 0</code>, <strong><code>is_probabilistic</code> const false</strong> (뼈 갈기는 상품이 아니라 게임 내 시행이므로 상점 테이블에 확률형 상품이 존재할 수 없다)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>확장 전용 스키마(로더 무시, 파일만 존재)</strong>: <code>camp_buildings</code>, <code>guilds</code>, <code>pass_tracks</code>, <code>drop_tables</code>, <code>passives</code> — P0.3에서 스키마만 작성하고 <code>_manifest.json</code>에 <code>"loaded": false</code>로 등록한다.</p>
+<h3 id="34-databalancejson">3.4 <code>data/balance.json</code> (단일 원본, 전체 키)</h3>
+<p>밸런스 모델 10절 + GDD 8.13을 합친 최종 키 목록이다. <strong>이 파일의 값은 Codex가 절대 수정하지 않는다</strong>(AGENTS.md 금지 규칙).</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;bal_v1&quot;, &quot;version&quot;: 1,
+  &quot;hp0&quot;: 25.0, &quot;hp_growth&quot;: 1.058, &quot;hp_step_coeff&quot;: 0.25, &quot;hp_step_every&quot;: 10,
+  &quot;mob_count&quot;: 4, &quot;boss_every&quot;: 10, &quot;boss_mult&quot;: 7.0, &quot;boss_timer_sec&quot;: 30,
+  &quot;gold0&quot;: 8.0, &quot;gold_growth&quot;: 1.052, &quot;boss_gold_mult&quot;: 10.0,
+  &quot;t_min_kill_sec&quot;: 0.5, &quot;t_wall_sec&quot;: 30,
+  &quot;atk0&quot;: 6.0, &quot;atk_lin_coeff&quot;: 0.12, &quot;atk_step_mult&quot;: 1.75, &quot;atk_step_every&quot;: 25,
+  &quot;brother_atk_ratio&quot;: 4.0, &quot;brother_cost_ratio&quot;: 4.0,
+  &quot;brother_unlock_stages&quot;: [1, 12, 35, 75, 150, 280],
+  &quot;cost0&quot;: 25.0, &quot;cost_growth&quot;: 1.075,
+  &quot;equip_tier_mult&quot;: 1.20, &quot;equip_tier_span&quot;: 60, &quot;equip_tier_cap&quot;: 40, &quot;merge_count&quot;: 4,
+  &quot;equip_recovery_mode&quot;: &quot;drop_wait&quot;,
+  &quot;offline_cap_sec&quot;: 28800, &quot;offline_rate&quot;: 0.60, &quot;ad_offline_mult&quot;: 2.0,
+  &quot;pass_offline_cap_sec&quot;: 43200,
+  &quot;ember_c&quot;: 0.35, &quot;ember_p&quot;: 1.45,
+  &quot;node_cost_base&quot;: 5.0, &quot;node_cost_slope&quot;: 0.7, &quot;node_effect&quot;: 1.05,
+  &quot;prestige_min_stage&quot;: 120, &quot;prestige_ratio_hint&quot;: 1.15, &quot;start_stage_ratio&quot;: 0.5,
+  &quot;wall_window_sec&quot;: 1800, &quot;wall_window_gain&quot;: 5,
+  &quot;rng_seed_default&quot;: 20260918,
+  &quot;drop_rates_ppm&quot;: { &quot;bone_grind&quot;: { &quot;legend&quot;: 5000, &quot;hero&quot;: 30000, &quot;rare&quot;: 150000, &quot;common&quot;: 815000 } },
+  &quot;pity_hero&quot;: 20, &quot;pity_legend&quot;: 40
+}
+</code></pre>
+<p>스키마 강제 제약: <code>drop_rates_ppm.bone_grind</code>의 4개 값은 <strong>전부 0~1,000,000 정수</strong>이고 <strong>합이 정확히 1,000,000</strong>이다(로더 검사 — 부동소수 허용 오차가 없어진다), <code>node_cost_slope &gt; 0</code>(등차 보장), <code>equip_recovery_mode</code> enum <code>["instant","drop_wait"]</code>, <code>version</code> integer ≥ 1. 공통 메타 3필드(<code>schema_version</code>·<code>generated_at</code>·<code>checksum</code>)는 3.1대로 이 파일에도 붙는다.</p>
+<p><code>equip_recovery_mode</code>는 GDD·밸런스 모델에 없는 <strong>신설 키</strong>다. 리더 결정 ③(드랍 대기 가정 채택)과 밸런스 모델의 즉시 반영 근사를 둘 다 실행 가능하게 만들어, 회귀 기준(<code>instant</code>)과 실제 게임 동작(<code>drop_wait</code>)의 격차를 리포트로 산출하기 위한 것이다(8절 D3·U-2 참조).</p>
+<hr />
+<h2 id="4-phase">4. Phase별 태스크 카드</h2>
+<p><strong>읽는 규칙</strong>: 태스크 1개 = Codex 1세션 = 커밋 1개. 수용 기준은 전부 <code>실행 명령 → 기대 결과</code> 형식이며, "동작해야 한다" 같은 서술은 기준이 아니다. 의존 태스크가 끝나지 않았으면 착수하지 않는다.</p>
+<p><strong>Phase 순서가 스킬 기본형과 다른 점</strong>: 스킬 템플릿은 Phase 3을 "저장·오프라인·프레스티지"로 두지만, 본 플랜은 <strong>오프라인·프레스티지를 Phase 1(코어)로 올리고 Phase 3을 "저장·영속성·회귀 시나리오"로 재정의</strong>했다. 밸런스 회귀(Phase 2)가 프레스티지와 오프라인 없이는 목표 벽 표를 재현할 수 없고, 디렉터 우선순위표도 오프라인(5위)·프레스티지(6위)를 시뮬레이터(8위)보다 앞에 두었기 때문이다.</p>
+<hr />
+<h3 id="phase-0-4">Phase 0 — 스캐폴드 (4태스크)</h3>
+<h4 id="t01-ci">T0.1 모노레포 스캐폴드와 CI 게이트</h4>
+<ul>
+<li>목표: Node 22 고정 npm workspaces 모노레포를 만들고 빈 패키지 4개가 빌드·테스트·린트를 통과하게 한다.</li>
+<li>의존: 없음</li>
+<li>입력: 본 문서 1.1, 2절. <code>AGENTS.md</code></li>
+<li>산출: <code>package.json</code>, <code>.nvmrc</code>, <code>tsconfig.base.json</code>, <code>vitest.workspace.ts</code>, <code>packages/{core,data,sim}/package.json</code>+<code>tsconfig.json</code>+<code>src/index.ts</code>, <code>apps/web/package.json</code>, <code>tools/check-deps.ts</code>, <code>.github/workflows/ci.yml</code>, <code>.gitignore</code>, <code>docs/ASSUMPTIONS.md</code>(빈 템플릿)</li>
+<li>규칙: <code>packages/core</code>의 <code>dependencies</code>는 <strong>빈 객체</strong>여야 한다. <code>check-deps.ts</code>는 <code>packages/core/src/**</code>에서 금지 식별자(<code>Math.random</code>, <code>Date.now</code>, <code>document</code>, <code>window</code>, <code>setTimeout</code>, <code>setInterval</code>, <code>performance</code>, <code>require(</code>, <code>process.</code>)를 정규식으로 찾아 1건이라도 있으면 exit 1.</li>
+<li>수용 기준:
+  1. <code>node -v</code> → <code>v22.</code> 로 시작
+  2. <code>npm ci</code> → 종료 코드 0, <code>package-lock.json</code> 존재
+  3. <code>npm run build</code> → 4개 패키지 전부 <code>tsc</code> 성공, 종료 코드 0
+  4. <code>npm test</code> → vitest 0 failed (스모크 테스트 1개 통과: <code>expect(1).toBe(1)</code>)
+  5. <code>npm run check:deps</code> → <code>OK: core has 0 runtime deps, 0 forbidden identifiers</code> 출력, 종료 코드 0
+  6. <code>packages/core/src/index.ts</code>에 <code>Math.random()</code> 한 줄을 임시로 넣고 <code>npm run check:deps</code> → <strong>종료 코드 1</strong>, 파일·라인 번호가 출력됨 (넣은 줄은 되돌린다)</li>
+<li>크기: M</li>
+<li>참고: <code>vitest.workspace.ts</code>를 빼먹으면 <code>npm test -w packages/core</code> 형태의 부분 실행이 안 된다. Playwright는 T4.5에서 설치하므로 여기서 devDependency에 넣지 않는다.</li>
+</ul>
+<h4 id="t02-rng-xoshiro128">T0.2 시드 RNG (<code>xoshiro128**</code>)와 스트림 분리</h4>
+<ul>
+<li>목표: 코어 전역의 유일한 난수원을 구현하고 결정성·분포를 테스트로 고정한다.</li>
+<li>의존: T0.1</li>
+<li>입력: 본 문서 1.2 (D-2), GDD 13.1 M1</li>
+<li>산출: <code>packages/core/src/rng.ts</code>, <code>packages/core/src/rng.test.ts</code></li>
+<li>규칙: 상태 <code>Uint32Array(4)</code>. <code>Math.imul</code>·시프트·XOR만 사용. <code>nextFloat() = next() / 2**32</code>. <code>fork(streamId: string)</code>은 <code>splitmix32(hash(streamId) ^ seed)</code>로 새 인스턴스를 만든다. 상태 직렬화 <code>toJSON(): number[4]</code> / <code>fromJSON()</code>.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- rng</code> → <strong>14 passed, 0 failed</strong>
+  2. 테스트 목록에 다음 케이스가 모두 포함: ① 동일 시드 2개 인스턴스가 10,000회 동일 시퀀스 ② <code>toJSON→fromJSON</code> 후 이후 1,000개 시퀀스 동일 ③ <code>nextFloat()</code> 결과가 전부 <code>[0,1)</code> ④ 100,000회 평균이 <code>0.5 ± 0.005</code> ⑤ <code>nextInt(0,1)</code> 1,000,000회에서 각 값 빈도 <code>0.5 ± 0.003</code> ⑥ 서로 다른 <code>fork("drop")</code>/<code>fork("craft")</code>의 첫 1,000개가 1개도 겹치지 않음 ⑦ <strong>경계</strong>: seed=0에서도 상태가 전부 0이 되지 않음(all-zero 상태 금지) ⑧ seed=<code>2**32-1</code>에서 정상 동작
+  3. <code>grep -rn "Math.random" packages/</code> → 출력 0줄</li>
+<li>크기: S</li>
+<li>참고: <code>next() / 2**32</code>를 <code>next() / 0xFFFFFFFF</code>로 쓰면 1.0이 나올 수 있다. 반드시 <code>2**32</code>로 나눈다.</li>
+</ul>
+<h4 id="t03">T0.3 데이터 스키마·로더·매니페스트</h4>
+<ul>
+<li>목표: <code>data/*.json</code> 12종과 JSON Schema 12종(+확장 5종)을 작성하고, ajv 검증·체크섬·참조 무결성을 통과하는 로더를 만든다.</li>
+<li>의존: T0.1</li>
+<li>입력: 본 문서 3절 전체, GDD 8.1~8.14, 밸런스 모델 10절</li>
+<li>산출: <code>data/*.json</code>(12), <code>data/schema/*.schema.json</code>(17), <code>data/_manifest.json</code>, <code>packages/data/src/{load,validate,manifest,integrity}.ts</code> + 테스트, <code>tools/gen-manifest.ts</code>, <code>tools/gen-equipment.ts</code></li>
+<li>규칙: 3.2의 MVP 행 수를 그대로 채운다. 3.3의 굵은 제약을 스키마에 반영한다. <code>balance.json</code>은 3.4를 <strong>한 글자도 바꾸지 않고</strong> 그대로 쓴다. <code>totems.json</code>은 계열 1행 + <code>order:0</code> (589행 금지). <strong>확률 필드는 전부 <code>*_ppm</code> 정수(0~1,000,000)로 쓰고 스키마에 <code>type: integer</code> + <code>minimum: 0</code> + <code>maximum: 1000000</code>을 박는다</strong>(3.1). <strong>전 데이터 파일에 공통 메타 3필드(<code>schema_version</code>·<code>generated_at</code>·<code>checksum</code>)를 붙이고 로더가 checksum을 재계산해 대조한다</strong>(3.1, 1.6-4).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/data</code> → <strong>22 passed, 0 failed</strong>
+  2. 테스트에 다음 실패 케이스가 포함되고 각각 기동 실패를 단언: ① <code>skins[0].stat_bonus.value = 0.06</code> → 스키마 오류 ② <code>totems[0].order = 5</code> → 스키마 오류 ③ <code>equipment[3].mult</code> 임의 변경 → 파생 검사 오류 ④ <code>monsters[0].codex_id = "cdx_none"</code> → 참조 무결성 오류 ⑤ <code>_manifest.json</code> 체크섬 1자 변경 → 체크섬 오류 ⑥ <code>drop_rates_ppm.bone_grind</code>의 정수 합 ≠ 1,000,000 → 합계 오류 ⑦ <code>stages</code> 구간 중첩 → 구간 오류 ⑧ <strong>경계</strong>: <code>brothers</code>가 빈 배열 → minItems 오류 ⑨ <strong>확률 단위</strong>: <code>drop_rates_ppm.legend = 0.005</code>(소수) → <code>type: integer</code> 오류 / <code>= 1000001</code>(범위 초과) → <code>maximum</code> 오류 / <code>equipment[0].drop_weight_ppm = 0.35</code> → 정수 오류 ⑩ <strong>공통 메타</strong>: <code>balance.json</code>의 <code>checksum</code>을 1자 변경 → 재계산 불일치로 기동 실패, <code>schema_version</code> 필드 삭제 → 필수 필드 오류
+  3. <code>npx tsx packages/data/src/load.ts --print-summary</code> → <code>tables loaded: 12, rows: 60, schema_version 1.0, checksum OK (12/12 recomputed), integrity OK, ppm OK</code> 형태 출력, 종료 코드 0
+  5. <code>npm run check:deps</code> → 종료 코드 0. <code>packages/core/src/equip.ts</code>에 <code>const p = 0.005;</code>를 임시로 넣고 다시 실행 → <strong>종료 코드 1</strong>, <code>float probability literal</code> 위반 출력 (되돌린다)
+  6. <code>grep -rn "drop_rates\b" data/ packages/ --include=*.json --include=*.ts</code> → <strong>0줄</strong>(구 키 <code>drop_rates</code>가 남아 있지 않음. 정본 키는 <code>drop_rates_ppm</code>)
+  4. <code>npx tsx tools/gen-equipment.ts --check</code> → 13행 재생성 결과가 <code>data/equipment.json</code>과 <strong>완전 일치</strong>(diff 0줄)</li>
+<li>크기: M</li>
+<li>참고: ajv <code>strict: true</code>에서는 <code>"$schema"</code>와 <code>"additionalProperties": false</code> 누락이 에러가 된다. <code>format: date-time</code>은 <code>ajv-formats</code> 등록이 필요하다.</li>
+</ul>
+<h4 id="t04">T0.4 에셋 거버넌스 게이트</h4>
+<ul>
+<li>목표: <code>origin:"ai"</code> 에셋의 추적·감수 메타가 비면 <strong>빌드가 실패</strong>하도록 만든다.</li>
+<li>의존: T0.3</li>
+<li>입력: 본 문서 1.7, GDD 8.1, 9.2</li>
+<li>산출: <code>tools/validate-assets.ts</code> + 테스트, <code>assets/_index.json</code>(약 34항목), <code>assets/source/.gitkeep</code>, <code>assets/gen/.gitkeep</code>, 루트 <code>package.json</code>의 <code>prebuild</code>/<code>pretest</code> 훅, <strong><code>simple-git-hooks</code> 기반 pre-commit 훅 설정</strong>(<code>package.json</code>의 <code>simple-git-hooks.pre-commit</code> = <code>npm run validate:assets</code>)</li>
+<li>규칙: 1.7 표의 7개 검사를 전부 구현. 애니메이션 프레임(<code>fx_anim_*</code>)은 <code>origin:"human"</code>만 허용. 실패 시 위반 항목 id·사유를 한 줄씩 출력하고 exit 1.</li>
+<li>수용 기준:
+  1. <code>npm run validate:assets</code> → <code>assets OK: 34 entries (human 11, ai 23)</code>, 종료 코드 0
+  2. <code>npm test -w tools -- validate-assets</code> → <strong>9 passed</strong> (7개 실패 케이스 + 정상 케이스 + 고아 참조 케이스)
+  3. <code>_index.json</code>에서 임의의 <code>origin:"ai"</code> 항목의 <code>reviewed_by</code>를 <code>""</code>로 바꾸고 <code>npm run build</code> → <strong>종료 코드 1</strong>, stderr에 해당 <code>asset_id</code>와 <code>reviewed_by is required for origin=ai</code> 출력 (변경은 되돌린다)
+  4. <code>origin:"ai"</code> 항목의 <code>source_id</code>를 다른 AI 항목 id로 바꾸고 <code>npm run validate:assets</code> → 종료 코드 1, <code>source of an ai asset must be human-origin</code> 출력
+  5. <strong>pre-commit 게이트(리더 결정 ⑥)</strong>: <code>npx simple-git-hooks</code> 실행 후 <code>git config core.hooksPath</code> → <code>.git/hooks</code> 경로 출력, <code>cat .git/hooks/pre-commit</code> → <code>npm run validate:assets</code> 포함. 위반 에셋(<code>reviewed_by:""</code>)을 스테이징하고 <code>git commit -m "t"</code> → <strong>종료 코드 1</strong>, 커밋이 생성되지 않음(<code>git log -1 --format=%s</code>가 직전 커밋 그대로) 후 되돌린다
+  6. <code>npm test -w tools -- hooks</code> → <strong>2 passed</strong>: ① <code>package.json</code>에 <code>simple-git-hooks.pre-commit</code> 키가 존재하고 값이 <code>validate:assets</code>를 포함 ② <code>postinstall</code>에 <code>simple-git-hooks</code> 등록이 있어 <code>npm ci</code> 후 훅이 자동 설치됨</li>
+<li>크기: S</li>
+<li>참고: <code>prebuild</code>/<code>pretest</code>는 npm이 자동 실행한다. CI에도 독립 잡으로 넣어서, 누군가 <code>--ignore-scripts</code>로 우회해도 머지가 막히게 한다. <strong>로컬 우회(<code>npm ci --ignore-scripts</code>)를 막는 것이 5·6번 기준의 목적이다</strong>(리더 결정 ⑥) — 훅 관리자는 <code>simple-git-hooks</code>로 <strong>지정한다</strong>(husky는 쓰지 않는다. 의존성이 더 작고 <code>package.json</code> 한 블록으로 끝나기 때문). <code>git commit --no-verify</code>로 뚫리는 것은 남지만, 그 경우에도 CI 독립 잡이 머지를 막는다 — 로컬 게이트는 "실수 방지", CI 잡은 "우회 방지"로 역할이 나뉜다.</li>
+</ul>
+<hr />
+<h3 id="phase-1-10">Phase 1 — 결정적 코어 룰 (10태스크)</h3>
+<h4 id="t11">T1.1 스테이지·몬스터 곡선과 사전 계산 테이블</h4>
+<ul>
+<li>목표: <code>HP(s)</code>·<code>G(s)</code>·보스 변형을 구현하고, 모든 거듭제곱을 로드 시 1회 생성 테이블로 고정한다(리더 결정 ①).</li>
+<li>의존: T0.3</li>
+<li>입력: 밸런스 모델 2.1·2.3, 본 문서 1.2 (D-3)</li>
+<li>산출: <code>packages/core/src/tables.ts</code>(사전 계산), <code>packages/core/src/stage.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>HP(s) = hp0 · g_hp^(s-1) · (1 + a_step · floor(s/10))</code>, <code>HP_boss(s) = HP(s) · m_boss</code> (<code>s % 10 == 0</code>)</li>
+<li><code>G(s) = gold0 · g_gold^(s-1)</code>, 보스는 <code>× boss_gold_mult</code></li>
+<li><code>powTable(g, n)</code>은 <code>t[0]=1; t[i]=t[i-1]*g</code> 반복 곱. <code>Math.pow</code> 사용 금지(<code>check:deps</code>에 <code>Math.pow</code> 금지 식별자 추가).</li>
+<li>테이블 범위 초과 호출은 <code>RangeError</code>를 던진다. 조용한 폴백 금지.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- stage</code> → <strong>18 passed, 0 failed</strong>
+  2. 밸런스 모델 2.3 표의 12개 행(s = 1, 10, 25, 50, 100, 138, 200, 360, 450, 700, 950, 1200)이 각각 <code>HP(s)</code>·<code>G(s)</code>·웨이브 총 HP에 대해 <strong>상대오차 1e-3 이내</strong>로 단언됨
+  3. <strong>경계 케이스</strong> 테스트 포함: <code>s=1</code>(지수 0), <code>s=10</code>(첫 보스, 계단 항 첫 적용), <code>s=9→10</code> 계단 불연속, <code>s=2000</code>(테이블 상한 정상), <code>s=2001</code> → <code>RangeError</code>, <code>s=0</code> → <code>RangeError</code>
+  4. <code>grep -rn "Math.pow\|\*\*" packages/core/src/stage.ts packages/core/src/tables.ts</code> → 지수 연산자 사용 0건(테이블 생성 루프의 곱셈만 존재)
+  5. <code>monsters.json</code>에 <code>mon_icebear</code> 1행을 추가하고 <code>stg_w1_main.monster_pool</code>에 추가 → <code>npm test -w packages/core</code> 통과 + <code>npm run sim -- --days 1 --bot balanced --seed 42</code>가 <strong>코드 변경 0줄로</strong> 실행(GDD 13.3-4 검증, T2.1 완료 후 재확인)</li>
+<li>크기: M</li>
+<li>참고: <code>floor(s/10)</code> 계단 항은 s=10에서 처음 1이 된다(s=9는 0). 보스 골드는 <code>G(s) × 10</code>이며 <code>n_mob</code>을 곱하지 않는다.</li>
+</ul>
+<h4 id="t12-dps">T1.2 형님 전투력과 DPS 합성</h4>
+<ul>
+<li>목표: <code>ATK_i(L)</code>·해금·<code>DPS_total</code>의 모든 배수 곱을 구현한다.</li>
+<li>의존: T1.1</li>
+<li>입력: 밸런스 모델 3.1·3.2·3.3, GDD 5.1</li>
+<li>산출: <code>packages/core/src/brother.ts</code>, <code>packages/core/src/dps.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>ATK_i(L) = atk0_i · (1 + b·L) · g_atk^floor(L/25)</code>, <code>atk0_i = ATK0 · 4^i</code></li>
+<li><code>DPS_base = Σ_{i ∈ 해금} ATK_i(L_i)</code>, <code>DPS_total = DPS_base · E(s) · M · (1 + Σcard%) · 패키지배수 · 스킨배수</code></li>
+<li>해금 판정은 <strong><code>run_best ≥ unlock_stage</code></strong> (GDD 모호 지점 4의 결정: 프레스티지 시작 스테이지가 높으면 즉시 해금. 시작 시 <code>run_best = start_stage</code>)</li>
+<li>배수 곱셈 순서를 <code>DPS_MULT_ORDER</code> 상수 배열로 고정한다(부동소수점 결합법칙이 성립하지 않으므로 순서가 결정성의 일부다).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- brother dps</code> → <strong>16 passed, 0 failed</strong>
+  2. 밸런스 모델 3.3 표 9행(L = 1, 10, 25, 50, 75, 100, 150, 200, 300)의 <code>ATK(L)</code>·<code>C(L)</code>이 상대오차 1e-3 이내로 단언됨
+  3. <strong>경계 케이스</strong>: <code>L=0</code>(배수 점프 0회, <code>ATK=atk0</code>), <code>L=24→25</code>(첫 ×1.75 점프), <code>L=4000</code>(테이블 상한), 해금되지 않은 형님의 기여 = 0, 형님 4명 전부 <code>L=0</code>일 때 <code>DPS_base = 6+24+96+384 = 510</code>
+  4. 배수 순서 테스트: <code>DPS_MULT_ORDER</code>를 뒤집으면 스냅샷 테스트가 <strong>실패</strong>함을 단언(순서 고정이 의도적임을 증명)</li>
+<li>크기: M</li>
+<li>참고: <code>4^i</code>도 사전 계산 테이블(i=0..5)에서 읽는다. 스킨 배수는 MVP에서 <code>skn_thak_basic</code>(0)만 장착되므로 1.0이지만 경로는 구현한다.</li>
+</ul>
+<h4 id="t13">T1.3 전투 틱 루프와 벽 판정</h4>
+<ul>
+<li>목표: 고정 100ms 정수 틱으로 웨이브·보스·벽을 처리하는 코어 루프를 만든다.</li>
+<li>의존: T1.2</li>
+<li>입력: GDD 3.2·3.3, 본 문서 1.2 (D-1), 1.4</li>
+<li>산출: <code>packages/core/src/combat.ts</code>, <code>packages/core/src/step.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>stepTicks(state, n)</code>만이 공개 진입점. 상태의 <code>tick</code>은 정수만 증가한다.</li>
+<li><code>t_min_kill_sec = 0.5</code>는 <strong>몬스터 1마리당</strong>(GDD 모호 지점 7의 결정) → 일반 웨이브 최소 <code>4 × 0.5 = 2.0초</code>(20틱), 보스 최소 <code>0.5초</code>(5틱)</li>
+<li>보스 타임아웃: <code>ticksNeeded &gt; boss_timer_sec × 10</code> (300틱) → <code>wall_hit</code> 이벤트(<code>wall_type:"boss"</code>) 발행 후 f* 파밍 모드</li>
+<li>일반 웨이브 벽: <code>ticksNeeded &gt; 300</code> → <code>wall_type:"wave"</code></li>
+<li>체감 벽: 30분(18,000틱) 이동창에서 <code>run_best</code> 증가 &lt; 5 → <code>wall_type:"window"</code></li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- combat step</code> → <strong>20 passed, 0 failed</strong>
+  2. <strong>경계 케이스</strong> 전량 포함: ① <code>L=0</code> 4명, <code>s=1</code> → 웨이브 클리어에 정확히 20틱(최소 처치 시간 지배) ② DPS가 극단적으로 클 때도 20틱 미만으로 내려가지 않음 ③ 보스에서 <code>ticksNeeded == 300</code> → 클리어(경계 포함), <code>301</code> → 벽 ④ <code>s=9</code>(일반) → <code>s=10</code>(보스) 전환 시 몬스터 수 4→1 ⑤ 벽 진입 후 f* 파밍 중에는 <code>stage</code>가 증가하지 않음 ⑥ 30분 이동창이 오프라인 주입 후에도 리셋되지 않음
+  3. 결정성: <code>stepTicks(state, 36000)</code> 1회와 <code>stepTicks(state, 100)</code> 360회의 최종 <code>JSON.stringify(state)</code>가 <strong>완전 일치</strong>
+  4. <code>npm test -w packages/core -- step</code> 실행 중 <code>state.tick</code>이 정수가 아닌 순간이 없음(<code>Number.isInteger</code> 단언이 매 스텝 수행)</li>
+<li>크기: M</li>
+<li>참고: 3번 기준(분할 호출 동일성)이 이 태스크의 핵심이다. 여기서 실패하면 렌더러와 시뮬레이터가 다른 결과를 낸다.</li>
+</ul>
+<h4 id="t14">T1.4 자동 강화 그리디 (타이브레이크 결정)</h4>
+<ul>
+<li>목표: <code>ΔATK/비용</code> 최대 항목을 반복 구매하는 결정적 그리디를 구현한다(리더 결정 ②).</li>
+<li>의존: T1.2</li>
+<li>입력: 밸런스 모델 9.3, GDD 5.2, 모호 지점 2</li>
+<li>산출: <code>packages/core/src/upgrade.ts</code> + 테스트</li>
+<li>규칙:
+  <code>반복 {
+    후보 = 해금된 형님 중 C_i(L_i) ≤ gold
+    선택 = argmax( ΔATK_i / C_i(L_i) )
+    동률이면 → 트랙 index(= brothers.slot) 오름차순      ← 리더 결정 ②
+    없으면 종료
+    gold -= C_i(L_i); L_i += 1
+  }</code></li>
+<li><code>ΔATK_i = ATK_i(L_i + 1) − ATK_i(L_i)</code> (25레벨 점프가 걸치는 구간에서 큰 값이 나오는 것은 의도된 동작이다)</li>
+<li>동률 비교는 <code>a === b</code>가 아니라 <code>Math.abs(a-b) &lt;= 1e-12 * Math.max(|a|,|b|)</code>로 판정한다. 순수 <code>===</code>는 계산 순서에 따라 동률을 놓친다.</li>
+<li><code>x1 / x10 / x100 / MAX</code> 수동 구매도 같은 함수를 쓴다(MAX = 그리디 무한 반복).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- upgrade</code> → <strong>14 passed, 0 failed</strong>
+  2. <strong>타이브레이크 테스트</strong>: 형님 0·1의 <code>ΔATK/C</code>가 정확히 동률이 되도록 구성한 픽스처에서 100회 반복 구매 → 매번 slot 0이 먼저 선택됨(결정적)
+  3. <strong>경계 케이스</strong>: ① gold가 최저가보다 1 적을 때 0회 구매 ② gold=0에서 무한 루프 없이 즉시 종료 ③ 해금되지 않은 형님은 후보에서 제외 ④ <code>L=24</code>에서 <code>ΔATK</code>가 점프 때문에 다른 트랙을 역전하는 케이스 ⑤ 100만 골드 투입 시 반복 횟수가 유한(&lt; 10,000)하고 종료
+  4. 결정성: 동일 초기 상태·동일 골드로 2회 실행 → <code>levels</code> 배열 완전 일치</li>
+<li>크기: S</li>
+<li>참고: 밸런스 모델 9.3은 "slot 오름차순"이라 적었고 리더 결정 ②는 "트랙 index 낮은 쪽"이다. <code>brothers.slot === 트랙 index</code>이므로 두 표현은 동일하다 — 스키마의 <code>slot</code> 유일성 제약이 이 동치를 보장한다.</li>
+</ul>
+<h4 id="t15-f">T1.5 사냥터 자동 최적화 <code>f*</code></h4>
+<ul>
+<li>목표: <code>f* = max{ s : HP(s) ≤ DPS · t_min_kill }</code>를 이진 탐색으로 구하고 파밍 수입률을 계산한다.</li>
+<li>의존: T1.3</li>
+<li>입력: 밸런스 모델 4.2·4.3, GDD 5.5</li>
+<li>산출: <code>packages/core/src/farm.ts</code> + 테스트</li>
+<li>규칙: <code>rate(f*) = G(f*) / t_min_kill</code>. <code>HP(s)</code>가 <code>s</code>에 대해 단조 증가이므로 이진 탐색 가능. 탐색 범위는 <code>[1, min(runBest, STAGE_TABLE_MAX)]</code>. f* 파밍 중 스테이지는 오르지 않는다.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- farm</code> → <strong>11 passed, 0 failed</strong>
+  2. 선형 스캔 구현과 이진 탐색 구현의 결과가 <code>s ∈ [1, 1200]</code>, DPS 20단계(1e1~1e30)의 전 조합에서 <strong>완전 일치</strong>
+  3. <strong>경계 케이스</strong>: ① DPS가 너무 작아 <code>HP(1) &gt; DPS·0.5</code> → <code>f* = 1</code>(0이나 음수 금지) ② DPS가 매우 커 <code>f* &gt; runBest</code> → <code>f* = runBest</code>로 클램프 ③ <code>HP(f*) == DPS·0.5</code> 정확 동률 → 그 <code>s</code>를 포함
+  4. 밸런스 모델 4.3의 "보스 전선이 <code>f*</code>보다 +38.1 스테이지" 관계가 <code>g_hp=1.058</code>·계단 항 제외 근사에서 <strong>±2 스테이지 이내</strong>로 재현됨</li>
+<li>크기: S</li>
+<li>참고: 이진 탐색 상한을 <code>STAGE_TABLE_MAX</code>로 잡으면 테이블 범위 예외를 건드린다. 상한은 <code>runBest</code>와 테이블 상한의 min이다.</li>
+</ul>
+<h4 id="t16">T1.6 장비 드랍과 결정적 합성</h4>
+<ul>
+<li>목표: 스테이지 드랍·4개→1개 결정적 합성·등급 배수 <code>E(s)</code>를 구현하고, 리더 결정 ③의 이중 모드를 만든다.</li>
+<li>의존: T1.3, T0.2</li>
+<li>입력: GDD 5.3·4.1, 밸런스 모델 3.1, 모호 지점 5, 리더 결정 ③</li>
+<li>산출: <code>packages/core/src/equip.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li>드랍 등급은 <code>floor(s / equip_tier_span)</code> 중심의 결정적 분포. 드랍 판정은 <code>rng.fork("drop")</code> 스트림만 사용. <strong>드랍 가중치는 <code>equipment[].drop_weight_ppm</code>(정수 0~1,000,000)을 읽어 <code>w = ppm / 1_000_000</code>으로 변환해 쓴다</strong> — 코드에 소수 가중치를 쓰지 않는다(3.1).</li>
+<li><strong>합성은 확률 없음</strong>: 동일 등급 4개 → 상위 1개, 100%. 불변식 "소모 4 / 생성 1 / 등급 +1"을 단언한다.</li>
+<li><code>E(s) = equip_tier_mult^min(tier, 40)</code>에서 <code>tier</code>의 출처가 모드에 따라 다르다:<ul>
+<li><code>equip_recovery_mode = "instant"</code> → <code>tier = min(floor(s / 60), 40)</code> (밸런스 모델 근사, <strong>회귀 테스트 기준값</strong>)</li>
+<li><code>equip_recovery_mode = "drop_wait"</code> → <code>tier = 실제 보유 최고 등급</code> (리더 결정 ③, <strong>실게임 기본</strong>)</li>
+</ul>
+</li>
+<li>세대 교체 시 <code>run.equip</code>은 전부 리셋되고 시작 스테이지에서 드랍부터 다시 모은다.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- equip</code> → <strong>15 passed, 0 failed</strong>
+  2. 합성 불변식 테스트: 무작위 시드 1,000회 합성 시퀀스에서 <code>Σ(보유수 × 1.20^tier 환산 가치)</code>가 합성 전후 보존되고, 4개 미만이면 합성이 <strong>일어나지 않음</strong>
+  3. <strong>경계 케이스</strong>: ① tier 40에서 추가 합성 시도 → 등급 상한 유지(41 생성 금지) ② 3개 보유 상태에서 합성 호출 → 변화 없음, 반환값 <code>false</code> ③ 드랍 스트림이 다른 스트림 소비에 영향받지 않음(<code>fork("craft")</code>를 10만 회 돌려도 drop 시퀀스 불변)
+  4. 모드 동등성 테스트: <code>instant</code> 모드에서 <code>s=600</code> → <code>tier=10</code>, <code>E=1.20^10</code>; <code>drop_wait</code> 모드에서 같은 상태·보유 0 → <code>tier=0</code>, <code>E=1.0</code> 임을 단언 (두 모드가 <strong>의도적으로 다름</strong>을 테스트가 명시)</li>
+<li>크기: M</li>
+<li>참고: 리더 결정 ③은 "리셋 후 시작 스테이지 기준 드랍 대기"이므로 실게임 기본은 <code>drop_wait</code>다. 그러나 밸런스 모델의 목표 벽 표는 <code>instant</code> 근사로 산출되었으므로 T2.5 회귀는 <code>instant</code>로 판정하고, 두 모드의 격차는 T2.7이 리포트로 뽑아 기획에 회신한다. <strong>파라미터를 바꿔 맞추지 않는다</strong>(리더 결정 ④의 원칙을 여기에도 적용).</li>
+</ul>
+<h4 id="t17">T1.7 오프라인 보상</h4>
+<ul>
+<li>목표: <code>R_off = min(t, T_cap) · rate(f*) · r_off · (광고 시 ×2)</code>를 오프라인 <strong>시작 시점 DPS</strong> 기준으로 구현한다.</li>
+<li>의존: T1.5</li>
+<li>입력: 밸런스 모델 5절, GDD 6.3, 모호 지점 3·6</li>
+<li>산출: <code>packages/core/src/offline.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>applyOffline(state, elapsedSec, { ad: boolean, capSec: number })</code>. <code>elapsedSec</code>은 정수, 코어는 벽시계를 모른다(1.5).</li>
+<li><strong><code>rate(f*)</code>는 오프라인 시작 시점의 DPS로 계산한다</strong>(모호 지점 3의 결정). 복귀 시점 DPS나 오프라인 중 자동 강화는 구현하지 않는다.</li>
+<li><strong>오프라인 중 스테이지는 오르지 않는다</strong>(모호 지점 6의 결정). 보스 도전 없음, f* 파밍만.</li>
+<li><code>capSec</code>은 <code>offline_cap_sec</code> + 패스 보유 시 <code>pass_offline_cap_sec</code>으로 대체 + 탈것 <code>offline_cap_add_sec</code> 가산.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- offline</code> → <strong>12 passed, 0 failed</strong>
+  2. 밸런스 모델 5절 유효 수입 시간 표 4행이 단언됨: 무과금 8h → <code>4.8h</code>분, 무과금 8h+광고 → <code>9.6h</code>분, 패스 12h → <code>7.2h</code>분, 패스 12h+광고 → <code>14.4h</code>분 (상대오차 1e-9)
+  3. <strong>경계 케이스</strong>: ① <code>elapsedSec = 0</code> → 보상 0, 상태 불변 ② <code>elapsedSec = capSec</code> 정확히 → 상한 미도달로 처리(<code>offline_capped = false</code>) ③ <code>capSec + 1</code> → <code>offline_capped = true</code> ④ 오프라인 전후 <code>state.run.stage</code>·<code>runBest</code> 불변 ⑤ 오프라인 중 <code>levels</code> 불변(자동 강화가 돌지 않음) ⑥ 오프라인 적용 후 <code>tick</code>이 <code>elapsedSec × 10</code>만큼 증가
+  4. 시작/복귀 DPS 구분 테스트: 오프라인 직전 DPS를 기록해 두고, 오프라인 적용 후 강화를 실행했을 때 보상액이 <strong>변하지 않음</strong>을 단언</li>
+<li>크기: S</li>
+<li>참고: 광고 ×2는 <code>ad_offline_mult</code>를 곱하는 것이지 시간을 2배로 늘리는 것이 아니다(상한은 그대로).</li>
+</ul>
+<h4 id="t18">T1.8 세대 교체와 불씨 노드</h4>
+<ul>
+<li>목표: 프레스티지 전 과정과 불씨 노드(불 계열)를 구현하고 GDD 4.1 리셋/유지 표를 단언 테스트로 고정한다.</li>
+<li>의존: T1.6, T1.7</li>
+<li>입력: GDD 4.1, 밸런스 모델 6절, 모호 지점 4</li>
+<li>산출: <code>packages/core/src/prestige.ts</code>, <code>packages/core/src/node.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>Q = floor(ember_c · s_reached^ember_p)</code> — <code>s^1.45</code>는 정수 지수가 아니므로 테이블화할 수 없다. <strong>여기서만 <code>Math.pow</code>를 허용</strong>하고, 허용 지점을 <code>core/src/prestige.ts</code> 한 줄로 한정한 뒤 <code>// ALLOW_POW: 비정수 지수</code> 주석 + <code>check:deps</code>의 화이트리스트에 등록한다(1건만 허용).</li>
+<li><code>cost(A) = node_cost_base + node_cost_slope · A</code> (등차), <code>누적(A) = base·A + slope·A(A−1)/2</code>, <code>M = node_effect^A</code> (사전 계산 테이블).</li>
+<li><code>start_stage = max(1, floor(start_stage_ratio × best_ever))</code>, 시작 시 <code>run_best = start_stage</code> → <strong>형님 즉시 재해금</strong>(모호 지점 4의 결정).</li>
+<li>트리거: 해금 <code>best_ever ≥ 120</code>, 권장선 <code>run_best ≥ 1.15 × last_best</code>, 정체 <code>30분 이동창 증가 &lt; 5</code>.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- prestige node</code> → <strong>19 passed, 0 failed</strong>
+  2. 밸런스 모델 6.1 표 8행(s = 120, 138, 200, 360, 450, 700, 950, 1150 → Q = 362, 443, 759, 1781, 2461, 4671, 7273, 9595)이 <strong>정확히 일치</strong>(floor 포함)
+  3. 6.2 표 7행(A = 10, 50, 100, 200, 400, 589, 724 → 누적 불씨 82, 1108, 3965, 14930, 57860, 124161, 188000 / M = 1.63, 11.5, 132, 1.73e4, 2.99e8, 3.02e12, 1.43e15)이 상대오차 1e-3 이내
+  4. <strong>리셋/유지 단언 테스트</strong>: 모든 필드에 고유한 마커 값을 채운 상태에서 <code>prestige()</code> 실행 후 GDD 4.1 표의 리셋 8항목이 전부 초기화되고 <strong>유지 12항목이 바이트 단위로 불변</strong>임을 단언(12개 개별 단언)
+  5. <strong>경계 케이스</strong>: ① <code>best_ever = 119</code> → 프레스티지 호출이 거부됨(<code>false</code> 반환, 상태 불변) ② <code>best_ever = 120</code> → 허용 ③ <code>start_stage</code>가 280을 넘는 경우 형님 6명 전원 즉시 해금 ④ <code>pity.grind</code> 카운터가 프레스티지로 리셋되지 않음 ⑤ 불씨 잔액이 노드 비용보다 1 적을 때 구매 실패</li>
+<li>크기: M</li>
+<li>참고: 4번 기준이 11.3-4 회귀 시나리오의 코어 측 구현이다. T3.3에서 저장·복원을 얹어 E2E로 다시 검증한다.</li>
+</ul>
+<h4 id="t19">T1.9 도감 카운트와 카드 보너스</h4>
+<ul>
+<li>목표: 몬스터 종별 누적 처치 10/100/1,000에서 카드를 지급하고 전역 % 보너스를 DPS·골드·드랍에 반영한다.</li>
+<li>의존: T1.3, T1.8</li>
+<li>입력: GDD 5.9·4.2, 8.10</li>
+<li>산출: <code>packages/core/src/codex.ts</code> + 테스트</li>
+<li>규칙: <code>account.codexKills[monsterId]</code>는 프레스티지로 리셋되지 않는다. 카드 획득은 임계 <strong>도달 즉시 1회</strong>(중복 지급 금지). 보너스 합산은 <code>1 + Σ(card.value)</code> 가산이며 곱셈이 아니다(곱셈 인플레 억제).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- codex</code> → <strong>10 passed, 0 failed</strong>
+  2. <strong>경계 케이스</strong>: ① 누적 9 → 카드 0, 10 → 카드 1개 ② 10을 넘어 11, 12로 가도 추가 지급 없음 ③ 한 번에 100마리 처치를 주입해도 1단계·2단계 카드가 <strong>각각 1개씩만</strong> 지급 ④ 프레스티지 후 <code>codexKills</code> 불변, 카드 보너스 유지 ⑤ 카드 0개일 때 보너스 배수 정확히 1.0
+  3. DPS 반영 테스트: <code>atk_mult</code> 카드 2장(+0.005 ×2) 보유 시 <code>DPS_total</code>이 정확히 <code>×1.01</code></li>
+<li>크기: S</li>
+<li>참고: 밸런스 모델 11절 미검증 항목 2번(카드 % 보너스가 모델에서 생략됨)에 해당한다. <strong>MVP 회귀(T2.5)는 카드 보너스를 0으로 둔 프로파일로 판정</strong>하고, 카드 포함 곡선은 T2.7의 diff 리포트로 별도 산출한다.</li>
+</ul>
+<h4 id="t110">T1.10 세션 파사드·표기 유틸·이벤트 싱크 인터페이스</h4>
+<ul>
+<li>목표: 렌더러와 시뮬레이터가 공유하는 단일 진입점(<code>GameSession</code>)과 큰 수 표기 유틸을 만든다.</li>
+<li>의존: T1.4, T1.5, T1.9</li>
+<li>산출: <code>packages/core/src/session.ts</code>, <code>packages/core/src/format.ts</code>, <code>packages/core/src/events.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>GameSession</code>은 상태를 소유하지만 계산은 전부 순수 함수에 위임한다. 공개 API: <code>stepTicks(n)</code>, <code>buy(targetId, count)</code>, <code>setAutoUpgrade(b)</code>, <code>prestige()</code>, <code>buyNode(branch)</code>, <code>applyOffline(sec, opts)</code>, <code>snapshot()</code>(읽기 전용 셀렉터), <code>toSave()</code> / <code>static fromSave()</code>.</li>
+<li>표기(GDD 12.2): <code>K/M/B/T</code> 이후 <code>aa, ab, ac...</code>. 표기 유틸은 <strong>코어에</strong> 두고 렌더러가 참조한다.</li>
+<li><code>EventSink</code> 인터페이스와 공통 필드 주입(<code>withCommon</code>). <code>data_version</code>은 필수 필드(누락 시 타입 에러).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- session format events</code> → <strong>17 passed, 0 failed</strong>
+  2. 표기 <strong>경계 케이스</strong>: <code>999</code> → <code>"999"</code>, <code>1000</code> → <code>"1.00K"</code>, <code>999_999</code> → <code>"1000.00K"</code> 아님(<code>"999.99K"</code> 규칙 확정), <code>1e12</code> → <code>"1.00T"</code>, <code>1e15</code> → <code>"1.00aa"</code>, <code>1e18</code> → <code>"1.00ab"</code>, <code>0</code> → <code>"0"</code>, 음수 → <code>"-"</code> 접두, <code>1e30</code> → <code>"1.00ae"</code>
+  3. <code>snapshot()</code>이 반환한 객체를 변경해도 내부 상태가 변하지 않음(동결 단언)
+  4. 이벤트 싱크 테스트: 임의 이벤트 1개 발행 시 GDD 11.1 공통 14필드가 <strong>전부</strong> 채워져 있고 <code>data_version === balance.version</code></li>
+<li>크기: M</li>
+<li>참고: <code>snapshot()</code>이 매 틱 깊은 복사를 하면 배속 ×1000에서 렌더러가 죽는다. 구조 공유 + <code>Object.freeze</code>로 처리한다.</li>
+</ul>
+<hr />
+<h3 id="phase-2-9">Phase 2 — 헤드리스 시뮬레이터와 밸런스 회귀 (9태스크)</h3>
+<h4 id="t21-cli">T2.1 시뮬레이터 CLI 골격과 압축 일정</h4>
+<ul>
+<li>목표: <code>npm run sim -- --days 7 --bot balanced --seed 42</code>가 도는 CLI와 프로파일·일정 엔진을 만든다.</li>
+<li>의존: T1.10</li>
+<li>입력: 밸런스 모델 9.1·9.2, 본 문서 6절</li>
+<li>산출: <code>packages/sim/src/{cli,profiles,schedule}.ts</code> + 테스트</li>
+<li>규칙:</li>
+<li>프로파일 <code>f2p</code> / <code>payer</code>는 밸런스 모델 9.1의 <code>Profile</code> 타입 그대로. <strong><code>emberMult</code>는 양쪽 다 1.00 고정</strong>(이력 #7: 결제 보너스를 프레스티지 통화에 붙이면 안 된다) — 스키마 레벨에서 <code>const 1.0</code>으로 막는다.</li>
+<li>1일 스케줄: <code>블록A(활성) → 오프라인(11h − 블록B) → 블록B(활성) → 오프라인(13h − 블록A)</code>. 하루 합이 정확히 24h임을 단언한다.</li>
+<li>활성 블록 안에서는 T1.3의 <code>stepTicks</code>만 호출한다(시뮬레이터가 별도 전투 코드를 갖지 않는다).</li>
+<li>CLI 옵션: <code>--days</code>(필수), <code>--bot</code>(balanced|aggressive|idle), <code>--seed</code>, <code>--profile</code>(f2p|payer), <code>--out</code>, <code>--equip-mode</code>(instant|drop_wait), <code>--ad-policy</code>(none|moderate|max), <code>--cards</code>(on|off).</li>
+<li>수용 기준:
+  1. <code>npm run sim -- --days 1 --bot balanced --seed 42 --profile f2p</code> → 종료 코드 0, stdout에 <code>day=1 stage=… gold=… prestige=…</code> 요약 1줄, <code>reports/{runId}/summary.json</code> 생성
+  2. <code>npm test -w packages/sim -- schedule</code> → <strong>9 passed</strong>. 포함 케이스: ① 1일 스케줄 합 = 86,400초 ② 활성 블록 분 수가 프로파일과 일치 ③ 오프라인 상한 초과분이 버려짐 ④ <strong>경계</strong>: <code>--days 0</code> → 사용법 출력 후 exit 1 ⑤ 알 수 없는 <code>--bot</code> → exit 1
+  3. <code>grep -rn "hp_growth\|1.058\|1.075\|0.35" packages/sim/src/</code> → <strong>0줄</strong>(수치 하드코딩 금지, 전부 balance.json에서 읽는다)
+  4. <code>npm run sim -- --days 1 --bot balanced --seed 42</code> 2회 실행 → 두 <code>summary.json</code>이 <code>runId</code> 필드를 제외하고 <strong>완전 동일</strong></li>
+<li>크기: M</li>
+<li>참고: <code>runId</code>는 <code>{botId}-{profile}-{seed}-{days}d</code>처럼 <strong>결정적</strong>으로 만든다. 타임스탬프를 넣으면 결정성 비교가 불가능해진다.</li>
+</ul>
+<h4 id="t22-3-balanced-aggressive-idle">T2.2 봇 3종 (balanced / aggressive / idle)</h4>
+<ul>
+<li>목표: 서로 다른 플레이 성향의 결정적 의사결정 정책 3개를 구현한다.</li>
+<li>의존: T2.1</li>
+<li>입력: 스킬 절차 4, GDD 3.4, 밸런스 모델 6.3</li>
+<li>산출: <code>packages/sim/src/bots/{balanced,aggressive,idle}.ts</code> + 테스트</li>
+<li>규칙:</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>봇</th>
+<th>강화 정책</th>
+<th>프레스티지 정책</th>
+<th>접속</th>
+<th>광고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>balanced</code></td>
+<td><code>ΔATK/C</code> 최대 그리디(T1.4), 동률 시 slot 오름차순</td>
+<td>권장선(1.15) <strong>또는</strong> 30분 정체</td>
+<td>프로파일 기본(2세션)</td>
+<td><code>moderate</code>(오프라인 ×2만)</td>
+</tr>
+<tr>
+<td><code>aggressive</code></td>
+<td>구매 가능한 <strong>최고 index 트랙 우선</strong>, 불가 시 그리디로 폴백</td>
+<td>권장선 <code>1.05</code>로 조기 + 정체</td>
+<td>프로파일 기본</td>
+<td><code>max</code>(전 슬롯 상한까지)</td>
+</tr>
+<tr>
+<td><code>idle</code></td>
+<td>자동 강화만(수동 개입 0), 그리디</td>
+<td><strong>정체 감지만</strong>(권장선 무시)</td>
+<td>1일 3회 × 10분</td>
+<td><code>none</code></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>봇은 코어 규칙을 바꾸지 않는다. 오직 "언제 무엇을 호출할지"만 다르다.</li>
+<li>각 봇의 난수 소비는 <code>rng.fork("bot")</code> 스트림으로 격리한다(봇을 바꿔도 드랍 시퀀스가 밀리지 않도록).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/sim -- bots</code> → <strong>12 passed</strong>
+  2. <code>for b in balanced aggressive idle; do npm run sim -- --days 7 --bot $b --seed 42 --profile f2p; done</code> → 3회 전부 종료 코드 0
+  3. 성향 단언 테스트(D7, seed 42, f2p 기준): <code>idle</code>의 도달 스테이지 &lt; <code>balanced</code>의 도달 스테이지, <code>aggressive</code>의 프레스티지 횟수 &gt; <code>balanced</code>의 프레스티지 횟수
+  4. <strong>경계</strong>: <code>idle</code> 봇이 30일 동안 프레스티지를 1회 이상 수행함(정체 감지만으로도 트리거가 걸리는지 확인 — 0회면 밸런스 모델 이력 #5의 회귀)
+  5. 각 봇 결정성: 동일 시드 2회 실행 결과 <code>summary.json</code> 동일</li>
+<li>크기: M</li>
+<li>참고: <code>aggressive</code>의 "최고 index 트랙 우선"은 초반에 명백히 손해다. 그것이 의도다 — 곡선의 하한을 재는 봇이다.</li>
+</ul>
+<h4 id="t23-csv-json">T2.3 출력물 (CSV·요약 JSON·마크다운 리포트)</h4>
+<ul>
+<li>목표: 사람이 읽을 수 있는 실행 산출물 4종을 생성한다.</li>
+<li>의존: T2.2</li>
+<li>입력: 스킬 절차 4, 본 문서 6.3</li>
+<li>산출: <code>packages/sim/src/report.ts</code> + 테스트, <code>reports/</code> 샘플</li>
+<li>규칙: 산출 파일과 필수 열은 다음과 같다.</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>파일</th>
+<th>열 / 키</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gold_curve.csv</code></td>
+<td><code>t_sec,stage,run_best,gold_total,gold_rate_per_sec,dps_total,equip_tier,nodes,M</code></td>
+</tr>
+<tr>
+<td><code>stage_curve.csv</code></td>
+<td><code>t_sec,stage_best,prestige_count,ember_total</code></td>
+</tr>
+<tr>
+<td><code>walls.csv</code></td>
+<td><code>t_sec,stage,wall_type,dps_total,hp_required,gap_ratio</code></td>
+</tr>
+<tr>
+<td><code>summary.json</code></td>
+<td><code>runId, botId, profile, seed, days, dataVersion, stageReached, bestEver, prestigeCount, emberTotal, nodesOwned, atkMult, firstWallSec, checkpoints[{label,tSec,stage}]</code></td>
+</tr>
+<tr>
+<td><code>report.md</code></td>
+<td>실행 파라미터 표, 체크포인트 대조표, 벽 목록 상위 10, 골드·스테이지 곡선 요약 통계</td>
+</tr>
+<tr>
+<td><code>events.jsonl</code></td>
+<td>분석 이벤트(T5.1 완료 후 채워짐. 그 전에는 빈 파일)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>샘플링 간격은 <code>--sample-sec</code>(기본 600초). CSV 행 수가 30일 기준 4,320행을 넘지 않게 한다.</li>
+<li>부동소수점 출력은 <code>toPrecision(12)</code>로 <strong>고정 폭 문자열화</strong>한다. 기본 <code>toString()</code>은 엔진별 표기 차이가 날 수 있고 diff가 지저분해진다.</li>
+<li>수용 기준:
+  1. <code>npm run sim -- --days 7 --bot balanced --seed 42 --profile f2p</code> → <code>reports/balanced-f2p-42-7d/</code> 아래 6개 파일 전부 생성
+  2. <code>head -1 reports/balanced-f2p-42-7d/gold_curve.csv</code> → 위 표의 9개 열 이름과 <strong>정확히 일치</strong>
+  3. <code>npm test -w packages/sim -- report</code> → <strong>8 passed</strong>. 포함: ① CSV 열 순서 고정 ② 숫자 표기 폭 고정 ③ <code>summary.json</code>이 JSON Schema(<code>sim/schema/summary.schema.json</code>) 통과 ④ <strong>경계</strong>: 0개 벽 발생 시 <code>walls.csv</code>가 헤더만 있는 파일로 생성(파일 누락 아님)
+  4. <code>report.md</code>를 열었을 때 체크포인트 대조표에 목표값·시뮬값·편차%가 표시됨(육안 확인용 — 자동 판정은 T2.5)</li>
+<li>크기: M</li>
+<li>참고: <code>gold_rate_per_sec</code>는 그 시점의 <code>rate(f*)</code>다. 벽 구간에서 이 값이 평평해지는 것이 곡선 리포트의 핵심 관전 포인트다.</li>
+</ul>
+<h4 id="t24-1">T2.4 결정성 회귀 (리더 결정 ① 범위)</h4>
+<ul>
+<li>목표: "동일 Node 22.x · 동일 시드 → 바이트 동일"을 자동 검증한다.</li>
+<li>의존: T2.3</li>
+<li>입력: 본 문서 1.2 (D-4), GDD 13.3-2</li>
+<li>산출: <code>packages/sim/src/determinism.ts</code>, <code>npm run sim:determinism</code> 스크립트 + 테스트</li>
+<li>규칙:</li>
+<li>판정 방법: 같은 인자로 2회 실행 → <code>reports/{runId}/</code> 내 <code>runId</code> 제외 전 파일의 SHA-256 목록을 비교. 1비트라도 다르면 exit 1, 어느 파일의 몇 번째 줄이 다른지 출력.</li>
+<li>추가 판정: 최종 <code>GameState</code>를 <code>JSON.stringify</code>한 문자열의 SHA-256도 비교(파일 출력에 안 실리는 내부 상태까지 커버).</li>
+<li>판정 범위를 <strong>문서에 명시</strong>한다: 다른 JS 엔진·다른 Node 메이저 버전과의 바이트 동일성은 요구하지 않는다.</li>
+<li>수용 기준:
+  1. <code>npm run sim:determinism</code> → <code>deterministic: 6/6 files identical, state hash match</code>, 종료 코드 0
+  2. <code>npm run sim:determinism -- --matrix</code> → <code>{balanced,aggressive,idle} × {f2p,payer} × {seed 42, 20260918} = 12</code>조합 전부 통과
+  3. <code>npm test -w packages/sim -- determinism</code> → <strong>6 passed</strong>. 포함: ① <code>Date.now()</code>를 코어 경로에 넣으면 실패함을 증명하는 회귀 테스트(주입식 시계로 시뮬레이션) ② <strong>경계</strong>: 30일 실행에서도 통과(장기 누적에서 깨지지 않음)
+  4. <code>packages/core/src/step.ts</code>에 <code>Math.random()</code> 1회 호출을 임시로 넣고 <code>npm run sim:determinism</code> → <strong>종료 코드 1</strong>, 차이 나는 파일명 출력 (되돌린다)</li>
+<li>크기: S</li>
+<li>참고: <code>runId</code>에 타임스탬프가 들어가면 이 태스크 전체가 무의미해진다. T2.1의 결정적 <code>runId</code> 규칙이 선행 조건이다.</li>
+</ul>
+<h4 id="t25-10-10">T2.5 목표 진행 벽 표 회귀 (10 체크포인트 ±10%)</h4>
+<ul>
+<li>목표: <code>npm run sim:regress</code>가 밸런스 모델 8.2 표를 자동 대조하고 초과 시 실패하게 한다.</li>
+<li>의존: T2.4</li>
+<li>입력: 밸런스 모델 7절·8.2·9.4 (T1·T2)</li>
+<li>산출: <code>packages/sim/src/regress.ts</code>, <code>packages/sim/fixtures/targets.json</code>, <code>npm run sim:regress</code> + 테스트</li>
+<li>규칙: 기준값은 <strong><code>fixtures/targets.json</code>에서 읽는다</strong>(테스트 코드에 하드코딩 금지). 회귀 실행 조건은 <code>--equip-mode instant --cards off --bot balanced</code>로 고정한다(밸런스 모델의 근사 조건과 일치시키기 위함, T1.6·T1.9 참고).</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>시점</th>
+<th>프로파일</th>
+<th>목표 s</th>
+<th>허용 구간 (±10%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1시간</td>
+<td>f2p</td>
+<td>105</td>
+<td>94.5 ~ 115.5</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1시간</td>
+<td>payer</td>
+<td>120</td>
+<td>108 ~ 132</td>
+</tr>
+<tr>
+<td>3</td>
+<td>D1</td>
+<td>f2p</td>
+<td>140</td>
+<td>126 ~ 154</td>
+</tr>
+<tr>
+<td>4</td>
+<td>D1</td>
+<td>payer</td>
+<td>210</td>
+<td>189 ~ 231</td>
+</tr>
+<tr>
+<td>5</td>
+<td>D3</td>
+<td>f2p</td>
+<td>350</td>
+<td>315 ~ 385</td>
+</tr>
+<tr>
+<td>6</td>
+<td>D3</td>
+<td>payer</td>
+<td>400</td>
+<td>360 ~ 440</td>
+</tr>
+<tr>
+<td>7</td>
+<td>D7</td>
+<td>f2p</td>
+<td>450</td>
+<td>405 ~ 495</td>
+</tr>
+<tr>
+<td>8</td>
+<td>D7</td>
+<td>payer</td>
+<td>520</td>
+<td>468 ~ 572</td>
+</tr>
+<tr>
+<td>9</td>
+<td>D30</td>
+<td>f2p</td>
+<td>950</td>
+<td>855 ~ 1,045</td>
+</tr>
+<tr>
+<td>10</td>
+<td>D30</td>
+<td>payer</td>
+<td>1,150</td>
+<td>1,035 ~ 1,265</td>
+</tr>
+</tbody>
+</table></div>
+<p>추가 단언: <strong>첫 벽 체감 시각 53.5분 ± 10%</strong> (48.15 ~ 58.85분), <strong>D30 소과금/무과금 도달 비 ≤ 1.2</strong>, <strong>D1 f2p 프레스티지 ≥ 1회</strong>.
+- 수용 기준:
+  1. <code>npm run sim:regress</code> → <code>PASS 13/13 (checkpoints 10, firstWall 1, payerGap 1, d1Prestige 1)</code>, 종료 코드 0
+  2. 실패 시 출력 형식 확인: <code>fixtures/targets.json</code>의 D30 f2p 목표를 <code>1500</code>으로 임시 변경 후 <code>npm run sim:regress</code> → <strong>종료 코드 1</strong>, <code>#9 D30/f2p: target 1500, actual 950, dev -36.7% (limit ±10%)</code> 출력 (되돌린다)
+  3. <code>npm test -w packages/sim -- regress</code> → <strong>7 passed</strong>. 포함: ① 허용 구간 경계값 정확히 ±10.0%는 <strong>통과</strong>, ±10.01%는 실패 ② 목표 파일이 없으면 즉시 실패(조용한 스킵 금지)
+  4. 전체 실행 시간이 <strong>10분 이내</strong>(CI 게이트로 쓸 수 있어야 한다). 넘으면 샘플링 간격을 늘리지 말고 스텝 병합을 최적화한다.
+- 크기: M
+- 참고: 이 태스크가 실패하면 <strong>밸런스 파라미터를 바꾸지 않는다.</strong> 원인이 구현 버그인지 모델 가정 차이인지 먼저 가려서 <code>docs/ASSUMPTIONS.md</code>에 기록하고 기획 담당에게 회신한다(7.3 참조).</p>
+<h4 id="t26">T2.6 확률 검증 하네스와 천장 단언</h4>
+<ul>
+<li>목표: 표기 확률을 <code>balance.drop_rates_ppm</code>(정수 ppm)에서 읽어 <code>p = ppm / 1_000_000</code>으로 변환한 뒤 <code>N ≥ 900(1−p)/p</code> 규칙으로 시행수를 자동 산출하고 검증한다.</li>
+<li>의존: T2.4</li>
+<li>입력: GDD 7.3, 밸런스 모델 8.4, 모호 지점 9</li>
+<li>산출: <code>packages/sim/src/prob.ts</code>, <code>npm run sim:prob</code> + 테스트</li>
+<li>규칙:</li>
+<li>시행수: <code>N_i = max(100_000, ceil(900 × (1 − p_i) / p_i))</code>를 100,000 단위로 올림. → 전설(5,000 ppm = 0.005) <strong>N = 1,800,000</strong>, 영웅(30,000 ppm) N = 100,000, 희귀(150,000 ppm) N = 100,000, 일반(815,000 ppm) N = 100,000.</li>
+<li><strong>단위</strong>: 입력·출력·리포트의 표기값은 <strong>정수 ppm</strong>이다. 소수 <code>p</code>는 3σ 계산의 중간값으로만 쓰고 파일에 쓰지 않는다. 4개 값의 <strong>정수 합이 1,000,000</strong>임을 같은 하네스가 단언한다.</li>
+<li>판정: 관측 빈도가 <code>p ± 3√(p(1−p)/N)</code> 안.</li>
+<li><strong>표기값 하드코딩 금지</strong>: 테스트는 <code>balance.json</code>의 <code>drop_rates_ppm</code>을 읽는다. <code>grep</code>으로 검증한다(부동소수 확률 리터럴도, ppm 정수 리터럴도 금지).</li>
+<li>천장(GDD 7.3): 20회 누적 → 다음 시행 영웅 이상 확정, 40회 누적 → 전설 확정. 천장 카운터는 계정 영구(프레스티지로 리셋 안 됨).</li>
+<li>시행 로직 자체(뼈 갈기)는 확장 기능이지만 <strong>하네스는 MVP에 넣는다</strong>(GDD 13.1 M11). MVP에서는 <code>rollGrind()</code> 순수 함수만 코어에 두고 UI는 만들지 않는다.</li>
+<li>수용 기준:
+  1. <code>npm run sim:prob</code> → 4행 표 출력(<code>grade, declared_ppm, p, N, observed_ppm, 3σ band, verdict</code>)에서 <strong>4/4 PASS</strong>, 종료 코드 0. 임계 위반 시 <strong>종료 코드 2</strong>(6.1 exit code 규약)
+  2. 출력의 <code>declared_ppm</code> 열이 <code>5000 / 30000 / 150000 / 815000</code>(합 1,000,000), <code>N</code> 열이 <code>1800000 / 100000 / 100000 / 100000</code>과 일치
+  3. <code>npm test -w packages/sim -- prob</code> → <strong>9 passed</strong>. 포함: ① 천장 단언 — 40회 연속 시행 × 1,000회 반복에서 전설 미획득 <strong>0건</strong> ② 20회 시점 영웅 이상 확정 × 1,000회 반복에서 위반 0건 ③ 천장 카운터가 <code>prestige()</code> 후에도 유지 ④ <strong>경계</strong>: 39회에서는 천장이 걸리지 않음, 40회에서 걸림 ⑤ <code>N</code> 산출식 자체의 단위 테스트(p=0.01 → 89,100 → 100,000으로 올림)
+  4. <code>grep -rn "0\.005\|0\.815\|\b0\.03\b\|\b0\.15\b\|\b5000\b\|\b30000\b\|\b150000\b\|\b815000\b" packages/sim/src/prob.ts packages/sim/src/prob.test.ts</code> → <strong>0줄</strong>(부동소수·ppm 정수 양쪽 다 하드코딩 금지)
+  5. 전설 1.8e6 시행 실행 시간이 <strong>60초 이내</strong>. <strong>60초를 초과하면(리더 결정 ⑦) <code>PROB_N_PROFILE=ci</code> 환경변수로 전설 N = 200,000 폴백을 허용한다</strong> — 폴백값은 산식 최소치 <strong>179,100 이상</strong>이어야 하고(하네스가 <code>N &gt;= ceil(900(1−p)/p)</code>를 단언), 리포트 머리글에 <code>profile: ci (N=200000, formula min 179100)</code>을 출력한다. 기본(증거 생산용) 프로파일은 그대로 1,800,000이며, 폴백은 <strong>CI 프로파일에서만</strong> 쓴다</li>
+<li>크기: M</li>
+<li>참고: 1.8e6 시행에서 <code>nextFloat()</code>을 매번 새 객체로 감싸면 GC로 시간이 폭발한다. 루프 안에서 할당하지 않는다.</li>
+</ul>
+<h4 id="t27-diff-simdiff">T2.7 곡선 diff 리포트 (<code>sim:diff</code>)</h4>
+<ul>
+<li>목표: 두 밸런스 버전(또는 두 실행 변형)의 곡선 차이를 마크다운 리포트로 자동 생성한다.</li>
+<li>의존: T2.5</li>
+<li>입력: 밸런스 모델 9.4 T7, 9.5, GDD 13.3-3</li>
+<li>산출: <code>packages/sim/src/diff.ts</code>, <code>npm run sim:diff</code> + 테스트</li>
+<li>규칙:</li>
+<li><code>npm run sim:diff -- --base bal_v1 --head bal_v2</code> — <code>--base</code>/<code>--head</code>는 <code>data/balance.{id}.json</code> 파일 또는 <code>reports/{runId}</code> 디렉터리를 가리킬 수 있다.</li>
+<li>리포트 내용: 파라미터 diff 표(변경된 키·이전값·새값), 체크포인트 10개의 base/head/변화율, 첫 벽 시각 변화, 프레스티지 횟수 변화, 골드 곡선 요약(각 샘플 구간 평균 상대차), 판정(<code>±10% 초과 항목 N개</code>).</li>
+<li><strong>리더 결정 ④의 원칙을 여기에도 적용</strong>: diff는 리포트만 만든다. 파라미터를 자동 조정하지 않는다.</li>
+<li>수용 기준:
+  1. <code>cp data/balance.json data/balance.bal_v2.json &amp;&amp; &lt;bal_v2의 hp_growth를 1.060으로 수정&gt;</code> 후 <code>npm run sim:diff -- --base bal_v1 --head bal_v2</code> → <code>reports/diff-bal_v1-bal_v2.md</code> 생성, 파라미터 diff 표에 <code>hp_growth 1.058 → 1.060</code> 1행, 체크포인트 10행 전부 표시, 종료 코드 0
+  2. <strong>장비 모드 diff</strong>(리더 결정 ③의 회신 근거): <code>npm run sim:diff -- --base equip_instant --head equip_drop_wait</code> → <code>reports/diff-equip_instant-equip_drop_wait.md</code> 생성, 체크포인트 10개의 도달 스테이지 격차가 표로 산출됨
+  3. <strong>카드 보너스 diff</strong>(밸런스 모델 11절 미검증 2): <code>npm run sim:diff -- --base cards_off --head cards_on</code> → 리포트 생성
+  4. <code>npm test -w packages/sim -- diff</code> → <strong>6 passed</strong>. 포함: ① 동일 입력 2개 → <code>변경 없음</code> 리포트 ② <strong>경계</strong>: base에만 있는 키/head에만 있는 키가 각각 <code>(추가)</code>/<code>(삭제)</code>로 표시
+  5. 생성된 리포트를 사람이 읽었을 때 "어느 체크포인트가 왜 움직였는지"가 파라미터 diff 표와 나란히 보임</li>
+<li>크기: M</li>
+<li>참고: 2번·3번 기준이 이 태스크를 단순 유틸이 아니라 <strong>기획 회신 문서 생성기</strong>로 만든다. 8절 D3·U-2의 해소 경로다.</li>
+</ul>
+<h4 id="t28-6090-4">T2.8 60일·90일 장기 프로파일 (리더 결정 ④)</h4>
+<ul>
+<li>목표: 등차 노드 비용의 장기 인플레를 측정해 <strong>리포트만</strong> 생성한다.</li>
+<li>의존: T2.5</li>
+<li>입력: 밸런스 모델 6.2 미검증 리스크, 11절 미검증 1, GDD 모호 지점 8, 리더 결정 ④</li>
+<li>산출: <code>packages/sim/src/long.ts</code>, <code>npm run sim:long</code>, <code>reports/long-term/report.md</code></li>
+<li>규칙:</li>
+<li>실행 조합: <code>{f2p, payer} × {60일, 90일} × bot=balanced × seed=rng_seed_default</code> = 4회.</li>
+<li>리포트 항목: 도달 스테이지, 노드 수 <code>A</code>, <code>M = 1.05^A</code>, 불씨 누적, 프레스티지 횟수, 스테이지/일 증가율의 시계열, <code>STAGE_TABLE_MAX(2000)</code> 및 f64 한계(1e308) 대비 여유.</li>
+<li><strong>결과가 목표표 범위를 벗어나도 <code>balance.json</code>을 수정하지 않는다.</strong> 리포트에 <code>[기획 확인 필요]</code> 섹션을 만들어 관측된 값과 우려 지점만 적는다.</li>
+<li><code>npm run sim:regress</code>의 게이트에 포함시키지 않는다(장기 실행은 CI를 막는다). 별도 수동/야간 실행.</li>
+<li>수용 기준:
+  1. <code>npm run sim:long -- --days 90 --profile f2p</code> → 종료 코드 0, <code>reports/long-term/f2p-90d/summary.json</code> 생성
+  2. <code>npm run sim:long -- --all</code> → 4개 조합 전부 실행, <code>reports/long-term/report.md</code> 생성. 실행 시간 <strong>30분 이내</strong>
+  3. 리포트에 다음 4개 항목이 반드시 포함됨: ① D60·D90 도달 스테이지 ② D60·D90 노드 수와 <code>M</code> ③ <code>STAGE_TABLE_MAX</code> 초과 여부 ④ <code>[기획 확인 필요]</code> 섹션
+  4. <strong>경계</strong>: 도달 스테이지가 <code>STAGE_TABLE_MAX</code>를 넘으면 <code>RangeError</code>로 죽지 않고, 리포트에 <code>stage table exhausted at day N</code>을 기록한 뒤 정상 종료(종료 코드 0). 상수 확장은 기획 회신 후에 한다.
+  5. <code>git diff --stat data/balance.json</code> → <strong>0줄</strong>(이 태스크가 파라미터를 건드리지 않았음을 증명)</li>
+<li>크기: M</li>
+<li>참고: 밸런스 모델 6.2의 "등차 비용은 상한이 없으므로 60·90일에서 인플레가 가속될 수 있다"가 이 태스크가 답할 질문이다. 답을 내되 고치지는 않는다 — 파라미터 결정은 기획 담당의 권한이다.</li>
+</ul>
+<h4 id="t29-sim-replay-checksum">T2.9 <code>sim replay</code> — 시드 + 테이블 checksum 재현 (규제 증거)</h4>
+<ul>
+<li>목표: 과거 실행 기록(<code>run.json</code>)만으로 <strong>같은 결과를 다시 만들어</strong>, 확률 검증 리포트가 법적 방어 증거로 성립하게 한다.</li>
+<li>의존: T2.3, T2.4</li>
+<li>입력: 전략 청사진 4.3.1(증거 3종 중 ① 시드 고정 재현 로그)·팀원 전달 메모 (2)-②, 본 문서 3.1(공통 메타)·6.1(서브커맨드·exit code)</li>
+<li>산출: <code>packages/sim/src/replay.ts</code>, <code>npm run sim:replay</code> 스크립트 + 테스트</li>
+<li>규칙:</li>
+<li><code>npm run sim:replay -- --run &lt;run.json&gt;</code> — <code>run.json</code>(= <code>reports/{runId}/summary.json</code>)에 기록된 <code>seed</code>·<code>tables_checksum</code>·<code>schema_version</code>·CLI 인자 전량을 읽어 같은 실행을 재구성한다. 사람이 인자를 다시 입력하지 않는다.</li>
+<li>T2.1이 <code>summary.json</code>에 <code>{"seed", "args", "tables_checksum", "schema_version", "generated_at"}</code>를 기록하는 것이 선행 조건이다(3.1 공통 메타와 같은 값).</li>
+<li><strong>checksum 불일치는 폴백 없이 exit 2</strong>: 테이블이 바뀐 상태의 재현은 증거가 아니다. stderr에 <code>tables changed: &lt;table&gt; expected &lt;sha&gt; got &lt;sha&gt;</code>를 출력한다.</li>
+<li>재현 판정은 <strong>T2.4와 같은 비교기</strong>(<code>runId</code> 제외 전 파일 SHA-256 + 최종 상태 해시)를 import해서 쓴다. 비교 로직을 두 벌 만들지 않는다.</li>
+<li>stdout은 기계 판독 JSON 1개 객체(<code>{"replay": "&lt;runId&gt;", "match": true|false, "diff_files": [...]}</code>), 사람용 요약은 stderr(6.1 출력 규약).</li>
+<li>수용 기준:
+  1. <code>npm run sim -- --days 7 --bot balanced --seed 42</code> 실행 후 <code>npm run sim:replay -- --run reports/balanced-f2p-42-7d/summary.json</code> → stdout <code>{"replay":"balanced-f2p-42-7d","match":true,"diff_files":[]}</code>, stderr <code>replay OK: 6/6 files identical, state hash match</code>, 종료 코드 <strong>0</strong>
+  2. <code>data/balance.json</code>의 <code>hp_growth</code>를 1.060으로 바꾸고 <code>npx tsx tools/gen-manifest.ts</code> 후 같은 명령 → 종료 코드 <strong>2</strong>, stderr에 <code>tables changed: balance expected sha256:… got sha256:…</code> (변경은 되돌린다)
+  3. <code>summary.json</code>의 <code>seed</code>를 <code>43</code>으로 바꾸고 같은 명령 → 종료 코드 <strong>2</strong>, stdout <code>"match":false</code>, <code>diff_files</code>에 최초로 갈라진 파일명이 들어감
+  4. <code>npm test -w packages/sim -- replay</code> → <strong>5 passed</strong>. 포함: ① 비교기가 T2.4와 동일 모듈임을 단언(<code>determinism.ts</code>의 <code>compareRun()</code>을 import) ② 공통 메타 3필드가 없는 <code>run.json</code> → 종료 코드 <strong>1</strong>(임계 위반이 아니라 실행 오류) ③ <strong>경계</strong>: <code>--run</code> 누락 → 사용법 출력 후 종료 코드 1 ④ <strong>경계</strong>: 30일 실행 기록도 재현 성공
+  5. 확률 검증 산출물도 재현 가능: <code>npm run sim:prob -- --out reports/prob</code> 후 <code>npm run sim:replay -- --run reports/prob/summary.json</code> → 종료 코드 0, 관측 빈도(ppm)가 <strong>완전히 동일한 값</strong>으로 재산출</li>
+<li>크기: S</li>
+<li>참고: 이 태스크는 회귀 게이트가 아니라 <strong>증거 생산 장치</strong>다. 결정성 테스트(T2.4)는 "같은 인자로 2회 돌리면 같은가"를 보고, 이 태스크는 "<strong>기록만으로 과거를 되살릴 수 있는가</strong>"를 본다 — 규제 대응에서 필요한 것은 후자다. exit 2를 쓰는 이유는 6.1 규약에서 임계 위반 = 배포 차단이고, 재현 불가는 같은 등급의 사건이기 때문이다.</li>
+</ul>
+<hr />
+<h3 id="phase-3-4">Phase 3 — 저장·영속성·회귀 시나리오 (4태스크)</h3>
+<h4 id="t31">T3.1 저장 포맷과 라운드트립</h4>
+<ul>
+<li>목표: <code>schemaVersion</code>을 가진 저장 포맷과 직렬화/역직렬화를 구현한다.</li>
+<li>의존: T1.10</li>
+<li>입력: 본 문서 1.5</li>
+<li>산출: <code>packages/core/src/save/{format,serialize}.ts</code> + 테스트</li>
+<li>규칙: 1.5의 포맷 그대로. <code>GameState</code>는 JSON 직렬화 가능해야 한다(함수·Map·Set·<code>undefined</code>·<code>NaN</code>·<code>Infinity</code> 금지). RNG 스트림 상태 전부 포함.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- save</code> → <strong>11 passed</strong>
+  2. 라운드트립 테스트: 30일 시뮬레이션 최종 상태를 <code>toSave()→JSON→fromSave()</code> 후 <strong><code>JSON.stringify</code> 완전 일치</strong>
+  3. 이어하기 결정성: 임의 시점에 저장→복원한 뒤 이어서 10,000틱 진행한 결과가, 저장 없이 연속 진행한 결과와 <strong>완전 일치</strong>(RNG 상태 보존 증명)
+  4. <strong>경계 케이스</strong>: ① <code>schemaVersion</code>이 현재보다 큰 세이브 → 로드 거부(예외), 상태 훼손 없음 ② 손상된 JSON → 예외, 기존 상태 유지 ③ <code>NaN</code>/<code>Infinity</code>가 상태에 들어가면 저장 시점에 예외(조용한 <code>null</code> 변환 금지) ④ 빈 문자열 → 예외</li>
+<li>크기: S</li>
+<li>참고: <code>JSON.stringify</code>는 <code>undefined</code> 필드를 조용히 삭제한다. 3번 기준이 이걸 잡는다.</li>
+</ul>
+<h4 id="t32">T3.2 마이그레이션 프레임워크</h4>
+<ul>
+<li>목표: 저장 포맷 버전 업그레이드 경로를 만들고, 마이그레이션 없는 필드 변경을 테스트로 막는다.</li>
+<li>의존: T3.1</li>
+<li>산출: <code>packages/core/src/save/migrations.ts</code> + 테스트, <code>packages/core/fixtures/saves/v1.json</code></li>
+<li>규칙: <code>migrations: Record&lt;number, (save) =&gt; save&gt;</code>. <code>load()</code>는 <code>schemaVersion</code>부터 현재까지 순차 적용. 샘플로 v1→v2 마이그레이션 1개를 실제로 구현한다(예: <code>account.settings</code>에 <code>bossRaidPreset</code> 기본값 추가).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- migrations</code> → <strong>8 passed</strong>
+  2. 고정 픽스처 <code>fixtures/saves/v1.json</code>(커밋된 실제 v1 세이브)이 현재 버전으로 로드되고, 마이그레이션 후 스키마 검사 통과
+  3. <strong>구조 잠금 테스트</strong>: <code>SCHEMA_VERSION</code>과 <code>Object.keys(migrations).length + 1</code>이 일치하지 않으면 실패 → 마이그레이션 없이 버전만 올리는 것을 막는다
+  4. <strong>필드 잠금 테스트</strong>: <code>GameState</code>의 최상위·<code>run</code>·<code>account</code> 키 목록 스냅샷과 현재 키 목록이 다르면 실패하며, 실패 메시지가 <code>add a migration for: &lt;키명&gt;</code>을 출력
+  5. <strong>경계</strong>: v1 → v3 2단계 점프가 순서대로 적용됨, 미등록 버전(v0) → 명시적 예외</li>
+<li>크기: S</li>
+<li>참고: 4번 기준이 "마이그레이션 함수 없이 필드 변경 금지"(AGENTS.md 규칙)를 코드로 강제하는 장치다.</li>
+</ul>
+<h4 id="t33-12-e2e">T3.3 세대 교체 유지 자산 12종 E2E 회귀</h4>
+<ul>
+<li>목표: GDD 11.3-4 시나리오를 저장·복원까지 포함한 E2E로 단언한다.</li>
+<li>의존: T3.1, T1.8</li>
+<li>입력: GDD 4.1 리셋/유지 표, 11.3-4</li>
+<li>산출: <code>packages/sim/src/scenarios/prestige-persist.test.ts</code></li>
+<li>규칙: 시나리오 = (1) 30일 시뮬레이션으로 실제 자산이 쌓인 상태 생성 → (2) 저장 → (3) 복원 → (4) <code>prestige()</code> → (5) 저장 → (6) 복원 → (7) 유지 12항목 단언. 마커 값이 아니라 <strong>실제 플레이로 쌓인 값</strong>을 쓰는 것이 T1.8과의 차이다.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/sim -- prestige-persist</code> → <strong>14 passed</strong> (유지 12항목 + 리셋 대표 2항목)
+  2. 12개 단언이 GDD 4.1 표의 유지 항목명과 1:1로 대응되고, 테스트 이름에 항목명이 들어감(<code>유지: 불씨 잔액·노드</code>, <code>유지: 우편함·미수령 상품</code> 등)
+  3. <strong>경계</strong>: 우편함에 미수령 상품 3건이 있는 상태에서 프레스티지 → 3건 전부 보존(결제 미수령 방지, GDD 4.1 비고)
+  4. 저장·복원을 2회 더 반복해도 유지 자산이 동일(누적 손실 없음)</li>
+<li>크기: S</li>
+<li>참고: 이 테스트는 "프레스티지 구현을 건드릴 때마다 깨질 수 있는" 의도적 방벽이다. 깨지면 구현이 아니라 GDD 4.1 표를 먼저 다시 읽는다.</li>
+</ul>
+<h4 id="t34-ux">T3.4 설정·우편함 영속성 회귀 (전작 UX 마찰 대응)</h4>
+<ul>
+<li>목표: GDD 11.3-2·11.3-3 시나리오(재기동 후 설정 유지 / 미수령 상품 복구)를 회귀 테스트로 고정한다.</li>
+<li>의존: T3.2</li>
+<li>입력: GDD 11.3, 2장(보스토벌 설정 초기화 이슈), 진단자 메모(결제 미수령)</li>
+<li>산출: <code>packages/core/src/settings.ts</code>, <code>packages/core/src/mailbox.ts</code>, <code>packages/sim/src/scenarios/persistence.test.ts</code></li>
+<li>규칙:</li>
+<li><code>account.settings</code>는 <strong>항상 저장 경로에 포함</strong>되고, 기본값은 마이그레이션이 채운다(로드 시점에 코드 기본값으로 덮어쓰기 금지 — 이것이 전작 "보스토벌 설정 초기화"의 전형적 원인이다).</li>
+<li>우편함: <code>grantPending(item)</code> → 저장 → 복원 → <code>claimPending()</code>이 항상 가능. 지급이 완료되어야만 제거된다(먼저 제거하고 지급하는 순서 금지).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/sim -- persistence</code> → <strong>10 passed</strong>
+  2. 시나리오 단언: ① 설정 변경 → 저장 → 복원 → <strong>변경값 유지</strong>(기본값으로 되돌아가지 않음) ② 새 설정 키가 추가된 버전으로 마이그레이션해도 기존 사용자 설정값 유지 ③ 지급 직전 강제 종료(= 저장 후 claim 미완료) → 복원 시 우편함에 남아 있고 재지급 가능 ④ <strong>중복 지급 금지</strong>: 같은 <code>transaction_id</code>로 2회 claim → 1회만 반영
+  3. <strong>경계</strong>: 우편함 0건 상태에서 <code>claimPending()</code> → 예외 없이 no-op
+  4. <code>npm run sim:regress</code> 여전히 통과(회귀 영향 없음)</li>
+<li>크기: S</li>
+<li>참고: 이 태스크는 밸런스와 무관하지만 <strong>매출 직결</strong>이다. 진단 보고서에서 확인된 "결제 3회 중 2회만 반영"의 구조적 예방책이며, 신작에서 같은 CS를 만들지 않기 위한 최소 장치다.</li>
+</ul>
+<hr />
+<h3 id="phase-4-mvp-5">Phase 4 — 렌더러 MVP (5태스크)</h3>
+<h4 id="t41-pixijs-pwa">T4.1 웹 앱 스캐폴드 (PixiJS · PWA · 배속)</h4>
+<ul>
+<li>목표: 코어를 구동하는 PixiJS 렌더러 셸과 배속 버튼을 만든다.</li>
+<li>의존: T1.10</li>
+<li>입력: GDD 12.3</li>
+<li>산출: <code>apps/web/{index.html,manifest.webmanifest,src/main.ts,src/bind/loop.ts,src/render/stage.ts}</code>, <code>vite.config.ts</code></li>
+<li>규칙:</li>
+<li>루프: <code>requestAnimationFrame</code>에서 실경과 ms를 누적해 <code>floor(acc/100) × speed</code> 틱만큼 <code>session.stepTicks()</code>를 호출한다. <strong>렌더러는 게임 규칙을 한 줄도 갖지 않는다.</strong></li>
+<li>배속 ×1/×10/×100/×1000. ×1000에서도 한 프레임의 <code>stepTicks</code> 호출 시간이 16ms를 넘으면 남은 틱을 다음 프레임으로 이월한다(프레임 드랍은 허용, 상태 스킵은 금지).</li>
+<li>PWA: <code>manifest.webmanifest</code> + 서비스 워커(오프라인 셸만). 30fps 목표.</li>
+<li>수용 기준:
+  1. <code>npm run build -w apps/web</code> → 종료 코드 0
+  2. <code>npm run dev -w apps/web</code> 기동 후 <code>curl -sf http://localhost:5173/</code> → HTTP 200
+  3. <code>npm run check:deps</code> → <code>apps/web</code>에서 게임 수식 식별자(<code>hp_growth</code>, <code>cost_growth</code>, <code>1.058</code>, <code>1.075</code>, <code>Math.pow</code>) 검출 0건
+  4. <code>npm run e2e -- --grep speed</code> → 배속 ×1000으로 10초 구동 시 콘솔 에러 0, 스테이지가 ×1 대비 증가(스크린샷 <code>speed-x1000.png</code> 생성)</li>
+<li>크기: M</li>
+<li>참고: PixiJS 8은 <code>await Application.init()</code> 비동기 초기화다. 동기 생성자 예제를 복사하면 동작하지 않는다.</li>
+</ul>
+<h4 id="t42">T4.2 메인 전투 화면</h4>
+<ul>
+<li>목표: GDD 12.1의 메인 화면(배경·형님 4·웨이브·HP바·HUD·스테이지 ±)을 구현한다.</li>
+<li>의존: T4.1</li>
+<li>입력: GDD 12.1·12.2</li>
+<li>산출: <code>apps/web/src/ui/main.ts</code>, <code>apps/web/src/render/{brothers,monsters,hud}.ts</code></li>
+<li>규칙: <strong>숫자가 주인공이다</strong>(GDD 12.2) — 데미지·골드·레벨업 팝이 이펙트에 가리지 않게 z-order를 고정한다. 큰 수 표기는 코어 <code>format.ts</code>를 호출한다(렌더러에 표기 로직 금지). 스테이지 ±버튼은 <code>runBest</code> 범위 안에서만 동작.</li>
+<li>수용 기준:
+  1. <code>npm run e2e -- --grep main</code> → <code>tests/e2e/__screenshots__/main.png</code> 생성, <strong>콘솔 에러 0건</strong>
+  2. 스크린샷에 골드·DPS·스테이지 HUD 3요소가 모두 보임(Playwright <code>toBeVisible</code> 단언 3건)
+  3. 배속 ×100으로 30초 구동 후 스테이지 표시가 증가하고 HP바가 0~1 범위를 벗어나지 않음
+  4. <strong>경계</strong>: 스테이지 −버튼을 <code>s=1</code>에서 눌러도 0 이하로 내려가지 않음, +버튼을 <code>runBest</code>에서 눌러도 넘어가지 않음</li>
+<li>크기: M</li>
+<li>참고: 에셋은 <code>assets/_index.json</code>을 통해서만 참조한다. 경로 문자열을 코드에 쓰면 T0.4 게이트에서 고아 참조로 잡히지 않고 런타임에 깨진다.</li>
+</ul>
+<h4 id="t43">T4.3 강화 화면과 장비 화면</h4>
+<ul>
+<li>목표: GDD 12.1의 강화·장비 두 화면을 구현한다.</li>
+<li>의존: T4.2</li>
+<li>입력: GDD 5.2·5.3, 12.1</li>
+<li>산출: <code>apps/web/src/ui/{upgrade,equip}.ts</code></li>
+<li>규칙: 강화 — 형님 리스트, 레벨/비용/ΔDPS 표시, <code>x1/x10/x100/MAX</code>, <strong>자동 강화 토글</strong>. 장비 — 인벤토리 그리드, 장착 슬롯 3, 결정적 합성 버튼(확률 표기 없음 — 100%이므로 표기 의무 자체가 없다). 모든 구매는 <code>session.buy()</code>를 호출하며 화면이 직접 골드를 차감하지 않는다.</li>
+<li>수용 기준:
+  1. <code>npm run e2e -- --grep "upgrade|equip"</code> → <code>upgrade.png</code>, <code>equip.png</code> 생성, <strong>콘솔 에러 0건</strong>
+  2. 강화 화면에서 <code>x10</code> 클릭 → 해당 형님 레벨이 정확히 10 증가(골드 충분 시), 골드가 <code>Σ C(L)</code>만큼 감소
+  3. 자동 강화 토글 ON → 10초 후 레벨 증가, OFF → 레벨 불변
+  4. <strong>경계</strong>: 골드 부족 상태에서 <code>MAX</code> 클릭 → 구매 0회, 에러 없음, 버튼이 비활성 표시
+  5. 장비 4개 보유 상태에서 합성 버튼 → 보유 4 감소·상위 1 증가(<code>instant</code>/<code>drop_wait</code> 모드와 무관하게 인벤토리 동작은 동일)</li>
+<li>크기: M</li>
+<li>참고: ΔDPS 표시는 <code>ATK</code> 차이가 아니라 <strong><code>DPS_total</code> 차이</strong>여야 한다(모든 배수가 곱해진 뒤 값). 여기를 틀리면 유저가 보는 숫자와 자동 강화의 판단 근거가 어긋난다.</li>
+</ul>
+<h4 id="t44">T4.4 세대 교체·불씨 노드·오프라인 보상 화면</h4>
+<ul>
+<li>목표: 프레스티지 확인 화면(리셋/유지 표 노출), 불씨 노드 트리, 오프라인 보상 팝업을 구현한다.</li>
+<li>의존: T4.2</li>
+<li>입력: GDD 12.1, 4.1, 6.3</li>
+<li>산출: <code>apps/web/src/ui/{prestige,nodes,offline}.ts</code></li>
+<li>규칙:</li>
+<li>세대 교체 화면은 <strong>GDD 4.1의 리셋/유지 표를 그대로 화면에 띄운다</strong>(설계 리스크 "전작 유저의 리셋 거부감" 완화책). 예상 불씨 <code>Q</code>를 상단에 표시.</li>
+<li>불씨 노드 화면: 불 계열 트리, 현재 <code>M</code> 표시, 다음 노드 비용 <code>cost(A)</code>.</li>
+<li><strong>오프라인 복귀 팝업은 2초 이내에 닫을 수 있어야 한다</strong>(GDD 12.2, 장기 유저 일일 마찰 1순위). 강제 연출·광고 자동 재생 금지. 광고 ×2는 <strong>선택 버튼</strong>.</li>
+<li>수용 기준:
+  1. <code>npm run e2e -- --grep "prestige|nodes|offline"</code> → <code>prestige.png</code>, <code>nodes.png</code>, <code>offline.png</code> 생성, <strong>콘솔 에러 0건</strong>
+  2. 프레스티지 화면 스크린샷에 유지 항목이 <strong>12행 전부</strong> 보임(Playwright로 행 수 12 단언)
+  3. <strong>2초 규칙 자동 검증</strong>: 오프라인 팝업 표시 후 닫기 버튼이 활성화되기까지의 시간이 <code>&lt; 2000ms</code>임을 Playwright 타이밍 단언으로 측정
+  4. <strong>경계</strong>: <code>best_ever &lt; 120</code>일 때 세대 교체 버튼이 비활성이고 사유 문구가 표시됨; 불씨 부족 시 노드 구매 버튼 비활성</li>
+<li>크기: M</li>
+<li>참고: 3번 기준은 UX 요구를 테스트로 바꾼 것이다. "닫기 버튼에 3초 딜레이" 같은 광고 유도 패턴이 나중에 슬쩍 들어오는 것을 막는다.</li>
+</ul>
+<h4 id="t45-playwright-e2e-6-0node">T4.5 Playwright E2E — 6화면 스크린샷·콘솔 에러 0·Node/브라우저 동치</h4>
+<ul>
+<li>목표: MVP 6화면의 스크린샷 회귀와 브라우저 결정성 확인을 자동화한다.</li>
+<li>의존: T4.3, T4.4</li>
+<li>입력: GDD 12.1의 ● 6개, 본 문서 1.2 (D-4)</li>
+<li>산출: <code>playwright.config.ts</code>, <code>tests/e2e/*.spec.ts</code>, <code>tests/e2e/__screenshots__/</code></li>
+<li>규칙: 대상 6화면 = 메인 / 강화 / 장비 / 세대 교체 / 불씨 노드 / 오프라인 보상. 뷰포트 고정(390×844 모바일 + 1280×720 데스크톱). 스크린샷 비교 임계 <code>maxDiffPixelRatio: 0.01</code>. <strong>콘솔 에러·경고·<code>pageerror</code>·실패한 네트워크 요청이 1건이라도 있으면 실패</strong>.</li>
+<li>수용 기준:
+  1. <code>npm run e2e</code> → <strong>12 passed</strong>(6화면 × 2뷰포트), 0 failed, <code>__screenshots__/</code>에 12개 PNG
+  2. 콘솔 리스너 단언: 전 테스트 합계 <code>console.error</code> 0건, <code>pageerror</code> 0건, 4xx/5xx 요청 0건
+  3. <strong>Node/브라우저 동치 테스트</strong>: 브라우저에서 시드 42로 1시간(36,000틱) 진행한 뒤 <code>session.snapshot()</code>의 <code>{stage, gold, levels, nodes}</code>를 추출 → 같은 조건 <code>npm run sim</code>의 값과 <strong>완전 일치</strong>(골드는 상대오차 0)
+  4. CI에서 동일하게 통과(헤드리스 크로미움)</li>
+<li>크기: M</li>
+<li>참고: 3번이 이 Phase의 진짜 목적이다. 여기서 값이 갈리면 (D-1) 정수 틱 또는 (D-3) 사전 계산 테이블이 렌더러 경로에서 새고 있는 것이다. 스크린샷은 눈으로 보는 용도, 동치 테스트는 결정성 보증 용도다.</li>
+</ul>
+<hr />
+<h3 id="phase-5-4">Phase 5 — 분석 이벤트·수익모델 스텁 (4태스크)</h3>
+<h4 id="t51-jsonl">T5.1 이벤트 버스와 JSONL 싱크</h4>
+<ul>
+<li>목표: GDD 11.1 공통 14필드를 강제하는 이벤트 버스와 로컬 싱크를 만든다.</li>
+<li>의존: T1.10</li>
+<li>입력: GDD 11.1, 모호 지점 10</li>
+<li>산출: <code>packages/core/src/events.ts</code>(확장), <code>packages/sim/src/sinks/jsonl.ts</code>, <code>apps/web/src/bind/sink.ts</code>, <code>data/schema/analytics.schema.json</code></li>
+<li>규칙:</li>
+<li>공통 14필드는 TS 타입에서 <strong>필수</strong>로 선언한다. 특히 <code>data_version</code>(= <code>balance.version</code>)은 누락 시 컴파일 에러가 나야 한다(모호 지점 10의 결정).</li>
+<li>시뮬레이터 싱크 → <code>reports/{runId}/events.jsonl</code>. 웹 싱크 → IndexedDB 버퍼 + 다운로드.</li>
+<li>코어는 I/O를 하지 않는다. 싱크는 주입된다.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- events</code> → <strong>9 passed</strong>. 포함: ① 공통 14필드 전량 존재 단언 ② <code>data_version</code> 누락 시 타입 에러(<code>tsd</code>/<code>expectTypeOf</code> 사용) ③ <strong>경계</strong>: 싱크가 예외를 던져도 게임 루프가 멈추지 않음(이벤트 발행 실패는 게임을 죽이지 않는다)
+  2. <code>npm run sim -- --days 1 --bot balanced --seed 42</code> → <code>events.jsonl</code> 생성, <code>wc -l</code> &gt; 0
+  3. <code>npx tsx packages/sim/src/sinks/validate-jsonl.ts reports/.../events.jsonl</code> → 전 줄이 <code>analytics.schema.json</code> 통과, <code>0 invalid</code>
+  4. <code>jq -r '.data_version' events.jsonl | sort -u</code> → <strong><code>1</code> 한 줄만</strong> 출력(전 이벤트에 동일 <code>data_version</code>)</li>
+<li>크기: M</li>
+</ul>
+<h4 id="t52-10">T5.2 이벤트 10종 발행 지점 연결</h4>
+<ul>
+<li>목표: GDD 11.2의 이벤트 10종을 코어의 정확한 지점에서 발행한다.</li>
+<li>의존: T5.1</li>
+<li>입력: GDD 11.2 표</li>
+<li>산출: <code>packages/core/src/**</code>의 발행 호출 + <code>packages/sim/src/scenarios/events.test.ts</code></li>
+<li>규칙: 대상 10종 = <code>session_start</code>, <code>session_end</code>, <code>stage_clear</code>, <code>wall_hit</code>, <code>upgrade</code>, <code>prestige</code>, <code>purchase</code>, <code>ad_reward</code>, <code>gacha_roll</code>, <code>content_enter</code>. 각 이벤트의 고유 필수 필드를 GDD 11.2 표대로 채운다. <code>wall_hit.gap_ratio = 필요DPS / 현재DPS</code>.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/sim -- events</code> → <strong>13 passed</strong> (10종 × 고유 필드 단언 + 3개 경계)
+  2. <code>npm run sim -- --days 1 --bot balanced --seed 42 &amp;&amp; jq -r '.event_name' events.jsonl | sort | uniq -c</code> → <strong>최소 6종</strong>(<code>session_start/end</code>, <code>stage_clear</code>, <code>wall_hit</code>, <code>upgrade</code>, <code>prestige</code>)이 1건 이상. 나머지 4종은 T5.3·T5.4·T6.4에서 채워진다.
+  3. <code>wall_hit</code> 이벤트의 <code>gap_ratio</code>가 항상 <code>&gt; 1.0</code>(벽이니까), <code>stage_clear</code>의 <code>clear_time_sec</code>이 항상 <code>≥ t_min_kill × 몬스터 수</code>
+  4. <strong>경계</strong>: 1일 실행에서 <code>prestige</code> 이벤트 수 == <code>summary.json</code>의 <code>prestigeCount</code></li>
+<li>크기: M</li>
+<li>참고: <code>wall_hit</code>은 벽에 <strong>진입할 때 1회</strong>만 발행한다. 매 틱 발행하면 JSONL이 폭발하고 분석이 못 쓰게 된다.</li>
+</ul>
+<h4 id="t53-ad_policy">T5.3 광고 슬롯과 <code>ad_policy</code> 프로파일</h4>
+<ul>
+<li>목표: GDD 7.4의 광고 슬롯 4종을 <code>AdReward</code> 이벤트 경로로만 들어오게 하고, 시뮬레이터 프로파일로 대체한다.</li>
+<li>의존: T5.2</li>
+<li>입력: GDD 7.4</li>
+<li>산출: <code>packages/core/src/ads.ts</code>, <code>packages/sim/src/profiles.ts</code>(확장), <code>apps/web/src/ui/ad-slots.ts</code>(스텁)</li>
+<li>규칙:</li>
+<li>슬롯 4종: <code>ad_offline_x2</code>(3회/일), <code>ad_gold_boost</code>(3회/일, 5분 골드 ×3), <code>ad_shard</code>(2회/일), <code>ad_revive_tower</code>(1회/일).</li>
+<li>코어는 광고 SDK를 모른다. <code>grantAdReward(slotId)</code>만 있고, 웹은 스텁(즉시 성공), 시뮬은 <code>ad_policy = none | moderate | max</code>로 대체한다.</li>
+<li><strong>광고 제거 구매자는 같은 횟수를 광고 없이 받는다</strong>(구매자 페널티 금지, GDD 7.4).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- ads</code> → <strong>10 passed</strong>. 포함: ① 일 상한 초과 시 거부 ② 일 리셋 후 회복 ③ <strong>광고 제거 보유 시 광고 없이 동일 횟수 지급</strong>(단언) ④ <strong>경계</strong>: 상한 정확히 3회째 성공, 4회째 실패
+  2. <code>npm run sim -- --days 7 --bot idle --seed 42 --ad-policy none</code> vs <code>--ad-policy max</code> → 도달 스테이지가 <code>max</code> 쪽이 더 큼
+  3. <code>jq -r 'select(.event_name=="ad_reward") | .slot_id' events.jsonl | sort -u</code> → 슬롯 id가 <code>data</code>의 정의와 일치
+  4. <strong>밸런스 모델 11절 미검증 6 해소</strong>: <code>--ad-policy none</code> 프로파일의 D30 도달 스테이지를 <code>reports/ad-policy-none.md</code>로 리포트 생성(파라미터 조정 없음)</li>
+<li>크기: M</li>
+</ul>
+<h4 id="t54-purchasegrant_status-e2e">T5.4 상점 스텁과 <code>purchase.grant_status</code> E2E 회귀</h4>
+<ul>
+<li>목표: 비확률 상품 지급 경로를 스텁으로 만들고, GDD 11.3-1·11.3-2 회귀 시나리오를 고정한다.</li>
+<li>의존: T5.2, T3.4</li>
+<li>입력: GDD 7.2, 11.2 <code>purchase</code>, 11.3-1·2</li>
+<li>산출: <code>packages/core/src/shop.ts</code>, <code>packages/sim/src/scenarios/purchase.test.ts</code></li>
+<li>규칙:</li>
+<li>지급 순서 고정: <strong>검증 → 우편함 적재 → 인벤토리 반영 → <code>purchase.grant_status="granted"</code> 발행 → 우편함 제거.</strong> 어느 단계에서 끊겨도 재기동 시 복구된다.</li>
+<li><code>grant_status</code>(<code>granted|pending|failed</code>)와 <code>grant_latency_ms</code>는 <strong>협상 불가 필수 필드</strong>다(GDD 11.2). 타입에서 필수로 선언한다.</li>
+<li>MVP는 실제 결제를 붙이지 않는다. <code>fakeStore.purchase(productId)</code>만 있다.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/sim -- purchase</code> → <strong>12 passed</strong>
+  2. 시나리오 단언: ① 정상 구매 → <code>grant_status="granted"</code>, <code>grant_latency_ms ≥ 0</code> ② 지급 직전 강제 종료 시뮬레이션 → 재기동 후 우편함에서 복구되어 최종 <code>granted</code> ③ <strong>중복 방지</strong>: 같은 <code>transaction_id</code> 2회 → 지급 1회, 2번째는 <code>grant_status="granted"</code>이되 인벤토리 변화 0 ④ 지급 실패 주입 → <code>failed</code> 이벤트 발행 후 우편함에 <strong>남아 있음</strong>
+  3. <code>jq -r 'select(.event_name=="purchase") | select(.grant_status!="granted")' events.jsonl | wc -l</code> → 정상 시나리오에서 <strong>0</strong>
+  4. <code>shop_products.json</code>의 9행 전부에 대해 <code>grants</code> 적용 후 상태 변화가 단언됨(특히 <code>p_season_pass</code>의 <code>offline_cap_sec</code> 43200 반영, <code>p_growth_1</code>의 DPS ×1.12)</li>
+<li>크기: M</li>
+<li>참고: 이것이 진단 보고서에서 확인된 "결제 3회 중 2회만 반영"을 신작에서 구조적으로 막는 장치다. 점수는 낮아 보이지만 <strong>매출 직결·CS 직결</strong>이라 MVP에 넣었다.</li>
+</ul>
+<hr />
+<h3 id="phase-6-5-v11v13">Phase 6 — 확장 (5태스크, v1.1~v1.3)</h3>
+<h4 id="t61-v11">T6.1 부족 캠프 (v1.1)</h4>
+<ul>
+<li>목표: GDD 5.10의 5×5 배치·건물 3종·인접 보너스를 구현한다.</li>
+<li>의존: T2.5 (회귀 통과 상태에서만 착수)</li>
+<li>입력: GDD 5.10, 8.14, 밸런스 모델 11절 미검증 3</li>
+<li>산출: <code>data/camp_buildings.json</code> + 스키마 활성화, <code>packages/core/src/camp.ts</code>, <code>apps/web/src/ui/camp.ts</code></li>
+<li>규칙: 화톳불(인접 +10%, 불씨 +5%) / 사냥막(골드 +X%) / 뼈공방(드랍 +X%). <strong>최대 효과와 최소 효과 차이는 1.3배 이내</strong>(배치를 틀려도 막히지 않게). 건물 레벨은 세대 교체로 리셋, 해금은 유지.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- camp</code> → <strong>12 passed</strong>. 포함: ① 최적 배치/최악 배치 비가 <strong>≤ 1.3</strong> 단언 ② 프레스티지 후 레벨 0·해금 유지 ③ <strong>경계</strong>: 5×5 밖 좌표 배치 거부, 같은 칸 중복 배치 거부
+  2. <code>npm run sim:diff -- --base camp_off --head camp_on</code> → 리포트 생성. 캠프가 <code>g_gold</code> 실효값을 바꾸므로 <strong>전 구간 재검산이 필요함</strong>이 리포트에 명시됨(밸런스 모델 11절 미검증 3)
+  3. <code>npm run sim:regress</code> → 캠프 OFF 기준으로 여전히 13/13 PASS
+  4. <code>npm run e2e -- --grep camp</code> → <code>camp.png</code> 생성, 콘솔 에러 0</li>
+<li>크기: M</li>
+</ul>
+<h4 id="t62-ui-v11">T6.2 도감 UI · 스킨 · 탈것 · 상점 · 시즌 패스 (v1.1)</h4>
+<ul>
+<li>목표: 수집·비확률 수익 축의 화면과 지급 경로를 붙인다.</li>
+<li>의존: T5.4, T1.9</li>
+<li>입력: GDD 5.8·5.9, 7.2, 4.4, 12.1</li>
+<li>산출: <code>data/pass_tracks.json</code> 활성화, <code>apps/web/src/ui/{codex,skins,shop,pass}.ts</code>, <code>packages/core/src/{skin,mount,season}.ts</code></li>
+<li>규칙: 미발견 몬스터는 <code>_silh</code> 에셋. 스킨 옵션 상한 +5%(스키마가 이미 강제). 탈것은 오프라인 상한·시작 스테이지에만 기여(전투력 ≤ +5%). 시즌 28일, 전환은 <strong>테이블 3종 교체만으로</strong>(<code>events</code>·<code>skins</code>·<code>monsters</code>) — 코드 변경이 필요하면 설계 실패.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- skin mount season</code> → <strong>16 passed</strong>. 포함: 스킨 +5% 초과 데이터 거부, 탈것 <code>atk_mult</code> 상한, 시즌 종료 시 패스 레벨 리셋·스킨/카드/불씨 유지
+  2. <strong>시즌 전환 테스트</strong>: <code>events.json</code>·<code>skins.json</code>·<code>monsters.json</code> 3개만 교체하고 <code>npm test &amp;&amp; npm run sim:regress</code> → <strong>코드 변경 0줄로</strong> 통과
+  3. <code>npm run e2e -- --grep "codex|shop|pass"</code> → 3개 스크린샷 생성, 콘솔 에러 0
+  4. 도감 미발견 항목이 <code>_silh</code> 에셋을 참조하고 <code>validate:assets</code> 통과</li>
+<li>크기: M</li>
+</ul>
+<h4 id="t63-v12">T6.3 얼음 절벽 · 보스 원정 · 주간 랭킹 (v1.2)</h4>
+<ul>
+<li>목표: 방치로 풀리지 않는 도전 축과 랭킹을 붙인다.</li>
+<li>의존: T6.2, T3.4</li>
+<li>입력: GDD 4.3, 5.6, 10.3, 11.3-3</li>
+<li>산출: <code>data/stages.json</code>에 <code>tower</code>/<code>raid</code> 행 추가, <code>packages/core/src/{tower,raid,ranking}.ts</code>, UI</li>
+<li>규칙: 절벽 — 층별 고정 HP·고정 제한시간, <strong>오프라인 진행 없음</strong>. 보스 원정 — 일 3회, 5분, 누적 딜량. <strong>설정은 서버 영속화가 원칙이고 로컬 캐시는 보조</strong>(GDD 2장, 전작 UX 마찰 직접 대응). 랭킹은 100인 그룹.</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- tower raid</code> → <strong>14 passed</strong>. 포함: 절벽에서 오프라인 보상 0, 원정 일 3회 상한, <strong>경계</strong>: 제한시간 정확히 소진 시 실패 판정
+  2. <strong>설정 영속성 회귀(11.3-3)</strong>: 보스 원정 설정 변경 → 저장 → 재기동 → <strong>설정 유지</strong> 단언이 T3.4 스위트에 추가되어 통과
+  3. <code>npm run e2e -- --grep "tower|raid"</code> → 스크린샷 생성, 콘솔 에러 0
+  4. <code>npm run sim:regress</code> → 여전히 13/13 PASS(신규 콘텐츠가 메인 곡선을 건드리지 않음)</li>
+<li>크기: M</li>
+</ul>
+<h4 id="t64-1-v12">T6.4 뼈 갈기 — 확률형 1종 구현 (v1.2)</h4>
+<ul>
+<li>목표: GDD 7.3의 유일한 확률형 요소를 구현하고, T2.6 하네스로 검증한다.</li>
+<li>의존: T2.6, T6.2</li>
+<li>입력: GDD 7.3, 밸런스 모델 8.4</li>
+<li>산출: <code>packages/core/src/grind.ts</code>, <code>apps/web/src/ui/{grind,rates}.ts</code></li>
+<li>규칙:</li>
+<li>등급 4종(전설 0.5 / 영웅 3 / 희귀 15 / 일반 81.5%). <strong>실패 개념 없음</strong> — 모든 시행이 옵션 1줄을 부여한다. 재료는 미획득 시 「갈린 뼈」로 환급 → 순수 손실 없음.</li>
+<li>천장: 20회 → 영웅 이상 확정, 40회 → 전설 확정. 카운터는 계정 영구.</li>
+<li><strong>확률 표기 4곳 전부</strong>: ① 실행 버튼 바로 위 인라인(접기 금지) ② <code>설정 &gt; 확률 정보</code> 상시 화면 ③ 스토어 상품 상세(원석 관여 시) ④ 공식 홈페이지용 정적 페이지 생성기(<code>tools/gen-rates-page.ts</code>, 버전별 이력 보존).</li>
+<li>표기값은 <strong><code>balance.drop_rates_ppm</code>(정수 ppm)에서 읽어</strong> <code>p = ppm / 1_000_000</code> 변환 후 퍼센트로 <strong>렌더링</strong>한다. UI에 숫자를 타이핑하면 표기-구현 불일치가 규제 리스크가 된다.</li>
+<li>수용 기준:
+  1. <code>npm run sim:prob</code> → 4/4 PASS (T2.6 하네스가 실제 구현을 검증)
+  2. <code>npm test -w packages/core -- grind</code> → <strong>13 passed</strong>. 포함: 천장 20/40 단언, 환급 불변식(시행 전후 순손실 0), <strong>경계</strong>: 39회/40회, 프레스티지 후 카운터 유지
+  3. <code>npm run e2e -- --grep "grind|rates"</code> → <code>grind.png</code>, <code>rates.png</code> 생성, 콘솔 에러 0. <strong>스크린샷에 4개 등급 확률이 전부 보임</strong>(Playwright 텍스트 단언 4건)
+  4. <code>npx tsx tools/gen-rates-page.ts --out dist/rates/v1.html</code> → 생성된 HTML의 확률 4개가 <code>balance.json</code> 값과 일치(파싱 단언)
+  5. <code>grep -rn "0\.5%\|0\.005\|81\.5\|\b5000\b\|\b815000\b" apps/web/src/ui/</code> → <strong>0줄</strong>(표기 하드코딩 금지 — 퍼센트·소수·ppm 정수 전부)</li>
+<li>크기: M</li>
+<li>참고: 기능 자체는 v1.2지만 <strong>검증 하네스는 T2.6에서 이미 MVP에 들어가 있다</strong>(GDD 13.1 M11). 그래서 이 태스크는 "구현 + 하네스 통과"만 하면 되고, 규제 대응 논의를 다시 열지 않는다.</li>
+</ul>
+<h4 id="t65-1">T6.5 대수 표현 로그 공간 전환 (리더 결정 ①의 확장 태스크)</h4>
+<ul>
+<li>목표: f64 한계(1e308) 접근 시나리오에 대비해 로그 공간 또는 <code>{mantissa, exponent}</code> 표현으로 전환할 수 있게 한다.</li>
+<li>의존: T2.8 (60/90일 리포트에서 필요성이 확인된 뒤에만 착수)</li>
+<li>입력: 본 문서 1.2 (D-3), GDD 모호 지점 1, 밸런스 모델 2.3 구현 주의</li>
+<li>산출: <code>packages/core/src/bignum.ts</code>, <code>packages/core/src/tables.ts</code> 전환, 교차 검증 테스트</li>
+<li>규칙:</li>
+<li>표현: <code>{ m: number, e: number }</code> (정규화 <code>1 ≤ m &lt; 10</code>) 또는 <code>log10</code> 저장 중 하나를 선택하고 <strong>선택 근거를 <code>docs/ASSUMPTIONS.md</code>에 기록</strong>한다.</li>
+<li>전환 범위: HP·골드·ATK·DPS·불씨만. 스테이지·레벨·노드 수·틱은 계속 정수.</li>
+<li><strong>회귀 동등성이 이 태스크의 성패다</strong>: 전환 전후 D30 체크포인트가 완전 일치해야 한다.</li>
+<li>착수 조건: T2.8의 90일 리포트에서 <code>max(HP, gold)</code>가 1e250을 넘거나, 기획이 D90 이상 운영을 확정한 경우. 그 전에는 <strong>착수하지 않는다</strong>(YAGNI — f64로 D30은 충분하다).</li>
+<li>수용 기준:
+  1. <code>npm test -w packages/core -- bignum</code> → <strong>18 passed</strong>. 포함: 곱·나눗셈·비교·정규화, <strong>경계</strong>: <code>1e308 × 10</code>(f64 오버플로 지점), <code>1e-320</code>(subnormal), <code>m=1.0</code> 정규화 경계, 0과 음수 처리
+  2. <strong>동등성 회귀</strong>: <code>npm run sim:regress</code> → 전환 전과 <strong>13/13 동일 PASS</strong>, 체크포인트 10개의 도달 스테이지가 <strong>정수 단위로 완전 일치</strong>
+  3. <code>npm run sim:determinism</code> → 여전히 통과
+  4. <code>npm run sim:long -- --all</code> → D90에서 오버플로 없이 완주, 리포트에 최대 지수 기록
+  5. 성능: <code>npm run sim:regress</code> 실행 시간이 전환 전 대비 <strong>3배 이내</strong>(넘으면 핫패스만 f64 유지하는 하이브리드로 되돌린다)</li>
+<li>크기: M (L로 커지면 "표현 구현"과 "코어 전환" 2개로 쪼갠다)</li>
+<li>참고: 리더 결정 ①은 <strong>MVP에서 이 태스크를 하지 않는다</strong>는 결정이다. bal_v1의 D30 최대값은 약 1.2e32로 f64 여유가 매우 크다. 이 카드는 확장 경로를 미리 못 박아 두어 나중에 즉흥 설계가 나오는 것을 막기 위한 것이다.</li>
+</ul>
+<hr />
+<h2 id="5-gdd">5. GDD 시스템 ↔ 태스크 대응표</h2>
+<p><strong>검수 방법</strong>: 아래 표에서 "태스크" 열이 비어 있는 행이 하나라도 있으면 빌드 플랜이 불완전하다. 현재 <strong>빈 행은 0개</strong>다. MVP 시스템은 전부 P0~P5에 태스크가 있고, 확장 시스템은 P6 태스크 또는 명시적 제외 근거를 갖는다.</p>
+<h3 id="51-gdd-5">5.1 GDD 5장 시스템 (전수)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>GDD 절</th>
+<th>시스템</th>
+<th>MVP/확장</th>
+<th>태스크</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.1</td>
+<td>형님(동료) 6종·해금·ATK 곡선</td>
+<td>MVP(4종)</td>
+<td><strong>T0.3, T1.2, T4.3</strong></td>
+<td>5·6번 형님은 <code>brothers.json</code> 2행 추가로 확장</td>
+</tr>
+<tr>
+<td>5.2</td>
+<td>강화 + 자동 강화(그리디)</td>
+<td>MVP</td>
+<td><strong>T1.4, T4.3</strong></td>
+<td>타이브레이크 = 리더 결정 ②</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>장비 드랍 + 결정적 합성</td>
+<td>MVP</td>
+<td><strong>T1.6, T4.3</strong></td>
+<td>확률 없음</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>「뼈 갈기」(확률형 1종)</td>
+<td>확장 v1.2</td>
+<td><strong>T2.6(하네스, MVP), T6.4(구현)</strong></td>
+<td>GDD 13.1 M11대로 하네스만 MVP</td>
+</tr>
+<tr>
+<td>5.4</td>
+<td>토템·유산 = 불씨 노드(불 계열)</td>
+<td>MVP</td>
+<td><strong>T1.8, T4.4</strong></td>
+<td>나머지 3계열은 <code>totems.json</code> 로더 플래그 해제만</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>스테이지·보스·시대·월드</td>
+<td>MVP</td>
+<td><strong>T1.1, T1.3, T4.2</strong></td>
+<td>월드2는 <code>stages.json</code> 1행 추가(코드 0줄)</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>사냥터 자동 최적화 <code>f*</code></td>
+<td>MVP</td>
+<td><strong>T1.5</strong></td>
+<td>밸런스 모델 4.3</td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>얼음 절벽(탑)</td>
+<td>확장 v1.2</td>
+<td><strong>T6.3</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>보스 원정</td>
+<td>확장 v1.2</td>
+<td><strong>T6.3</strong> (+ 설정 영속성은 <strong>T3.4</strong>에서 MVP 선반영)</td>
+<td>전작 UX 마찰 대응은 MVP로 앞당김</td>
+</tr>
+<tr>
+<td>5.7</td>
+<td>길드</td>
+<td>확장 v1.3</td>
+<td><strong>명시적 제외</strong> + <code>data/schema/guilds.schema.json</code>만 작성(<strong>T0.3</strong>)</td>
+<td>근거: 9명 팀에서 소셜은 CS·밸런스 부하가 가장 크고(GDD 5.7), 신작 검증 단계의 성공 판정(GDD 13.3)과 무관하다. <code>account.guildId</code> 필드 자리만 예약한다</td>
+</tr>
+<tr>
+<td>5.8</td>
+<td>탈것</td>
+<td>확장 v1.1</td>
+<td><strong>T0.3(스키마·1행), T6.2(지급·효과)</strong></td>
+<td>전투력 ≤ +5% 상한은 스키마가 강제</td>
+</tr>
+<tr>
+<td>5.8</td>
+<td>스킨</td>
+<td>MVP(1종) / 확장(상점)</td>
+<td><strong>T0.3, T1.2(배수 경로), T6.2(UI·상점)</strong></td>
+<td>+5% 상한 스키마 강제</td>
+</tr>
+<tr>
+<td>5.9</td>
+<td>도감·카드</td>
+<td>MVP(카운트·보너스) / 확장(UI)</td>
+<td><strong>T1.9, T6.2</strong></td>
+<td>회귀는 <code>--cards off</code> 기준(T2.5), 포함 곡선은 T2.7 diff</td>
+</tr>
+<tr>
+<td>5.10</td>
+<td>부족 캠프</td>
+<td>확장 v1.1</td>
+<td><strong>T6.1</strong></td>
+<td>효과 상한 1.3배를 테스트로 단언</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="52-gdd-3467101112">5.2 GDD 3·4·6·7·10·11·12장 대응</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>GDD 절</th>
+<th>항목</th>
+<th>태스크</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.2</td>
+<td>고정 dt=100ms 틱 파이프라인</td>
+<td><strong>T1.3</strong> (+ 1.2절 D-1 계약)</td>
+</tr>
+<tr>
+<td>3.3</td>
+<td>벽 정의 3종(보스·웨이브·체감)</td>
+<td><strong>T1.3</strong></td>
+</tr>
+<tr>
+<td>3.4</td>
+<td>벽 돌파 자원 6종</td>
+<td><strong>T1.5</strong>(파밍) <strong>T1.7</strong>(오프라인·광고) <strong>T1.6</strong>(장비) <strong>T1.8</strong>(프레스티지) <strong>T5.4</strong>(성장 패키지)</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td>세대 교체 + 리셋/유지 표</td>
+<td><strong>T1.8</strong>(코어 단언) <strong>T3.3</strong>(E2E) <strong>T4.4</strong>(화면 노출)</td>
+</tr>
+<tr>
+<td>4.1</td>
+<td>불씨 노드 트리(등차 비용)</td>
+<td><strong>T1.8, T4.4</strong>, 장기 검증 <strong>T2.8</strong></td>
+</tr>
+<tr>
+<td>4.2</td>
+<td>수집 메타 5축</td>
+<td><strong>T1.9</strong>(도감·카드) <strong>T6.2</strong>(스킨·탈것) <strong>T1.2</strong>(형님)</td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>주간 콘텐츠 4종</td>
+<td><strong>T6.3</strong> (길드 대항전은 5.7과 함께 제외)</td>
+</tr>
+<tr>
+<td>4.4</td>
+<td>시즌 28일·테이블 교체</td>
+<td><strong>T6.2</strong> (수용 기준 2번이 "코드 0줄" 검증)</td>
+</tr>
+<tr>
+<td>6.1</td>
+<td>자원 7종·상한·리셋</td>
+<td><strong>T0.3</strong>(스키마) <strong>T1.x</strong>(각 자원 경로) <strong>T3.3</strong>(리셋 단언)</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>인플레이션 규칙(<code>reward_hours</code>)</td>
+<td><strong>T0.3</strong>(스키마 0.5~10 강제) <strong>T5.4</strong>(지급)</td>
+</tr>
+<tr>
+<td>7.2</td>
+<td>비확률 상품 9종</td>
+<td><strong>T5.4</strong></td>
+</tr>
+<tr>
+<td>7.3</td>
+<td>확률형 1종·표기 4곳·검증·천장</td>
+<td><strong>T2.6</strong>(검증) <strong>T6.4</strong>(구현·표기)</td>
+</tr>
+<tr>
+<td>7.4</td>
+<td>광고 슬롯 4종 + <code>ad_policy</code></td>
+<td><strong>T5.3</strong></td>
+</tr>
+<tr>
+<td>10.1</td>
+<td>라이브 이벤트 4타입</td>
+<td><strong>T0.3</strong>(<code>events</code> 스키마) <strong>T6.2</strong>(시즌 전환)</td>
+</tr>
+<tr>
+<td>10.3</td>
+<td>랭킹 3종</td>
+<td><strong>T6.3</strong></td>
+</tr>
+<tr>
+<td>11.1</td>
+<td>분석 공통 14필드(<code>data_version</code> 포함)</td>
+<td><strong>T5.1</strong></td>
+</tr>
+<tr>
+<td>11.2</td>
+<td>이벤트 10종 고유 필드</td>
+<td><strong>T5.2</strong> (+ <code>purchase</code> <strong>T5.4</strong>, <code>ad_reward</code> <strong>T5.3</strong>, <code>gacha_roll</code> <strong>T6.4</strong>)</td>
+</tr>
+<tr>
+<td>11.3</td>
+<td>회귀 시나리오 5종</td>
+<td>1·2 → <strong>T5.4</strong> / 3 → <strong>T3.4, T6.3</strong> / 4 → <strong>T3.3</strong> / 5 → <strong>T2.6</strong></td>
+</tr>
+<tr>
+<td>12.1</td>
+<td>MVP 6화면</td>
+<td><strong>T4.2, T4.3, T4.4</strong> (검증 <strong>T4.5</strong>)</td>
+</tr>
+<tr>
+<td>12.2</td>
+<td>큰 수 표기·연출 원칙·2초 규칙</td>
+<td><strong>T1.10</strong>(표기 유틸) <strong>T4.4</strong>(2초 자동 검증)</td>
+</tr>
+<tr>
+<td>12.3</td>
+<td>배속·렌더러 읽기 전용</td>
+<td><strong>T4.1, T4.5</strong></td>
+</tr>
+<tr>
+<td>13.1</td>
+<td>MVP M1~M11</td>
+<td>M1→T1.3 / M2→T0.3 / M3→T1.1,T1.3,T1.5 / M4→T1.4 / M5→T1.6 / M6→T1.7 / M7→T1.8 / M8→T2.1~T2.5 / M9→T5.1,T5.2 / M10→T4.1~T4.5 / M11→T2.6</td>
+</tr>
+<tr>
+<td>13.3</td>
+<td>성공 판정 4개</td>
+<td>1→T2.5 / 2→<strong>T2.4, T2.9</strong>(재현) / 3→T2.7 / 4→T1.1 수용 기준 5</td>
+</tr>
+<tr>
+<td>7.3</td>
+<td>확률 검증 <strong>증거 3종</strong>(전략 청사진 4.3.1)</td>
+<td>① 시드 고정 재현 로그 → <strong>T2.9</strong> / ② 대량 시행 분포 검증 리포트 → <strong>T2.6</strong> / ③ 버전별 확률 테이블 diff 기록 → <strong>T2.7</strong></td>
+</tr>
+<tr>
+<td>8.1, 9.2</td>
+<td>에셋 거버넌스(원본/변형 분리)</td>
+<td><strong>T0.4</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="53">5.3 명시적 제외 목록 (근거 포함)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>제외 대상</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>길드(5.7)·부족 대항전(4.3)</td>
+<td>GDD가 v1.2 이후로 명시. 9명 팀 CS·밸런스 부하 최대. 스키마 자리만 예약(T0.3)</td>
+</tr>
+<tr>
+<td>서버·계정 동기화</td>
+<td>GDD 13.1 "MVP 제외 명시". 프로토타입 성공 판정(13.3)이 전부 로컬에서 판정 가능</td>
+</tr>
+<tr>
+<td>실제 결제 SDK·광고 SDK</td>
+<td>T5.3·T5.4에서 <strong>스텁 인터페이스만</strong>. 실 SDK 연동은 본편 트랙</td>
+</tr>
+<tr>
+<td>형님 패시브(5.1)</td>
+<td>GDD가 "MVP는 패시브 없음" 명시. <code>passives</code> 스키마만 작성(T0.3), <code>passive_id: null</code></td>
+</tr>
+<tr>
+<td>Unity/C# 포팅</td>
+<td>2차 트랙(1.9절). 프로토타입 성공 판정 통과 후 별도 문서로 분해</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="6">6. 시뮬레이터 · 회귀 테스트 명세</h2>
+<h3 id="61-cli">6.1 CLI</h3>
+<pre><code class="language-bash"># 단일 실행
+npm run sim -- --days 7 --bot balanced --seed 42
+npm run sim -- --days 30 --bot idle --seed 20260918 --profile payer --ad-policy none
+
+# 회귀 (CI 게이트)
+npm run sim:regress                 # 목표 벽 표 10 + 첫 벽 + 격차 + D1 프레스티지 = 13 단언
+npm run sim:prob                    # 확률 4종 + 천장
+npm run sim:determinism             # 동일 시드 바이트 동일
+npm run sim:determinism -- --matrix # 12조합
+npm run sim:replay -- --run reports/balanced-f2p-42-7d/summary.json   # 기록 재현 (T2.9)
+
+# 리포트 (게이트 아님)
+npm run sim:diff -- --base bal_v1 --head bal_v2
+npm run sim:diff -- --base equip_instant --head equip_drop_wait
+npm run sim:long -- --days 90 --profile f2p
+npm run sim:long -- --all
+</code></pre>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>옵션</th>
+<th>값</th>
+<th>기본</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--days</code></td>
+<td>정수 ≥ 1 (압축 일정 일수)</td>
+<td>필수</td>
+</tr>
+<tr>
+<td><code>--bot</code></td>
+<td><code>balanced</code> | <code>aggressive</code> | <code>idle</code></td>
+<td><code>balanced</code></td>
+</tr>
+<tr>
+<td><code>--seed</code></td>
+<td>정수</td>
+<td><code>balance.rng_seed_default</code> (20260918)</td>
+</tr>
+<tr>
+<td><code>--profile</code></td>
+<td><code>f2p</code> | <code>payer</code></td>
+<td><code>f2p</code></td>
+</tr>
+<tr>
+<td><code>--equip-mode</code></td>
+<td><code>instant</code> | <code>drop_wait</code></td>
+<td><code>balance.equip_recovery_mode</code></td>
+</tr>
+<tr>
+<td><code>--ad-policy</code></td>
+<td><code>none</code> | <code>moderate</code> | <code>max</code></td>
+<td>봇 기본값</td>
+</tr>
+<tr>
+<td><code>--cards</code></td>
+<td><code>on</code> | <code>off</code></td>
+<td><code>off</code> (회귀 기준 조건)</td>
+</tr>
+<tr>
+<td><code>--sample-sec</code></td>
+<td>정수</td>
+<td>600</td>
+</tr>
+<tr>
+<td><code>--out</code></td>
+<td>경로</td>
+<td><code>reports/{runId}</code></td>
+</tr>
+<tr>
+<td><code>--run</code></td>
+<td><code>run.json</code> 경로 (<code>sim:replay</code> 전용)</td>
+<td>필수</td>
+</tr>
+<tr>
+<td><code>--format</code></td>
+<td><code>json</code> | <code>md</code> | <code>json,md</code></td>
+<td><code>json</code></td>
+</tr>
+<tr>
+<td><code>--thresholds</code></td>
+<td>임계 설정 파일 (<code>sim:diff</code> 전용 — 코드 상수 금지)</td>
+<td><code>config/thresholds.json</code></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="611-npm">6.1.1 규격 서브커맨드 ↔ npm 스크립트 별칭 (정본 대조표)</h4>
+<p>전략 청사진 팀원 전달 메모 (2)-②가 규정한 서브커맨드 체계에 맞춘다. <strong>npm 스크립트 이름은 그대로 유지하고</strong>(워크스페이스 관례 + CI 잡과 1:1), 아래 표가 규격 ↔ 별칭의 정본이다. 전작 시뮬레이터가 합류할 때는 이 표의 왼쪽 열을 공통 인터페이스로 삼는다 → 8.3 A-D15.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>규격 서브커맨드</th>
+<th>본 저장소 별칭</th>
+<th>대응 태스크</th>
+<th>비고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sim run</code></td>
+<td><code>npm run sim -- …</code></td>
+<td>T2.1</td>
+<td>옵션명 동일(<code>--days</code> <code>--seed</code> <code>--profile</code> <code>--out</code> <code>--format</code>). 규격의 <code>--tables &lt;dir&gt;</code>는 <code>data/</code>가 고정이라 생략하고, <code>--runs &lt;N&gt;</code>은 <code>--days</code>와 시드 목록으로 대체</td>
+</tr>
+<tr>
+<td><code>sim diff</code></td>
+<td><code>npm run sim:diff -- --base … --head … --thresholds …</code></td>
+<td>T2.7</td>
+<td>임계는 설정 파일로 분리(코드 상수 금지)</td>
+</tr>
+<tr>
+<td><code>sim verify-odds</code></td>
+<td><code>npm run sim:prob</code></td>
+<td>T2.6</td>
+<td>표기표는 <code>balance.drop_rates_ppm</code>(정수 ppm)에서 읽는다</td>
+</tr>
+<tr>
+<td><code>sim replay</code></td>
+<td><code>npm run sim:replay -- --run &lt;run.json&gt;</code></td>
+<td><strong>T2.9(신설)</strong></td>
+<td>시드 + 테이블 checksum으로 동일 결과 재현</td>
+</tr>
+<tr>
+<td>(규격 외 · CI 전용)</td>
+<td><code>npm run sim:regress</code></td>
+<td>T2.5</td>
+<td><code>sim run</code> + 회귀 단언 13개 묶음 게이트</td>
+</tr>
+<tr>
+<td>(규격 외 · CI 전용)</td>
+<td><code>npm run sim:determinism</code></td>
+<td>T2.4</td>
+<td>같은 인자 2회 바이트 동일</td>
+</tr>
+<tr>
+<td>(규격 외 · 리포트)</td>
+<td><code>npm run sim:long</code></td>
+<td>T2.8</td>
+<td>60·90일 장기 프로파일, 게이트 아님</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="612-exit-code">6.1.2 exit code 규약 (전 서브커맨드 공통)</h4>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>코드</th>
+<th>의미</th>
+<th>CI 동작</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>정상 — 판정 PASS</td>
+<td>통과</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td><strong>실행 오류</strong> — 인자 오류, 파일 없음, 스키마 위반, 공통 메타 누락</td>
+<td>실패(빌드 오류로 취급)</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><strong>임계 위반</strong> — 회귀 밴드 초과, 확률 3σ 이탈, 천장 단언 실패, 재현 불일치</td>
+<td>실패 + <strong>배포 차단</strong>(deploy 잡의 선행 게이트)</td>
+</tr>
+</tbody>
+</table></div>
+<p>1과 2를 나누는 이유는 CI가 <strong>"우리가 잘못 실행했다"와 "제품이 기준을 위반했다"를 다르게 다뤄야</strong> 하기 때문이다. 2는 사람 판단 없이 배포를 막는다.</p>
+<h4 id="613">6.1.3 출력 규약</h4>
+<ul>
+<li><strong>stdout = 기계 판독 JSON 1개 객체.</strong> 사람용 문장을 섞지 않는다(에이전트가 파싱한다).</li>
+<li><strong>stderr = 사람용 요약</strong> 몇 줄.</li>
+<li><code>--format md</code>를 주면 마크다운 리포트를 <code>--out</code> 경로에 추가로 쓴다. <code>--format json,md</code>로 둘 다 낼 수 있다.</li>
+</ul>
+<h3 id="62-3">6.2 봇 3종 요약</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>봇</th>
+<th>목적</th>
+<th>강화</th>
+<th>프레스티지</th>
+<th>접속</th>
+<th>광고</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>balanced</code></td>
+<td><strong>회귀 기준 봇</strong> — 밸런스 모델 9.2·9.3의 합리적 유저 근사</td>
+<td><code>ΔATK/C</code> 그리디, 동률 시 slot↑</td>
+<td>권장선 1.15 또는 30분 정체</td>
+<td>프로파일 기본 2세션</td>
+<td><code>moderate</code></td>
+</tr>
+<tr>
+<td><code>aggressive</code></td>
+<td>곡선 상한 탐색 — 조기·과다 프레스티지의 영향 측정</td>
+<td>최고 index 트랙 우선</td>
+<td>권장선 1.05 + 정체</td>
+<td>프로파일 기본</td>
+<td><code>max</code></td>
+</tr>
+<tr>
+<td><code>idle</code></td>
+<td><strong>곡선 하한 탐색</strong> — 진짜 방치 유저. 목표표가 이 봇에게도 성립하는지 확인</td>
+<td>자동 강화만</td>
+<td>정체 감지만</td>
+<td>1일 3회 × 10분</td>
+<td><code>none</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="63">6.3 출력물</h3>
+<pre><code>reports/{botId}-{profile}-{seed}-{days}d/
+  summary.json      # 기계 판독용. 회귀·diff의 입력
+  gold_curve.csv    # t_sec,stage,run_best,gold_total,gold_rate_per_sec,dps_total,equip_tier,nodes,M
+  stage_curve.csv   # t_sec,stage_best,prestige_count,ember_total
+  walls.csv         # t_sec,stage,wall_type,dps_total,hp_required,gap_ratio
+  report.md         # 사람 판독용. 체크포인트 대조표 + 벽 목록 + 곡선 요약
+  events.jsonl      # GDD 11장 분석 이벤트
+</code></pre>
+<p>곡선 diff 리포트(<code>reports/diff-{base}-{head}.md</code>) 구성: ① 파라미터 diff 표 ② 체크포인트 10개 base/head/변화율 ③ 첫 벽 시각 변화 ④ 프레스티지 횟수 변화 ⑤ 골드 곡선 구간별 평균 상대차 ⑥ 판정(±10% 초과 항목 수). <strong>리포트는 판정만 하고 파라미터를 고치지 않는다.</strong></p>
+<h3 id="64-94-t1t7">6.4 회귀 단언 목록 (밸런스 모델 9.4 T1~T7 대응)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>단언</th>
+<th>태스크</th>
+<th>명령</th>
+<th>게이트</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1</td>
+<td>목표 벽 표 10 체크포인트 ±10%</td>
+<td>T2.5</td>
+<td><code>npm run sim:regress</code></td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>T2</td>
+<td>첫 벽 53.5분 ±10% (48.15~58.85분)</td>
+<td>T2.5</td>
+<td>동상</td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>T3</td>
+<td>동일 시드 2회 완전 일치</td>
+<td>T2.4</td>
+<td><code>npm run sim:determinism</code></td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>T4</td>
+<td>세대 교체 후 유지 자산 12종 보존</td>
+<td>T1.8, T3.3</td>
+<td><code>npm test -w packages/sim -- prestige-persist</code></td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>T5</td>
+<td>확률 표기값(정수 ppm)을 <code>balance.drop_rates_ppm</code>에서 읽어 검증 + 정수 합 1,000,000 단언</td>
+<td>T2.6</td>
+<td><code>npm run sim:prob</code></td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>T6</td>
+<td>천장 단언(40회×1,000회 전설 미획득 0건, 20회 영웅 확정)</td>
+<td>T2.6</td>
+<td>동상</td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>T7</td>
+<td>balance 상수 1개 변경 시 곡선 diff 자동 생성</td>
+<td>T2.7</td>
+<td><code>npm run sim:diff -- --base bal_v1 --head bal_v2</code></td>
+<td>수동</td>
+</tr>
+<tr>
+<td>+1</td>
+<td>D30 소과금/무과금 도달 비 ≤ 1.2</td>
+<td>T2.5</td>
+<td><code>npm run sim:regress</code></td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>+2</td>
+<td>D1 f2p 프레스티지 ≥ 1회</td>
+<td>T2.5</td>
+<td>동상</td>
+<td>CI 필수</td>
+</tr>
+<tr>
+<td>+3</td>
+<td>60/90일 장기 리포트 생성(판정 아님)</td>
+<td>T2.8</td>
+<td><code>npm run sim:long -- --all</code></td>
+<td>수동·야간</td>
+</tr>
+<tr>
+<td>+4</td>
+<td>기록(<code>run.json</code>)만으로 재현 — 시드 + 테이블 checksum 일치</td>
+<td>T2.9</td>
+<td><code>npm run sim:replay -- --run &lt;run.json&gt;</code></td>
+<td>CI 필수(확률 리포트 생산 시)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="65-9">6.5 확률 검증 시행수 (모호 지점 9의 결정)</h3>
+<p><code>N_i = max(100_000, ceil(900 × (1 − p_i) / p_i))</code>를 100,000 단위로 올림. 입력은 <code>balance.drop_rates_ppm</code>의 <strong>정수 ppm</strong>이고 <code>p_i = ppm_i / 1_000_000</code>이다.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>등급</th>
+<th>표기값(ppm)</th>
+<th>표기 p</th>
+<th>산식값</th>
+<th>채택 N</th>
+<th>3σ 허용 구간</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>전설</td>
+<td><strong>5,000</strong></td>
+<td>0.005</td>
+<td>179,100</td>
+<td><strong>1,800,000</strong> (산식값의 약 10배 여유)</td>
+<td>p ± 3√(p(1−p)/N) = 0.005 ± 0.000158</td>
+</tr>
+<tr>
+<td>영웅</td>
+<td><strong>30,000</strong></td>
+<td>0.03</td>
+<td>29,100</td>
+<td>100,000</td>
+<td>0.03 ± 0.001618</td>
+</tr>
+<tr>
+<td>희귀</td>
+<td><strong>150,000</strong></td>
+<td>0.15</td>
+<td>5,100</td>
+<td>100,000</td>
+<td>0.15 ± 0.003387</td>
+</tr>
+<tr>
+<td>일반</td>
+<td><strong>815,000</strong></td>
+<td>0.815</td>
+<td>204</td>
+<td>100,000</td>
+<td>0.815 ± 0.003676</td>
+</tr>
+</tbody>
+</table></div>
+<p>(합 1,000,000 — 정수 합 단언, 3.1)</p>
+<p>전 확률에 N=100,000을 일괄 적용하면 전설의 3σ 상대오차가 13.4%로 ±10% 기준을 못 넘는다. 그래서 산식을 코드에 넣고 표기표에서 자동 산출한다. <strong>전설의 채택 N(1,800,000)은 산식값(179,100)보다 한 자릿수 크다 — 규제 증거용 여유분이며 리더 결정 ⑦로 유지가 확정됐다. 다만 T2.6 수용 기준 5(60초 이내)를 못 지키는 경우에 한해 <code>PROB_N_PROFILE=ci</code>에서 N = 200,000 폴백을 허용한다(산식 최소 179,100 이상 단언). 증거 생산용 기본 프로파일은 1,800,000 그대로다.</strong></p>
+<hr />
+<h2 id="7-codex">7. Codex 실행 가이드</h2>
+<h3 id="71-1">7.1 저장소 준비 순서 (사람이 1회 수행)</h3>
+<ol>
+<li>빈 저장소 생성: <code>git init primitive-brothers-2 &amp;&amp; cd primitive-brothers-2</code></li>
+<li><code>05b_AGENTS.md</code>를 루트 <code>AGENTS.md</code>로 배치</li>
+<li><code>docs/</code> 생성 후 배치: <code>04_gdd_primitive_brothers_2.md</code> → <code>docs/GDD.md</code>, <code>04b_balance_model.md</code> → <code>docs/BALANCE.md</code>, 본 문서 → <code>docs/BUILD_PLAN.md</code></li>
+<li><code>docs/ASSUMPTIONS.md</code> 생성 — <strong>본 문서 8절을 그대로 초기 내용으로 복사</strong>한다(Codex가 여기에 행을 추가한다)</li>
+<li><code>.nvmrc</code>에 <code>22</code> 작성, <code>nvm use 22</code>로 확인</li>
+<li>첫 커밋: <code>git commit -m "chore: docs and AGENTS.md"</code></li>
+<li>T0.1부터 태스크 순서대로 Codex 세션 실행. <strong>의존 태스크가 끝나기 전에 착수하지 않는다.</strong></li>
+</ol>
+<h3 id="72">7.2 태스크별 프롬프트 템플릿</h3>
+<pre><code>저장소 루트의 AGENTS.md를 먼저 읽고 그 규칙을 따르세요.
+docs/BUILD_PLAN.md의 태스크 카드 「{태스크 id} {제목}」 하나만 구현합니다.
+다른 태스크의 범위를 침범하지 마세요.
+
+읽을 문서: docs/BUILD_PLAN.md {카드가 지시한 절}, docs/GDD.md {절}, docs/BALANCE.md {절}
+구현 후 카드의 수용 기준 명령을 **전부** 실행하고 출력을 그대로 보고하세요.
+기준 중 하나라도 통과하지 못하면 커밋하지 말고 무엇이 왜 실패했는지 보고하세요.
+
+제약:
+- data/balance.json의 값을 수정하지 마세요(기획 담당 결정 사항입니다).
+- 수치를 코드에 하드코딩하지 마세요. 전부 data/*.json에서 읽습니다.
+- packages/core에 런타임 의존성·DOM·Math.random·Date.now를 넣지 마세요.
+- GDD에 없는 규칙이 필요하면 임의로 정하지 말고 가장 보수적인 선택을 한 뒤
+  docs/ASSUMPTIONS.md에 &quot;가정: …&quot; 한 줄을 추가하고 보고하세요.
+
+커밋: 메시지 첫머리에 태스크 id를 붙입니다. 예) &quot;{태스크 id}: 스테이지 곡선과 사전 계산 테이블&quot;
+보고: 변경 요약 3줄 + 수용 기준 명령별 실행 결과 + 새로 추가한 가정.
+</code></pre>
+<h3 id="73-2">7.3 실제 프롬프트 예시 2개</h3>
+<p><strong>예시 A — P0.1 스캐폴드</strong></p>
+<pre><code>저장소 루트의 AGENTS.md를 먼저 읽고 그 규칙을 따르세요.
+docs/BUILD_PLAN.md의 태스크 카드 「T0.1 모노레포 스캐폴드와 CI 게이트」 하나만 구현합니다.
+
+읽을 문서: docs/BUILD_PLAN.md 1.1절(패키지 경계·의존 규칙), 2절(저장소 구조·npm 스크립트), T0.1 카드
+
+만들 것:
+- npm workspaces 루트 package.json (engines.node &quot;&gt;=22 &lt;23&quot;), .nvmrc=&quot;22&quot;
+- packages/core, packages/data, packages/sim, apps/web 의 package.json + tsconfig.json + src/index.ts
+- tsconfig.base.json, vitest.workspace.ts, .gitignore, .github/workflows/ci.yml
+- tools/check-deps.ts — packages/core의 dependencies가 비어 있는지, 그리고
+  packages/core/src/** 에 Math.random / Date.now / document / window / setTimeout /
+  setInterval / performance / process. / require( 가 있는지 검사해 1건이라도 있으면 exit 1
+- docs/ASSUMPTIONS.md 템플릿 (표 헤더: 번호 | 구분 | 내용 | 근거 | 상태)
+
+packages/core의 dependencies는 반드시 빈 객체여야 합니다.
+
+수용 기준을 전부 실행하고 출력을 보고하세요:
+1. node -v            → v22.* 로 시작
+2. npm ci             → 종료 코드 0
+3. npm run build      → 4개 패키지 tsc 성공
+4. npm test           → vitest 0 failed (스모크 1개)
+5. npm run check:deps → &quot;OK: core has 0 runtime deps, 0 forbidden identifiers&quot;
+6. packages/core/src/index.ts에 Math.random() 한 줄을 임시로 넣고 npm run check:deps
+   → 종료 코드 1 + 파일·라인 출력. 확인 후 그 줄을 되돌리고 다시 5번이 통과하는지 확인
+
+커밋 메시지: &quot;T0.1: 모노레포 스캐폴드와 CI 게이트&quot;
+</code></pre>
+<p><strong>예시 B — P2.5 목표 벽 표 회귀 테스트</strong></p>
+<pre><code>저장소 루트의 AGENTS.md를 먼저 읽고 그 규칙을 따르세요.
+docs/BUILD_PLAN.md의 태스크 카드 「T2.5 목표 진행 벽 표 회귀 (10 체크포인트 ±10%)」 하나만 구현합니다.
+선행 태스크 T2.4까지 완료된 상태여야 합니다. 완료되지 않았으면 착수하지 말고 보고하세요.
+
+읽을 문서: docs/BALANCE.md 7절(목표 진행 벽 표), 8.2절(검산 대조표), 9.4절(회귀 단언),
+          docs/BUILD_PLAN.md T2.5 카드, 6.4절
+
+만들 것:
+- packages/sim/fixtures/targets.json — 체크포인트 10개 {label, profile, atSec, targetStage, tolerance:0.10}
+  + firstWallSec 3210(=53.5분), payerGapMax 1.2, d1MinPrestige 1
+  (기준값은 반드시 이 파일에서 읽습니다. 테스트 코드에 숫자를 쓰지 마세요.)
+- packages/sim/src/regress.ts 와 npm 스크립트 &quot;sim:regress&quot;
+- 회귀 실행 조건 고정: --bot balanced --equip-mode instant --cards off,
+  프로파일별 시드는 balance.rng_seed_default
+
+수용 기준을 전부 실행하고 출력을 보고하세요:
+1. npm run sim:regress → &quot;PASS 13/13 (checkpoints 10, firstWall 1, payerGap 1, d1Prestige 1)&quot;, 종료 코드 0
+2. fixtures/targets.json의 D30 f2p 목표를 1500으로 임시 변경 → npm run sim:regress
+   → 종료 코드 1 + &quot;#9 D30/f2p: target 1500, actual …, dev …% (limit ±10%)&quot; 형식 출력.
+   확인 후 950으로 되돌리고 1번을 다시 실행
+3. npm test -w packages/sim -- regress → 7 passed
+   (±10.00%는 통과, ±10.01%는 실패하는 경계 테스트와 목표 파일 부재 시 즉시 실패 테스트 포함)
+4. time npm run sim:regress → 실행 시간 10분 이내
+
+중요: 회귀가 통과하지 않아도 data/balance.json의 값을 절대 바꾸지 마세요.
+실패하면 (a) 구현 버그인지 (b) 모델 가정 차이인지 판단해 보고하고,
+(b)라면 docs/ASSUMPTIONS.md에 관측값과 함께 한 줄 추가하세요.
+
+커밋 메시지: &quot;T2.5: 목표 벽 표 회귀 테스트(10 체크포인트 ±10%)&quot;
+</code></pre>
+<h3 id="74">7.4 실패 시 대응</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>상황</th>
+<th>대응</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>유닛 테스트 실패</strong></td>
+<td>Codex가 자체 해결한다. 단, <strong>테스트를 약화시켜 통과시키는 것은 금지</strong>(기대값 변경·단언 삭제·<code>skip</code> 추가). 수용 기준의 테스트 개수가 줄면 그 자체가 실패다. 3회 시도 후에도 실패하면 중단하고 실패 원인·시도 내역을 보고한다</td>
+</tr>
+<tr>
+<td><strong>밸런스 회귀 실패(<code>sim:regress</code>)</strong></td>
+<td><strong><code>balance.json</code>을 절대 수정하지 않는다.</strong> 순서: ① 최근 커밋 diff에서 곡선에 영향 주는 변경을 찾는다 ② <code>npm run sim:diff</code>로 이전 통과 시점과 곡선을 비교한다 ③ 구현 버그면 고친다 ④ 모델 가정 차이(예: 100ms 양자화, 장비 모드)면 <code>docs/ASSUMPTIONS.md</code>에 관측값과 함께 기록하고 <strong>기획 담당(game-design-director)에게 회신</strong>한다. 파라미터 조정은 기획 담당의 결정이다(밸런스 모델 9.5 워크플로)</td>
+</tr>
+<tr>
+<td><strong>결정성 실패(<code>sim:determinism</code>)</strong></td>
+<td>최우선 수정 대상. 체크 순서: <code>Math.random</code>/<code>Date.now</code> 유입 → 실수 시간 누적(D-1 위반) → <code>Math.pow</code> 사용(D-3 위반) → 객체 키 순회 순서 의존 → 부동소수점 덧셈 순서 변경. 고칠 때까지 다음 태스크로 넘어가지 않는다</td>
+</tr>
+<tr>
+<td><strong>Playwright 스크린샷 차이</strong></td>
+<td>의도한 UI 변경이면 스크린샷을 갱신하고 커밋에 명시한다. 의도하지 않았으면 회귀다. <strong>콘솔 에러 0건 기준은 어떤 경우에도 완화하지 않는다</strong></td>
+</tr>
+<tr>
+<td><strong>에셋 게이트 실패(<code>validate:assets</code>)</strong></td>
+<td>게이트를 우회하지 않는다(<code>--ignore-scripts</code> 금지). <code>origin:"ai"</code> 항목에 <code>source_id</code>·<code>reviewed_by</code>를 채우거나, 감수 전이면 해당 에셋을 커밋에서 제외한다</td>
+</tr>
+<tr>
+<td><strong>가정이 필요한 상황</strong></td>
+<td>임의로 정하지 않는다. ① 가장 <strong>보수적인</strong>(유저에게 불리하지 않고 곡선을 빠르게 만들지 않는) 선택을 한다 ② <code>docs/ASSUMPTIONS.md</code>에 <code>가정: {내용} / 근거: {왜 이 선택} / 영향: {어느 태스크·곡선}</code> 한 행을 추가한다 ③ 보고에 명시한다. <strong><code>balance.json</code> 값 변경은 가정으로 처리할 수 없다</strong> — 항상 기획 담당 회신 대상이다</td>
+</tr>
+<tr>
+<td><strong>태스크가 1세션을 넘음</strong></td>
+<td>중간 상태로 커밋하지 않는다. 카드를 2개로 쪼개는 제안(각각의 목표·산출·수용 기준)을 보고하고 사람의 승인을 받는다</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="75-phase">7.5 사람 검토 포인트 (각 Phase 종료 시)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>검토자가 실행할 명령</th>
+<th>눈으로 볼 것</th>
+<th>넘어가도 되는 조건</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0 종료</td>
+<td><code>npm ci &amp;&amp; npm run build &amp;&amp; npm test &amp;&amp; npm run check:deps &amp;&amp; npm run validate:assets</code></td>
+<td><code>packages/core/package.json</code>의 <code>dependencies</code>가 <code>{}</code>인지, <code>data/*.json</code> 12개가 3.2의 행 수와 맞는지</td>
+<td>5개 명령 전부 종료 코드 0</td>
+</tr>
+<tr>
+<td>P1 종료</td>
+<td><code>npm test -w packages/core</code></td>
+<td>테스트 개수 합계가 카드들의 합(약 152개) 이상인지, 리셋/유지 12항목 단언이 <strong>항목명으로</strong> 보이는지</td>
+<td>코어 테스트 0 failed, <code>check:deps</code> 통과</td>
+</tr>
+<tr>
+<td>P2 종료</td>
+<td><code>npm run sim:regress &amp;&amp; npm run sim:prob &amp;&amp; npm run sim:determinism -- --matrix</code></td>
+<td><code>report.md</code>의 체크포인트 대조표를 <strong>밸런스 모델 8.2 표와 눈으로</strong> 대조. <code>sim:long</code> 리포트의 <code>[기획 확인 필요]</code> 섹션</td>
+<td>13/13 + 4/4 + 12/12 PASS. <strong>여기가 프로젝트의 분기점</strong> — 통과하지 못하면 P4로 가지 않는다</td>
+</tr>
+<tr>
+<td>P3 종료</td>
+<td><code>npm test -w packages/sim -- "prestige-persist|persistence"</code></td>
+<td>유지 12항목 단언 이름이 GDD 4.1 표와 1:1인지</td>
+<td>0 failed</td>
+</tr>
+<tr>
+<td>P4 종료</td>
+<td><code>npm run e2e &amp;&amp; npm run dev -w apps/web</code></td>
+<td><strong>실제로 30분 플레이</strong>한다. 첫 벽이 55분 근처에 오는 체감, 오프라인 팝업이 2초 안에 닫히는지, 숫자가 이펙트에 가리지 않는지</td>
+<td>e2e 12 passed, 콘솔 에러 0, Node/브라우저 동치 테스트 통과</td>
+</tr>
+<tr>
+<td>P5 종료</td>
+<td><code>npm run sim -- --days 1 …</code> 후 <code>jq</code> 로 <code>events.jsonl</code> 확인</td>
+<td><code>data_version</code>이 전 이벤트에 있는지, <code>purchase.grant_status</code>가 전부 <code>granted</code>인지</td>
+<td>스키마 검증 0 invalid</td>
+</tr>
+<tr>
+<td>P6 각 태스크</td>
+<td><code>npm run sim:regress</code></td>
+<td>확장 기능이 메인 곡선을 건드리지 않았는지</td>
+<td>13/13 유지</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>P2 종료 검토가 전체에서 가장 중요하다.</strong> 여기서 목표 벽 표가 재현되지 않으면 렌더러를 붙여도 검증할 대상이 없다. 시뮬레이터-퍼스트 원칙의 실제 의미가 이 게이트다.</p>
+<hr />
+<h2 id="8">8. 가정 · 미결 목록</h2>
+<p><code>docs/ASSUMPTIONS.md</code>의 초기 내용이다. 상태는 <strong>결정</strong>(이 문서로 확정, 구현자 재량 없음) / <strong>가정</strong>(GDD에 없어 보수적으로 채움, 기획 회신 시 변경 가능) / <strong>보류</strong>(측정 후 판단).</p>
+<h3 id="81-4">8.1 리더 결정 4건 (디렉터 회신 요청에 대한 응답)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>대응 GDD 모호 지점</th>
+<th>결정 내용</th>
+<th>구현 위치</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D1</strong></td>
+<td>3-1 부동소수점 결정성</td>
+<td><strong>IEEE754 f64 사용.</strong> bal_v1의 D30 값(HP≈1.07e26, M≈3.02e12, 소과금 s=1150에서 HP≈1.2e32)은 f64 범위 안이다. 단 <code>Math.pow</code> 금지 — <code>g^n</code>은 <strong>반복 곱으로 만든 사전 계산 테이블</strong>(스테이지별 HP·골드, 레벨별 비용, 노드별 배수)에서 읽어 엔진 간 차이를 최소화한다. 결정성 테스트는 "동일 Node 22.x · 동일 시드 → 바이트 동일"로 한정한다. 1e300 초과 대비 로그 공간 전환은 <strong>확장 태스크 T6.5로만</strong> 명시하고 MVP에서 하지 않는다</td>
+<td>1.2 D-3/D-4, T1.1, T2.4, T6.5</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td>3-2 자동 강화 타이브레이크</td>
+<td><strong>비용 동률 시 트랙 index(= <code>brothers.slot</code>) 낮은 쪽 우선.</strong> 동률 판정은 상대오차 1e-12 허용 비교</td>
+<td>T1.4</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td><strong>D3</strong></td>
+<td>3-5 장비 세대 교체 후</td>
+<td><strong>GDD 4.1 리셋/유지 표를 따른다</strong>(장비 인벤토리·장착 = 리셋). 표에 없는 "리셋 직후 즉시 되찾는가"는 보수적으로 **「리셋 후 시작 스테이지 기준 드랍 대기」**를 채택한다. 밸런스 모델은 즉시 반영(<code>1.20^floor(s/60)</code>)으로 근사했으므로, <code>balance.equip_recovery_mode</code>(<code>instant</code>/<code>drop_wait</code>) 두 모드를 구현해 <strong>회귀는 <code>instant</code>로 판정하고 실게임 기본은 <code>drop_wait</code></strong>로 둔다. 두 모드의 곡선 격차는 T2.7이 리포트로 산출해 기획에 회신한다. <strong>목표 벽 표 재검산이 필요하다</strong>(GDD 메모 3-5가 요구한 회신 사항). <strong>이중 모드는 한시적이다(리더 결정 ⑤) — 기한: T2.7 격차 리포트 수령 후 2주 내에 기획이 목표 벽 표를 <code>drop_wait</code> 기준으로 재검산하고, 그 시점에 회귀 기준(T2.5)을 <code>instant</code>에서 <code>drop_wait</code>로 이관한다. 이관과 동시에 <code>instant</code>는 diff 전용으로 강등하며, 기한 내 이관이 이뤄지지 않으면 <code>instant</code> 모드와 <code>equip_recovery_mode</code> 키를 삭제하고 <code>drop_wait</code> 단일 모드로 간다.</strong> 기한 없는 이중 모드는 영구화되고, 실게임 기본값이 회귀 게이트에 걸리지 않는 구성은 장기적으로 위험하다</td>
+<td>3.4, T1.6, T2.5, T2.7</td>
+<td><strong>결정</strong>(재검산은 기획 담당 · <strong>이관 기한 T2.7+2주</strong>)</td>
+</tr>
+<tr>
+<td><strong>D4</strong></td>
+<td>3-8 노드 상한 부재 / 60·90일</td>
+<td><strong>시뮬레이터 Phase의 별도 태스크(T2.8)로 실행한다.</strong> 결과가 목표표 범위를 벗어나도 <strong>파라미터를 바꾸지 않고 리포트만</strong> 생성한다(<code>[기획 확인 필요]</code> 섹션). 파라미터 결정은 기획 담당의 권한이다. <code>sim:regress</code> 게이트에도 넣지 않는다(장기 실행이 CI를 막는다)</td>
+<td>T2.8</td>
+<td><strong>결정</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="82-gdd-10">8.2 GDD 모호 지점 10개 처리</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>모호 지점</th>
+<th>처리</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>부동소수점 결정성(f64 vs 로그공간 vs BigNumber)</td>
+<td><strong>D1</strong> 적용. f64 + 사전 계산 테이블 + <code>Math.pow</code> 금지. 예외 1건(<code>Q = 0.35·s^1.45</code>의 비정수 지수)만 화이트리스트로 허용</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>자동 강화 그리디 타이브레이크</td>
+<td><strong>D2</strong> 적용. 밸런스 모델 9.3의 "slot 오름차순"과 동치(스키마가 <code>slot</code> 유일성을 강제해 동치가 보장된다)</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>오프라인 골드의 DPS 시점</td>
+<td><strong>오프라인 시작 시점 DPS로 고정.</strong> GDD가 지시한 그대로. 오프라인 중 자동 강화는 돌지 않는다</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>start_stage</code>와 형님 재해금</td>
+<td><strong>즉시 해금.</strong> 시작 시 <code>run_best = start_stage</code>이고 해금 판정은 <code>run_best ≥ unlock_stage</code>. 밸런스 모델 계산과 일치</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>장비 등급과 세대 교체</td>
+<td><strong>D3</strong> 적용. <code>drop_wait</code> 채택 + <code>instant</code> 회귀 모드 병행 + 격차 리포트로 회신. <strong>이중 모드 종료 기한 = T2.7 리포트 + 2주</strong>(리더 결정 ⑤)</td>
+<td><strong>결정</strong>(기획 재검산 대기 · 기한 명시)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>보스 타이머와 오프라인</td>
+<td><strong>오프라인은 <code>f*</code> 파밍만. 스테이지 상승·보스 도전 없음.</strong> GDD 전제 유지</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>t_min_kill_sec</code> 적용 범위</td>
+<td><strong>몬스터 1마리당 0.5초.</strong> 일반 웨이브 최소 2.0초(20틱), 보스 최소 0.5초(5틱). <code>f*</code> 정의의 근거이므로 정확히 지킨다</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>불씨 노드 상한 부재</td>
+<td><strong>D4</strong> 적용. T2.8에서 60·90일 측정 → 리포트만. 상한/기울기 변경은 기획 결정</td>
+<td><strong>보류</strong>(측정 후 기획 판단)</td>
+</tr>
+<tr>
+<td>9</td>
+<td>확률 검증의 N</td>
+<td><strong><code>N = max(100_000, ceil(900(1−p)/p))</code>를 코드가 표기표(<code>drop_rates_ppm</code>, 정수 ppm)에서 자동 산출.</strong> 전설 5,000 ppm → N=1,800,000 <strong>유지</strong>(리더 결정 ⑦). 60초 초과 시에만 CI 프로파일 한정 N=200,000 폴백(산식 최소 179,100 이상). 표기값 하드코딩은 <code>grep</code> 기준으로 금지</td>
+<td><strong>결정</strong></td>
+</tr>
+<tr>
+<td>10</td>
+<td>분석 이벤트 <code>data_version</code></td>
+<td><strong>공통 14필드에 <code>data_version</code>(= <code>balance.version</code>)을 TS 타입 필수로 선언.</strong> 누락 시 컴파일 에러. MVP 로컬 JSONL 싱크에도 포함하고 <code>jq</code> 기준으로 검증</td>
+<td><strong>결정</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="83">8.3 본 빌드 플랜이 추가로 도입한 가정</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>가정</th>
+<th>근거</th>
+<th>영향</th>
+<th>상태</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-D5</td>
+<td>RNG를 GDD 13.1 M1의 <code>xorshift128+</code> 대신 <strong><code>xoshiro128**</code></strong>로 한다</td>
+<td>xorshift128+는 64비트 상태라 JS에서 BigInt(성능) 또는 분할 구현(엔진 차이)이 필요하다. xoshiro128**은 <code>Math.imul</code> 기반 32비트 정수 연산만 쓴다</td>
+<td>T0.2, 결정성 전반. GDD 13.1 M1 문구 수정 필요</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D6</td>
+<td><code>data/balance.json</code>이 모든 튜닝 파라미터의 <strong>유일한 원본</strong>이고, <code>stages.json</code>/<code>upgrades.json</code>의 곡선 필드는 <strong>선택 필드</strong>(생략 시 balance 상속)다</td>
+<td>같은 값을 두 파일에 적으면 언젠가 갈라진다. GDD 8.3/8.6 예시 JSON의 인라인 값은 문서용 예시로 해석</td>
+<td>T0.3, 3.1절</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D7</td>
+<td>코어의 시간은 <strong>정수 틱(100ms)만</strong> 사용하고, 시뮬레이터도 해석적으로 구한 시간을 <code>ceil(t×10)</code> 틱으로 올림해 같은 함수를 호출한다</td>
+<td>GDD 3.2의 <code>dt=100ms</code>와 12.3의 "렌더러를 제거해도 동일 결과"를 동시에 만족시키는 유일한 방법</td>
+<td>1.2 D-1, T1.3, T4.5. <strong>밸런스 모델 9.2의 연속 시간과 미세 편차 발생</strong>(U-3)</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D8</td>
+<td>장비 회복 모드를 <code>balance.json</code>의 신설 키 <code>equip_recovery_mode</code>로 스위칭한다</td>
+<td>D3을 실행 가능하게 만들면서 회귀 기준(밸런스 모델 근사)을 보존하기 위함</td>
+<td>3.4, T1.6, T2.5, T2.7</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D9</td>
+<td>MVP 회귀(T2.5)는 <strong>카드 보너스 OFF</strong>(<code>--cards off</code>) 조건으로 판정한다</td>
+<td>밸런스 모델 11절 미검증 2가 "카드 % 보너스는 모델에서 생략"이라고 명시. 모델과 같은 조건으로 재현해야 ±10% 판정이 성립</td>
+<td>T1.9, T2.5, T2.7</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D10</td>
+<td>확장 전용 테이블 5종(<code>camp_buildings</code>, <code>guilds</code>, <code>pass_tracks</code>, <code>drop_tables</code>, <code>passives</code>)은 스키마만 작성하고 <code>_manifest.json</code>에 <code>"loaded": false</code>로 등록한다</td>
+<td>GDD 8.14·팀원 전달 메모 2)의 "스키마만 선작성, 로더는 무시"</td>
+<td>T0.3</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D11</td>
+<td>애니메이션 프레임 에셋(<code>fx_anim_*</code>)은 <code>origin:"human"</code>만 허용해 빌드 게이트가 AI 생성을 차단한다</td>
+<td>GDD 9.2가 "프레임 간 일관성은 현 시점 AI 한계"로 사람 생산을 명시</td>
+<td>T0.4</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D12</td>
+<td><code>packages/data</code>를 신설해 ajv·파일 I/O를 격리하고 <code>packages/core</code>의 의존성 0을 지킨다</td>
+<td>스킬 기본 구조는 core/sim/web 3개지만, 로더가 core에 들어가면 "의존성 0"이 깨진다</td>
+<td>1.1, T0.3</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D13</td>
+<td>Phase 3을 "저장·영속성·회귀 시나리오"로 재정의하고, 오프라인·프레스티지를 Phase 1로 올린다</td>
+<td>시뮬레이터(P2)가 프레스티지·오프라인 없이는 목표 벽 표를 재현할 수 없고, 디렉터 우선순위표도 같은 순서</td>
+<td>4절 Phase 구성</td>
+<td><strong>가정</strong></td>
+</tr>
+<tr>
+<td>A-D14</td>
+<td>확률값을 **정수 ppm(백만분율)**으로 관리한다 (<code>balance.drop_rates_ppm</code>, <code>equipment[].drop_weight_ppm</code>). 값은 0~1,000,000 정수, 시행별 합 = 1,000,000, 로드 시 <code>p = ppm / 1_000_000</code> 변환</td>
+<td>전략 청사진 4.3.1(법적 방어 증거)·팀원 전달 메모 (2)-①(d)와 기획서 부록 E의 고객 약속에 맞춘다. 05 1.2 (D-3)의 <code>Math.pow</code> 금지·사전 계산 테이블(부동소수 오차 최소화)과도 방향이 같고, 전작 시뮬레이터와 검증 하네스를 공유하려면 단위가 같아야 한다(03 9.1)</td>
+<td>3.1, 3.3, 3.4, 1.6, T0.3, T1.6, T2.6, GDD 8.0/7.3/8.4/8.13, 04b 8.4·10절</td>
+<td><strong>결정 완료: ppm 채택</strong>(리더 결정 ④ · 2026-09-18 · 08 참조)</td>
+</tr>
+<tr>
+<td>A-D15</td>
+<td>시뮬레이터 CLI는 <strong>규격 서브커맨드(<code>sim run</code>/<code>sim diff</code>/<code>sim verify-odds</code>/<code>sim replay</code>)를 정본 인터페이스로 삼고</strong>, 기존 npm 스크립트는 그 <strong>별칭</strong>으로 유지한다(정본 대조표 = 6.1.1). exit code 규약 <strong>0/1/2</strong>(2 = 임계 위반 → 배포 차단)와 stdout JSON / stderr 요약 / <code>--format md</code>를 전 서브커맨드에 적용하고, 테이블 JSON에 공통 메타 <code>schema_version</code>·<code>generated_at</code>·<code>checksum</code>을 필수로 둔다</td>
+<td>명령 <strong>이름</strong>은 npm 워크스페이스 관례상 현 체계가 실무적이므로 유지하되, 누락돼 있던 <strong>규제 증거 기능</strong>(재현 <code>sim replay</code>, 배포 차단 신호 exit 2, 테이블 앵커 메타)을 채운다. 전작 시뮬레이터는 왼쪽 열(규격 서브커맨드)로 합류한다</td>
+<td>2절, 3.1, 1.6, 6.1·6.1.1·6.1.2·6.1.3, 6.4(+4), <strong>T2.9 신설</strong>, T0.3, 05b AGENTS.md</td>
+<td><strong>결정 완료</strong>(리더 결정 I-7 · 2026-09-18 · 08 참조)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="84">8.4 미결·미검증 (측정 후 판단)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>항목</th>
+<th>왜 미결인가</th>
+<th>해소 경로</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>U-1</td>
+<td>60·90일 곡선과 등차 노드 인플레</td>
+<td>30일까지만 검산됨</td>
+<td>T2.8 리포트 → 기획 결정</td>
+</tr>
+<tr>
+<td>U-2</td>
+<td><code>drop_wait</code> 모드의 실제 곡선</td>
+<td>밸런스 모델이 <code>instant</code> 근사로 산출</td>
+<td>T2.7 장비 모드 diff → 기획 재검산</td>
+</tr>
+<tr>
+<td>U-3</td>
+<td>100ms 양자화로 인한 목표표 편차</td>
+<td>밸런스 모델은 연속 시간</td>
+<td>T2.5 실행 결과의 편차 폭으로 측정. ±10% 밴드 안이면 수용</td>
+</tr>
+<tr>
+<td>U-4</td>
+<td>카드 % 보너스 포함 곡선</td>
+<td>모델에서 생략</td>
+<td>T2.7 <code>cards_off</code> vs <code>cards_on</code> diff</td>
+</tr>
+<tr>
+<td>U-5</td>
+<td>캠프 건물 보너스의 <code>g_gold</code> 실효값 변화</td>
+<td>v1.1</td>
+<td>T6.1 수용 기준 2 (전 구간 재검산 명시)</td>
+</tr>
+<tr>
+<td>U-6</td>
+<td>형님 5·6번(unlock 150/280) 기여</td>
+<td>4트랙까지만 정밀 검증</td>
+<td><code>brothers.json</code> 2행 추가 후 6트랙 프로파일 재실행</td>
+</tr>
+<tr>
+<td>U-7</td>
+<td>광고 미시청 유저 프로파일</td>
+<td><code>ad_policy=none</code> 미실행</td>
+<td>T5.3 수용 기준 4</td>
+</tr>
+<tr>
+<td>U-8</td>
+<td>전작 전투 로직 분리 여부(진단 U-06)</td>
+<td>첫 미팅 세션 B에서 해소</td>
+<td>1.9절 — 결과에 따라 Unity 트랙이 "추출"인지 "신규 작성"인지 갈린다</td>
+</tr>
+<tr>
+<td>U-9</td>
+<td>실제 세션 길이 분포</td>
+<td>일 2세션 고정 가정</td>
+<td>전작 Firebase 데이터 확보 시 프로파일 교체. <strong>첫 미팅 사전 요청 자료 B에 "실제 세션 길이 분포(가능하면 분석 도구 export)"로 등록됨</strong>(06c 4절 B)</td>
+</tr>
+<tr>
+<td>U-10</td>
+<td><strong>사전 계산 테이블의 누적 오차 — <code>s=1200</code> 근처에서 T1.1 수용 기준 2(상대오차 1e-3)를 못 지킬 경우의 보정 설계가 없다</strong></td>
+<td>D1(<code>Math.pow</code> 금지 + 반복 곱 사전 계산 테이블)은 결정성을 얻는 대신 정확성을 내준다. 반복 곱 <code>pow[i] = pow[i-1] × g</code>의 오차는 <code>i</code>에 비례해 누적되므로, 고스테이지에서 잘 구현된 <code>Math.pow</code>보다 <strong>덜 정확할 수 있다</strong>. 안전망은 T1.1 수용 기준 2 하나뿐이고, 그 기준을 넘겼을 때의 대응(예: 100스테이지마다 고정밀 기준값으로 구간 재정규화)은 아직 설계되지 않았다</td>
+<td><strong>T1.1 첫 실행 시 <code>s=1000~1400</code> 구간의 상대오차를 측정해 리포트한다. 1e-3을 넘으면</strong> ① 구간별 재정규화(앵커 스테이지에서 테이블 값을 고정밀 기준값으로 리셋, 앵커 간격은 오차 측정 결과로 결정) 설계를 별도 태스크로 신설하고 ② 그때까지 T2.5 회귀 판정은 해당 구간을 <code>[측정 불가]</code>로 표시한다. <strong>결정성(D1)을 되돌리지 않는다</strong> — 되돌리면 13.3-2와 12.3이 동시에 약해진다</td>
+</tr>
+</tbody>
+</table></div>
+<hr /><div class="pn"><a class="prev" href="balance.html"><small>← 이전</small>밸런스 모델 bal_v1</a><a class="next" href="agents-md.html"><small>다음 →</small>AGENTS.md</a></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>

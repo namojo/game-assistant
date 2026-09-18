@@ -1,0 +1,179 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>스킬 — ax-consulting-orchestrator · game-assistant</title><meta name="description" content="지방(부산) 게임사 AX 컨설팅 기획서·세부 자료·신작 GDD·Codex 빌드 플랜을 에이전트 팀으로 생성하는 오케스트레이터. &#x27;게임사 AX 컨설팅 기획서 만들어줘&#x27;, &#x27;썬더게임즈 AX 전략&#x27;, &#x27;부산 게임사 컨설팅 자료&#x27;, &#x27;방치형 RPG 신작 기획 + Codex로 구현&#x27; 같은 요청, 또는 게임 스튜디오 대상 AI 전환 제안서·진단·로드맵을 한 묶음으로 요청하면 반드시 이 스킬을 사용할 것. 단일 문서(예: 시장 브리핑만, GDD만)만 필요하면 해당 개별 스킬을 직접 사용."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230B1F3A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2338E1FF'/%3E%3C/svg%3E"></head><body><header class="nav"><div class="wrap"><a class="brand" href="../index.html"><span class="dot"></span>game-assistant</a><nav class="nav-links"><a href="../index.html" class="">홈</a><a href="../thundergames/proposal.html" class="">기획서</a><a href="../thundergames/strategy.html" class="">전략</a><a href="../gdd/gdd.html" class="">원시인 형님 2</a><a href="../harness/index.html" class="on">하네스</a><a href="https://github.com/namojo/game-assistant" class="" target=_blank rel=noopener>GitHub</a></nav><button class="theme" aria-label="테마 전환" title="테마 전환">◐</button></div></header><div class="doc-head"><div class="wrap"><div class="crumbs"><a href="../index.html">홈</a> / <a href="index.html">하네스</a> / 스킬</div><h1>스킬 — ax-consulting-orchestrator</h1><p class="sub">지방(부산) 게임사 AX 컨설팅 기획서·세부 자료·신작 GDD·Codex 빌드 플랜을 에이전트 팀으로 생성하는 오케스트레이터. &#x27;게임사 AX 컨설팅 기획서 만들어줘&#x27;, &#x27;썬더게임즈 AX 전략&#x27;, &#x27;부산 게임사 컨설팅 자료&#x27;, &#x27;방치형 RPG 신작 기획 + Codex로 구현&#x27; 같은 요청, 또는 게임 스튜디오 대상 AI 전환 제안서·진단·로드맵을 한 묶음으로 요청하면 반드시 이 스킬을 사용할 것. 단일 문서(예: 시장 브리핑만, GDD만)만 필요하면 해당 개별 스킬을 직접 사용.</p></div></div>
+<div class="wrap doc-grid"><aside class="toc"><div class="t">CONTENTS</div><a href="#_1">실행 모드: 에이전트 팀 (기본) / 서브 에이전트 (폴백)</a>
+<a href="#_2">에이전트 구성</a>
+<a href="#_3">워크플로우</a>
+<a class="l3" href="#phase-0">Phase 0: 준비 (리더)</a>
+<a class="l3" href="#phase-a">Phase A: 팬아웃 (병렬, 상호 독립)</a>
+<a class="l3" href="#phase-b-0102-04">Phase B: 수렴 (01·02 → 전략, 04 → 빌드 플랜)</a>
+<a class="l3" href="#phase-c">Phase C: 기획서 + 검수</a>
+<a class="l3" href="#phase-d">Phase D: 조립 (리더)</a>
+<a href="#_4">데이터 흐름</a>
+<a href="#_5">에러 핸들링</a>
+<a href="#_6">테스트 시나리오</a>
+<a class="l3" href="#_7">정상 흐름</a>
+<a class="l3" href="#_8">에러 흐름</a></aside><article class="md"><h1 id="ax-consulting-orchestrator">AX Consulting Orchestrator</h1>
+<p>게임 스튜디오 AX 컨설팅 산출물 묶음(시장 브리핑 → 진단 → 전략 청사진 → 기획서 → 신작 GDD → Codex 빌드 플랜 → 검수)을 생성하는 통합 스킬.</p>
+<h2 id="_1">실행 모드: 에이전트 팀 (기본) / 서브 에이전트 (폴백)</h2>
+<p>팀 도구(TeamCreate)가 있으면 팀 모드로, 없으면 <code>Agent</code> 도구 병렬 호출로 같은 Phase 구조를 실행한다. 두 모드 모두 산출물은 <code>_workspace/</code>에 파일로 남기므로 데이터 흐름은 동일하다. 모든 Agent 호출은 <code>model: "opus"</code>.</p>
+<h2 id="_2">에이전트 구성</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>팀원</th>
+<th>정의 파일</th>
+<th>역할</th>
+<th>사용 스킬</th>
+<th>출력 (<code>_workspace/</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ax-market-analyst</td>
+<td><code>.claude/agents/ax-market-analyst.md</code></td>
+<td>시장·지역·정책 브리핑</td>
+<td>regional-game-market-brief</td>
+<td><code>01_market_analyst_brief.md</code></td>
+</tr>
+<tr>
+<td>ax-studio-diagnostician</td>
+<td><code>.claude/agents/ax-studio-diagnostician.md</code></td>
+<td>스튜디오 진단·미팅 키트</td>
+<td>studio-ax-diagnosis</td>
+<td><code>02_diagnostician_studio_diagnosis.md</code></td>
+</tr>
+<tr>
+<td>ax-strategy-architect</td>
+<td><code>.claude/agents/ax-strategy-architect.md</code></td>
+<td>AX 전략 청사진</td>
+<td>ax-strategy-blueprint</td>
+<td><code>03_strategy_ax_blueprint.md</code></td>
+</tr>
+<tr>
+<td>game-design-director</td>
+<td><code>.claude/agents/game-design-director.md</code></td>
+<td>신작 GDD·밸런스 모델</td>
+<td>idle-rpg-gdd</td>
+<td><code>04_gdd_*.md</code>, <code>04b_balance_model.md</code></td>
+</tr>
+<tr>
+<td>codex-build-planner</td>
+<td><code>.claude/agents/codex-build-planner.md</code></td>
+<td>Codex 빌드 플랜·AGENTS.md</td>
+<td>codex-build-spec</td>
+<td><code>05_codex_build_plan.md</code>, <code>05b_AGENTS.md</code></td>
+</tr>
+<tr>
+<td>ax-proposal-writer</td>
+<td><code>.claude/agents/ax-proposal-writer.md</code></td>
+<td>고객 제출용 기획서</td>
+<td>ax-proposal-writer</td>
+<td><code>06_proposal_main.md</code>, <code>06b_*</code>, <code>06c_*</code></td>
+</tr>
+<tr>
+<td>ax-deliverable-reviewer</td>
+<td><code>.claude/agents/ax-deliverable-reviewer.md</code></td>
+<td>교차 정합성 검수</td>
+<td>ax-deliverable-review</td>
+<td><code>07_review_report.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="_3">워크플로우</h2>
+<h3 id="phase-0">Phase 0: 준비 (리더)</h3>
+<ol>
+<li>사용자 입력에서 대상사·지역·대표 게임·신작 요청·요청 범위(아트/QA 등)를 추출한다.</li>
+<li><code>_workspace/00_input/</code>에 입력 리포트·메모를 저장한다. 없으면 대상사 이름만으로도 시작 가능하나, 산출물 전체에 "진단 후 갱신" 표시가 늘어난다는 점을 사용자에게 알린다.</li>
+<li>출력 경로를 정한다. 기본: <code>deliverables/{company-slug}/</code>.</li>
+</ol>
+<h3 id="phase-a">Phase A: 팬아웃 (병렬, 상호 독립)</h3>
+<p>market-analyst, studio-diagnostician, game-design-director를 동시에 실행한다. 세 작업은 입력 리포트만 있으면 시작할 수 있어 서로 기다릴 필요가 없다.</p>
+<p>팀 모드 통신 규칙:
+- analyst → diagnostician: 규제·경쟁 신호 (체크리스트 반영용)
+- diagnostician → game-design-director: 전작 시스템 목록·UX 마찰
+- analyst → game-design-director: 정면 경쟁 회피 구간·수익모델 트렌드</p>
+<p>서브 에이전트 모드: 위 정보는 리더가 프롬프트에 입력 리포트 경로와 함께 미리 명시한다.</p>
+<h3 id="phase-b-0102-04">Phase B: 수렴 (01·02 → 전략, 04 → 빌드 플랜)</h3>
+<ul>
+<li>strategy-architect: 01·02를 읽고 03 작성. 병목 점수 순위와 우선순위가 어긋나면 diagnostician과 토론 후 병기.</li>
+<li>codex-build-planner: 04·04b를 읽고 05·05b 작성. GDD 모호 규칙은 director에게 질의(팀 모드) 또는 "가정" 표시(서브 모드).
+두 작업은 서로 독립이므로 병렬 실행.</li>
+</ul>
+<h3 id="phase-c">Phase C: 기획서 + 검수</h3>
+<ol>
+<li>proposal-writer가 01~05를 읽고 06 세트 작성.</li>
+<li>reviewer가 01~06 교차 검수 → 07 작성 → 차단/중요 항목을 원저자(또는 리더)에게 전달.</li>
+<li>수정 루프 최대 2회. 서브 모드에서는 리더가 07의 차단 항목을 직접 반영한다.</li>
+</ol>
+<h3 id="phase-d">Phase D: 조립 (리더)</h3>
+<p><code>_workspace/</code> 산출물을 <code>deliverables/{company-slug}/</code> 구조로 복사·정리한다:</p>
+<pre><code>deliverables/{company-slug}/
+├── 00_executive_summary.md        ← 06b
+├── 01_ax_consulting_proposal.md   ← 06
+├── 02_market_and_region_brief.md  ← 01
+├── 03_studio_diagnosis.md         ← 02
+├── 04_ax_strategy_blueprint.md    ← 03
+├── 05_first_meeting_kit.md        ← 06c
+├── 06_review_report.md            ← 07
+└── gdd/{game-slug}/
+    ├── 01_gdd.md                  ← 04
+    ├── 02_balance_model.md        ← 04b
+    ├── 03_codex_build_plan.md     ← 05
+    └── AGENTS.md                  ← 05b
+</code></pre>
+<p><code>_workspace/</code>는 보존한다(감사 추적). 사용자에게 산출물 목록과 리뷰의 잔여 리스크를 보고한다.</p>
+<h2 id="_4">데이터 흐름</h2>
+<pre><code>00_input ─┬→ [analyst] ──→ 01 ─┐
+          ├→ [diagnostician] → 02 ─┼→ [strategy] → 03 ─┐
+          └→ [director] ─→ 04/04b ─→ [codex-planner] → 05/05b ─┼→ [writer] → 06 ─→ [reviewer] → 07
+                                                                 └────────────────────────┘
+                                                                        ↓
+                                                              [리더: deliverables/ 조립]
+</code></pre>
+<h2 id="_5">에러 핸들링</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>상황</th>
+<th>전략</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase A 팀원 1명 실패</td>
+<td>1회 재시도. 재실패 시 입력 리포트의 해당 장을 대체 입력으로 사용, 문서에 "에이전트 산출 아님" 표시</td>
+</tr>
+<tr>
+<td>01·02 모두 실패</td>
+<td>사용자에게 알리고 입력 리포트만으로 전략을 쓸지 확인</td>
+</tr>
+<tr>
+<td>director↔planner 질의 응답 없음</td>
+<td>planner는 "가정" 표시 후 진행, 리뷰어가 가정 목록을 첫 미팅 확인 항목으로 승격</td>
+</tr>
+<tr>
+<td>리뷰 차단 항목 2회 후 잔존</td>
+<td>최종 보고에 미해결 목록 명시, 조립은 진행</td>
+</tr>
+<tr>
+<td>산출물 간 수치 상충</td>
+<td>출처 병기, 삭제 금지</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="_6">테스트 시나리오</h2>
+<h3 id="_7">정상 흐름</h3>
+<ol>
+<li>입력: 컨설팅 내부 리포트 + "썬더게임즈 AX 기획서와 원시인 형님 2 GDD를 Codex용으로"</li>
+<li>Phase A: 01·02·04(+04b) 생성</li>
+<li>Phase B: 03·05(+05b) 생성</li>
+<li>Phase C: 06 세트, 07 생성. 리뷰 차단 항목 0~2개 → 수정</li>
+<li>Phase D: <code>deliverables/thundergames/</code> 12개 파일 조립</li>
+<li>검증: 06의 KPI 4개가 03과 동일, 05의 태스크 목록이 04의 시스템을 전부 커버</li>
+</ol>
+<h3 id="_8">에러 흐름</h3>
+<ol>
+<li>Phase A에서 market-analyst 웹 조사 실패(네트워크)</li>
+<li>1회 재시도 실패 → 입력 리포트 4~5장을 01로 대체, "추가 조사 필요" 섹션 생성</li>
+<li>Phase B·C 정상 진행, 07에 "시장 브리핑 경쟁작 비교 미수집" 기록</li>
+<li>최종 보고에 누락 명시</li>
+</ol><div class="pn"><a class="prev" href="index.html"><small>← 하네스</small>구조로 돌아가기</a><span></span></div></article></div><footer><div class="wrap"><div>game-assistant · 부산 게임사 AX 컨설팅 하네스 · 2026-09-18</div><div>산출물은 Claude Code 에이전트 팀이 생성했고, 컨설턴트 검토 전 초안입니다. <a href="https://github.com/namojo/game-assistant" target="_blank" rel="noopener">저장소</a></div></div></footer><script src="../assets/app.js"></script></body></html>
