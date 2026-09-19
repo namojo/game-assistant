@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 """Static site builder: deliverables/*.md + .claude/agents → docs/ (GitHub Pages)."""
-import re, shutil, html, pathlib, json
-import markdown
+import re, shutil, html, pathlib, json, sys, tempfile
+try:
+    import markdown
+except ImportError:
+    sys.exit("markdown 모듈이 없습니다: pip install markdown pymdown-extensions")
+try:
+    import pymdownx  # noqa: F401
+    EXTRA_EXT = ["pymdownx.tilde", "pymdownx.betterem", "pymdownx.tasklist"]
+except ImportError:
+    EXTRA_EXT = []
+    print("warn: pymdown-extensions 미설치 — 취소선/체크박스 없이 빌드합니다 (pip install pymdown-extensions)")
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs"
@@ -49,7 +58,7 @@ def img(name, rel):
     return f"{rel}images/{name}.svg"
 
 def md_to_html(text):
-    md = markdown.Markdown(extensions=["tables","fenced_code","toc","attr_list","md_in_html","sane_lists","pymdownx.tilde","pymdownx.betterem","pymdownx.tasklist"],
+    md = markdown.Markdown(extensions=["tables","fenced_code","toc","attr_list","md_in_html","sane_lists"] + EXTRA_EXT,
                            extension_configs={"toc":{"toc_depth":"2-3","permalink":False}})
     body = md.convert(text)
     body = body.replace("<table>", '<div class="tbl"><table>').replace("</table>", "</table></div>")
@@ -245,7 +254,9 @@ def harness_doc(title, sub, text, slug, kind):
     return page(rel, f"{title} · game-assistant", inner, "하네스", sub)
 
 def build():
-    if OUT.exists(): shutil.rmtree(OUT)
+    global OUT
+    FINAL = OUT
+    OUT = pathlib.Path(tempfile.mkdtemp(prefix="ga-site-", dir=str(FINAL.parent)))
     (OUT/"assets").mkdir(parents=True)
     for f in (SITE/"assets").iterdir(): shutil.copy(f, OUT/"assets"/f.name)
     (OUT/"images"/"gen").mkdir(parents=True)
@@ -273,7 +284,9 @@ def build():
                 txt += f"\n\n---\n\n## 참조 문서: references/{r.name}\n\n" + re.sub(r"^# ", "### ", r.read_text(encoding="utf-8"), flags=re.M).replace("\n## ", "\n### ")
         (OUT/"harness"/f"skill-{p.parent.name}.html").write_text(harness_doc(f"스킬 — {p.parent.name}", fm.get("description",""), txt, p.parent.name, "스킬"), encoding="utf-8")
     n = len(list(OUT.rglob("*.html")))
-    print(f"built {n} pages → {OUT}")
+    if FINAL.exists(): shutil.rmtree(FINAL)
+    shutil.move(str(OUT), str(FINAL)); OUT = FINAL
+    print(f"built {n} pages → {FINAL}")
 
 if __name__ == "__main__":
     build()
