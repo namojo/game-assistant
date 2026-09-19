@@ -36,6 +36,12 @@ Claude Code에서 `ax-consulting-orchestrator` 스킬을 트리거하는 요청(
 bash site/scripts/gen_concept_images.sh && python3 site/build.py
 ```
 
+## 웹 페이지 배포 (GitHub Pages)
+
+```bash
+bash site/scripts/deploy_pages.sh   # docs/ 빌드 → gh-pages 브랜치에 푸시 → 1~2분 후 사이트 반영
+```
+
 ## Codex로 원시인 형님 2 프로토타입 만들기
 
 1. `codex-starter/primitive-brothers-2/`를 새 저장소 루트로 복사합니다. AGENTS.md와 `docs/`(GDD·BALANCE·BUILD_PLAN·ASSUMPTIONS), `data/balance.json`이 이미 배치되어 있습니다.
