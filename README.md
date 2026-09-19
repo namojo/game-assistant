@@ -12,6 +12,7 @@
 | `.claude/skills/` | 팀원이 쓰는 스킬 8개 (오케스트레이터 포함) |
 | `deliverables/thundergames/` | 썬더게임즈 AX 컨설팅 기획서·경영진 요약·시장 브리핑·진단·전략 청사진·첫 미팅 키트·검수 리포트 |
 | `deliverables/thundergames/gdd/primitive-brothers-2/` | 신작 '원시인 형님 2' GDD · 밸런스 모델 · Codex 빌드 플랜 · AGENTS.md |
+| `codex-starter/primitive-brothers-2/` | **Codex에 바로 넘기는 스타터**: `AGENTS.md` + `docs/{GDD,BALANCE,BUILD_PLAN,ASSUMPTIONS}.md` + `data/balance.json` + `.nvmrc` (`scripts/make_codex_starter.py`로 생성) |
 | `inputs/` | 원천 자료(컨설턴트 내부 리포트) |
 | `_workspace/` | 에이전트 중간 산출물 (감사 추적용 보존) |
 
@@ -37,6 +38,6 @@ bash site/scripts/gen_concept_images.sh && python3 site/build.py
 
 ## Codex로 원시인 형님 2 프로토타입 만들기
 
-1. 새 저장소를 만들고 `deliverables/thundergames/gdd/primitive-brothers-2/`의 `AGENTS.md`를 루트에, GDD·밸런스·빌드 플랜을 `docs/`에 둡니다.
-2. 빌드 플랜의 Phase 0 태스크부터 순서대로 Codex에 프롬프트합니다(빌드 플랜 7장의 예시 프롬프트 참고).
+1. `codex-starter/primitive-brothers-2/`를 새 저장소 루트로 복사합니다. AGENTS.md와 `docs/`(GDD·BALANCE·BUILD_PLAN·ASSUMPTIONS), `data/balance.json`이 이미 배치되어 있습니다.
+2. 스타터의 README에 있는 프롬프트 템플릿으로 T0.1부터 순서대로 Codex에 넘깁니다.
 3. 각 태스크의 수용 기준 명령(`npm test`, `npm run sim:regress` 등)을 통과했을 때만 다음 태스크로 넘어갑니다.

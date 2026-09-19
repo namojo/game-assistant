@@ -211,7 +211,7 @@ def index():
 
 <section class="sec alt"><div class="wrap"><div class="sec-h"><span class="num">07</span><h2>Codex로 프로토타입 만들기</h2><p>코딩 에이전트는 모호함에 약하고 테스트로 완료를 증명할 수 있는 작업에 강합니다. 그래서 모든 태스크는 <code>실행 명령 → 기대 결과</code> 수용 기준을 갖습니다.</p></div>
 <div class="steps">
-<div class="step"><div><b>새 저장소 루트에 AGENTS.md, docs/에 GDD·BALANCE·BUILD_PLAN 배치</b><p>문서가 코드보다 우선. 문서와 코드가 다르면 문서를 고치지 말고 이슈로 남긴 뒤 문서를 따릅니다.</p></div></div>
+<div class="step"><div><b>스타터 폴더를 새 저장소로 복사</b><p><a href="{REPO}/tree/claude/thundergames-ax-consulting-qfhgeu/codex-starter/primitive-brothers-2" target="_blank" rel="noopener"><code>codex-starter/primitive-brothers-2/</code></a>에 AGENTS.md, <code>docs/</code>(GDD·BALANCE·BUILD_PLAN·ASSUMPTIONS), <code>data/balance.json</code>이 이미 배치되어 있습니다. 문서가 코드보다 우선. 문서와 코드가 다르면 문서를 고치지 말고 가정 목록에 남긴 뒤 문서를 따릅니다.</p></div></div>
 <div class="step"><div><b>T0.1(스캐폴드)부터 순서대로 Codex에 프롬프트</b><p>빌드 플랜 7.3의 프롬프트 예시 2개(P0.1, P2.x)를 템플릿으로. 태스크 1개 = Codex 1세션.</p></div></div>
 <div class="step"><div><b>수용 기준 명령이 통과할 때만 다음 태스크</b><p><code>npm test</code> · <code>npm run sim:regress</code>(목표 벽 표 ±10%) · <code>npm run e2e</code>. 밸런스 파라미터는 코딩 에이전트가 바꾸지 않습니다.</p></div></div>
 <div class="step"><div><b>Phase 종료마다 사람 검토</b><p>P2 종료 시 시뮬레이터 리포트로 기획 담당이 목표표를 재검산. 가정은 docs/ASSUMPTIONS.md에 누적.</p></div></div>

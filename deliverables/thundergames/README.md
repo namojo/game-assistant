@@ -25,6 +25,6 @@
 - 신작 장르(방치형 유지) 재검토는 첫 미팅 확인 항목으로만 존재
 
 ## Codex 실행 순서
-1. 새 저장소 루트에 `AGENTS.md`, `docs/GDD.md`(01_gdd), `docs/BALANCE.md`(02), `docs/BUILD_PLAN.md`(03) 배치
+1. `codex-starter/primitive-brothers-2/`(저장소 루트)를 새 저장소로 복사 — AGENTS.md·docs/·data/balance.json이 이미 배치됨
 2. 빌드 플랜 7.3의 프롬프트 예시대로 T0.1부터 순서대로 실행
 3. 각 태스크 수용 기준 명령 통과 후 다음 태스크. 밸런스 파라미터는 코딩 에이전트가 바꾸지 않음
